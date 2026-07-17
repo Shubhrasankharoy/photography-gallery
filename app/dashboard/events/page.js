@@ -221,7 +221,7 @@ export default function EventsList() {
                     alt={evt.eventName}
                     className="h-full w-full object-cover group-hover:scale-103 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-black/10" />
                   
                   {/* Status Badge */}
                   <span className={`absolute top-3 left-3 inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
@@ -234,7 +234,7 @@ export default function EventsList() {
                 </div>
 
                 {/* Details Section */}
-                <div className="p-5 flex-grow flex flex-col justify-between">
+                <div className="p-5 grow flex flex-col justify-between">
                   <div className="text-left">
                     <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 truncate leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                       {evt.eventName}

@@ -115,7 +115,7 @@ export default async function EventGuestView({ params, searchParams }) {
                 type="text"
                 name="pin"
                 required
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400 transition-all text-center tracking-widest font-bold"
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400 transition-all text-center tracking-widest font-bold"
                 placeholder="E.g., 5082"
               />
             </div>
@@ -192,7 +192,7 @@ export default async function EventGuestView({ params, searchParams }) {
 
           {/* Details / Couples Column */}
           <div className="mt-6 flex flex-col md:flex-row md:items-start justify-between gap-6 text-left">
-            <div className="flex-grow space-y-4 max-w-2xl">
+            <div className="grow space-y-4 max-w-2xl">
               <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50">Event Details</h3>
               <p className="text-zinc-600 dark:text-zinc-300 font-light text-sm leading-relaxed whitespace-pre-line">
                 {event.description || "Welcome to the custom proofing workspace folder. High-resolution photographs will be visible here for review shortly."}
@@ -242,7 +242,7 @@ export default async function EventGuestView({ params, searchParams }) {
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                         <p className="text-xs font-semibold text-white truncate">{photo.name}</p>
                         <p className="text-[10px] text-zinc-300 mt-1">Click to download</p>
                       </div>

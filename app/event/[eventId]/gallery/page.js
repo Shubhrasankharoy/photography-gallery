@@ -103,7 +103,7 @@ export default async function EventGalleryPage({ params, searchParams }) {
                 type="text"
                 name="pin"
                 required
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400 transition-all text-center tracking-widest font-bold"
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400 transition-all text-center tracking-widest font-bold"
                 placeholder="E.g., 5082"
               />
             </div>

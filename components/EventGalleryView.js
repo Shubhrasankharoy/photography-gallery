@@ -10,6 +10,25 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [downloadingId, setDownloadingId] = useState(null);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedPhotoIds, setSelectedPhotoIds] = useState(new Set());
+  const [bulkDownloading, setBulkDownloading] = useState(false);
+
+  const togglePhotoSelection = (photoId) => {
+    setSelectedPhotoIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(photoId)) {
+        next.delete(photoId);
+      } else {
+        next.add(photoId);
+      }
+      return next;
+    });
+  };
+
+  const selectAllPhotos = () => {
+    setSelectedPhotoIds(new Set(initialPhotos.map((p) => p.photoId)));
+  };
 
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
@@ -130,12 +149,80 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
       document.body.removeChild(link);
       
       URL.revokeObjectURL(blobUrl);
+
+      // Log download to Firestore asynchronously
+      fetch("/api/downloads/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: event.eventId,
+          photographerId: event.photographerId,
+          photoIds: [photo.photoId],
+        }),
+      }).catch((err) => console.error("Failed to log download history:", err));
     } catch (error) {
       console.error("Blob download failed, opening URL in new window instead:", error);
       window.open(photo.url, "_blank");
     } finally {
       setDownloadingId(null);
     }
+  };
+
+  // Bulk downloads handler for multiple selected photos
+  const handleDownloadMultiple = async () => {
+    if (selectedPhotoIds.size === 0 || bulkDownloading) return;
+    setBulkDownloading(true);
+    
+    const idsArray = Array.from(selectedPhotoIds);
+    
+    // Log all downloads to the history endpoint in a single batch call
+    try {
+      await fetch("/api/downloads/record", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventId: event.eventId,
+          photographerId: event.photographerId,
+          photoIds: idsArray,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to log bulk download stats:", err);
+    }
+
+    // Sequentially trigger browser download of each photo with a 200ms delay
+    for (let i = 0; i < idsArray.length; i++) {
+      const photoId = idsArray[i];
+      const photo = initialPhotos.find((p) => p.photoId === photoId);
+      if (!photo) continue;
+
+      try {
+        const response = await fetch(photo.url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = photo.name || `photo_${photo.photoId}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(blobUrl);
+      } catch (error) {
+        console.error("Bulk photo download failed:", error);
+        window.open(photo.url, "_blank");
+      }
+
+      // Add a small delay between downloads to prevent browser lockups or popup blocks
+      if (i < idsArray.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+    }
+
+    setBulkDownloading(false);
+    setIsSelectMode(false);
+    setSelectedPhotoIds(new Set());
   };
 
   const currentPhoto = lightboxIndex !== null ? initialPhotos[lightboxIndex] : null;
@@ -160,10 +247,28 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-xs font-semibold text-zinc-500 bg-zinc-100 dark:bg-zinc-900 px-3 py-1.5 rounded-full">
               {initialPhotos.length} {initialPhotos.length === 1 ? "Photo" : "Photos"}
             </span>
+            {initialPhotos.length > 0 && (
+              <button
+                onClick={() => {
+                  setIsSelectMode((prev) => !prev);
+                  setSelectedPhotoIds(new Set());
+                }}
+                className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 select-none cursor-pointer ${
+                  isSelectMode
+                    ? "bg-indigo-650 text-white shadow-md shadow-indigo-600/10"
+                    : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                {isSelectMode ? "Exit Select" : "Select Photos"}
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -177,34 +282,65 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
               {visiblePhotos.map((photo, index) => (
                 <div
                   key={photo.photoId}
-                  onClick={() => openLightbox(index)}
-                  className="break-inside-avoid mb-4 group relative overflow-hidden rounded-2xl border border-zinc-200/60 dark:border-zinc-800/50 bg-zinc-100 dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-300 cursor-zoom-in animate-fade-in-up"
+                  onClick={() => {
+                    if (isSelectMode) {
+                      togglePhotoSelection(photo.photoId);
+                    } else {
+                      openLightbox(index);
+                    }
+                  }}
+                  className={`break-inside-avoid mb-4 group relative overflow-hidden rounded-2xl border transition-all duration-300 animate-fade-in-up ${
+                    isSelectMode
+                      ? "cursor-pointer"
+                      : "cursor-zoom-in hover:shadow-lg"
+                  } ${
+                    selectedPhotoIds.has(photo.photoId)
+                      ? "border-indigo-500 ring-2 ring-indigo-500/20"
+                      : "border-zinc-200/60 dark:border-zinc-800/50 bg-zinc-100 dark:bg-zinc-950"
+                  }`}
                 >
+                  {isSelectMode && (
+                    <div className="absolute top-3 left-3 z-10 select-none">
+                      <div className={`h-5 w-5 rounded-md border flex items-center justify-center transition-all ${
+                        selectedPhotoIds.has(photo.photoId)
+                          ? "bg-indigo-600 border-indigo-600 text-white"
+                          : "bg-white/90 border-zinc-300 dark:bg-zinc-950/90 dark:border-zinc-700"
+                      }`}>
+                        {selectedPhotoIds.has(photo.photoId) && (
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   <img
                     src={photo.thumbnailUrl || photo.url}
                     alt={photo.name}
-                    className="w-full h-auto object-cover group-hover:scale-[1.03] transition-transform duration-500 rounded-2xl"
+                    className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500 rounded-2xl"
                     loading="lazy"
                   />
                   {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                    <p className="text-xs font-semibold text-white truncate">{photo.name}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-[10px] text-zinc-300 font-light">View Details</span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDownload(photo);
-                        }}
-                        className="p-1.5 rounded-full bg-white/20 hover:bg-white text-white hover:text-black transition-all"
-                        title="Download Photo"
-                      >
-                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </button>
+                  {!isSelectMode && (
+                    <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                      <p className="text-xs font-semibold text-white truncate">{photo.name}</p>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-[10px] text-zinc-300 font-light">View Details</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownload(photo);
+                          }}
+                          className="p-1.5 rounded-full bg-white/20 hover:bg-white text-white hover:text-black transition-all"
+                          title="Download Photo"
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -233,7 +369,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
       {lightboxIndex !== null && currentPhoto && (
         <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950/98 backdrop-blur-lg select-none" onClick={closeLightbox}>
           {/* Lightbox Toolbar */}
-          <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/80 to-transparent w-full z-10" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between px-4 py-3 bg-linear-to-b from-black/80 to-transparent w-full z-10" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-4">
               <button
                 onClick={closeLightbox}
@@ -428,6 +564,53 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Selection Action Bar */}
+      {isSelectMode && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4 animate-fade-in-up">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-200 bg-white/95 p-4 shadow-xl dark:border-zinc-800 dark:bg-zinc-950/95 backdrop-blur-md">
+            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+              {selectedPhotoIds.size} selected
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={selectAllPhotos}
+                className="text-xs font-semibold px-3 py-1.5 rounded-xl bg-zinc-150 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-850 transition-all text-zinc-800 dark:text-zinc-250 cursor-pointer"
+              >
+                Select All
+              </button>
+              <button
+                onClick={handleDownloadMultiple}
+                disabled={selectedPhotoIds.size === 0 || bulkDownloading}
+                className="text-xs font-bold px-4 py-1.5 rounded-xl bg-indigo-650 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 shadow-md shadow-indigo-600/10 cursor-pointer"
+              >
+                {bulkDownloading ? (
+                  <>
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <span>Downloading...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Download Selected</span>
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setIsSelectMode(false);
+                  setSelectedPhotoIds(new Set());
+                }}
+                className="text-xs font-semibold px-3 py-1.5 rounded-xl text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
