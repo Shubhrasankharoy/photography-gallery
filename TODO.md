@@ -80,14 +80,26 @@
 ---
 
 ## Phase 7 - Gallery
-- [ ] Masonry Grid
-- [ ] Download Image
-- [ ] Lightbox
-- [ ] Lazy Loading
+- [x] Masonry Grid
+- [x] Download Image
+- [x] Lightbox
+- [x] Lazy Loading
 
 ---
 
-## Phase 8 - Downloads
+## Phase 8 - Google Drive Integration
+- [ ] Google OAuth
+- [ ] Connect Google Drive
+- [ ] Choose Upload Folder
+- [ ] Upload Images to Google Drive
+- [ ] Save Drive File ID
+- [ ] Save Metadata
+- [ ] Generate Thumbnails
+- [ ] Disconnect Google Drive
+
+---
+
+## Phase 9 - Downloads
 - [ ] Download Single Photo
 - [ ] Download Multiple Photos
 - [ ] Select Images
@@ -97,7 +109,7 @@
 
 ---
 
-## Phase 9 - Photographer Directory
+## Phase 10 - Photographer Directory
 - [ ] Search
 - [ ] Filter
 - [ ] Sort
@@ -105,23 +117,11 @@
 
 ---
 
-## Phase 10 - Event Search
+## Phase 11 - Event Search
 - [ ] Autocomplete
 - [ ] Filters
 - [ ] Pagination
 - [ ] Responsive Results
-
----
-
-## Phase 11 - Google Drive Integration
-- [ ] Google OAuth
-- [ ] Connect Google Drive
-- [ ] Choose Upload Folder
-- [ ] Upload Images to Google Drive
-- [ ] Save Drive File ID
-- [ ] Save Metadata
-- [ ] Generate Thumbnails
-- [ ] Disconnect Google Drive
 
 ---
 
