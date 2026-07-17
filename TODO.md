@@ -13,11 +13,11 @@
 ---
 
 ## Phase 1 - Authentication
-- [ ] Register
-- [ ] Login
-- [ ] Google Login
-- [ ] Logout
-- [ ] Protected Dashboard
+- [x] Register
+- [x] Login
+- [x] Google Login
+- [x] Logout
+- [x] Protected Dashboard
 
 ---
 

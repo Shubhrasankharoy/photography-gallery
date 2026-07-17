@@ -170,7 +170,7 @@ export default function Contact() {
                 
                 {isSuccess && (
                   <div className="mb-6 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-900 dark:text-emerald-300 flex items-start gap-3 animate-fade-in">
-                    <svg className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                     </svg>
                     <div>
@@ -197,8 +197,8 @@ export default function Contact() {
                         }}
                         className={`rounded-xl border bg-transparent px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all ${
                           errors.name 
-                            ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" 
-                            : "border-zinc-200 focus:border-indigo-500 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
+                            ? "border-rose-500 focus:ring-rose-500" 
+                            : "border-zinc-200 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
                         }`}
                         placeholder="John Doe"
                       />
@@ -219,8 +219,8 @@ export default function Contact() {
                         }}
                         className={`rounded-xl border bg-transparent px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all ${
                           errors.email 
-                            ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" 
-                            : "border-zinc-200 focus:border-indigo-500 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
+                            ? "border-rose-500 focus:ring-rose-500" 
+                            : "focus:border-indigo-500 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
                         }`}
                         placeholder="john@example.com"
                       />
@@ -242,8 +242,8 @@ export default function Contact() {
                       }}
                       className={`rounded-xl border bg-transparent px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all ${
                         errors.subject 
-                          ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" 
-                          : "border-zinc-200 focus:border-indigo-500 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
+                          ? "border-rose-500 focus:ring-rose-500" 
+                          : "border-zinc-200 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
                       }`}
                       placeholder="Pricing inquiry, feature request..."
                     />
@@ -261,8 +261,8 @@ export default function Contact() {
                       onChange={handleChange}
                       className={`rounded-xl border bg-transparent px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all resize-none ${
                         errors.message 
-                          ? "border-rose-500 focus:border-rose-500 focus:ring-rose-500" 
-                          : "border-zinc-200 focus:border-indigo-500 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
+                          ? "border-rose-500 focus:ring-rose-500" 
+                          : "border-zinc-200 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
                       }`}
                       placeholder="Write details of your studio or question..."
                     />
@@ -279,7 +279,7 @@ export default function Contact() {
                         handleSubmit(e);
                       }
                     }}
-                    className={`w-full mt-4 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center block ${
+                    className={`w-full mt-4 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center ${
                       isSubmitting ? "opacity-50 pointer-events-none" : ""
                     }`}
                   >
