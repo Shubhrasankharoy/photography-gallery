@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getProfileByUid } from "@/lib/profileService";
+import { getEventsByPhotographer } from "@/lib/eventService";
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [studioName, setStudioName] = useState("");
+  const [events, setEvents] = useState([]);
+  const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -18,12 +21,27 @@ export default function Dashboard() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (user) {
-      getProfileByUid(user.uid).then((profile) => {
+    async function loadDashboardData() {
+      if (!user) return;
+      try {
+        // Fetch profile
+        const profile = await getProfileByUid(user.uid);
         if (profile && profile.studioName) {
           setStudioName(profile.studioName);
         }
-      });
+
+        // Fetch live events
+        const liveEvents = await getEventsByPhotographer(user.uid);
+        setEvents(liveEvents);
+      } catch (err) {
+        console.error("Failed to load dashboard statistics:", err);
+      } finally {
+        setIsFetching(false);
+      }
+    }
+
+    if (user) {
+      loadDashboardData();
     }
   }, [user]);
 
@@ -31,13 +49,10 @@ export default function Dashboard() {
     return null;
   }
 
-  // Mock events list showing active and draft states
-  const mockEvents = [
-    { id: 1, name: "Sophie & Daniel Wedding Ceremony", photos: 342, downloads: 184, pin: "5082", status: "Published", date: "Jul 12, 2026" },
-    { id: 2, name: "Urban Summer Fashion Campaign", photos: 88, downloads: 92, pin: "None", status: "Published", date: "Jul 05, 2026" },
-    { id: 3, name: "Headshots Studio session | James", photos: 45, downloads: 0, pin: "1098", status: "Draft", date: "Jun 28, 2026" },
-    { id: 4, name: "Coastal Family Portrait Shoot", photos: 75, downloads: 44, pin: "None", status: "Published", date: "Jun 15, 2026" },
-  ];
+  // Calculate dynamic metrics
+  const totalEventsCount = events.length;
+  const totalPhotosCount = events.reduce((sum, evt) => sum + (evt.photos || 0), 0);
+  const totalDownloadsCount = events.reduce((sum, evt) => sum + (evt.downloads || 0), 0);
 
   // Mock recent uploads list with details and images
   const mockRecentUploads = [
@@ -60,10 +75,10 @@ export default function Dashboard() {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
-            href="/dashboard/profile"
+            href="/dashboard/events/new"
             className="rounded-full bg-white px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-zinc-100 transition-all select-none"
           >
-            Edit Profile
+            Create New Event
           </Link>
           {studioName && (
             <Link
@@ -79,41 +94,47 @@ export default function Dashboard() {
       {/* Stats Cards Grid */}
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Total Events */}
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
+        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20 text-left">
           <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Total Events</span>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">4</span>
-            <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full">+1 active</span>
+            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">
+              {isFetching ? "..." : totalEventsCount}
+            </span>
+            <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full">Live</span>
           </div>
         </div>
 
         {/* Card 2: Total Photos */}
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
+        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20 text-left">
           <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Total Photos</span>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">550</span>
+            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">
+              {isFetching ? "..." : totalPhotosCount}
+            </span>
             <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 px-2 py-0.5 rounded-full">High-res</span>
           </div>
         </div>
 
         {/* Card 3: Downloads */}
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
+        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20 text-left">
           <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Downloads</span>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">320</span>
-            <span className="text-xs font-semibold text-zinc-400">across 3 events</span>
+            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">
+              {isFetching ? "..." : totalDownloadsCount}
+            </span>
+            <span className="text-xs font-semibold text-zinc-400">deliveries</span>
           </div>
         </div>
 
         {/* Card 4: Storage Used */}
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
+        <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20 text-left">
           <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Storage Used</span>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">1.6 GB</span>
+            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">0.0 GB</span>
             <span className="text-xs text-zinc-400">of 5.0 GB</span>
           </div>
           <div className="mt-3 w-full h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 overflow-hidden">
-            <div className="h-full bg-linear-to-r from-violet-600 to-indigo-600 dark:from-violet-500 dark:to-indigo-500" style={{ width: "32%" }} />
+            <div className="h-full bg-linear-to-r from-violet-600 to-indigo-600 dark:from-violet-500 dark:to-indigo-500" style={{ width: "0%" }} />
           </div>
         </div>
       </div>
@@ -122,73 +143,77 @@ export default function Dashboard() {
       <div className="mt-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Left Column: Recent Events (span 8) */}
-        <div className="lg:col-span-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
+        <div className="lg:col-span-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20 text-left">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Recent Client Events</h3>
-              <p className="text-xs text-zinc-450 font-light mt-0.5">Summary of published and draft spaces</p>
+              <p className="text-xs text-zinc-450 font-light mt-0.5">Summary of published and PIN protected spaces</p>
             </div>
-            <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-not-allowed">Manage All</span>
+            <Link href="/dashboard/events" className="text-xs font-bold text-indigo-650 dark:text-indigo-400 hover:underline">
+              Manage All
+            </Link>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-zinc-150 dark:border-zinc-850 text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                  <th className="pb-3 font-semibold">Event Details</th>
-                  <th className="pb-3 font-semibold">Photos</th>
-                  <th className="pb-3 font-semibold">Downloads</th>
-                  <th className="pb-3 font-semibold">PIN Protection</th>
-                  <th className="pb-3 font-semibold">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-150 dark:divide-zinc-850 text-sm">
-                {mockEvents.map((evt) => (
-                  <tr key={evt.id} className="group">
-                    <td className="py-4 font-bold text-zinc-900 dark:text-zinc-100 flex flex-col">
-                      <span>{evt.name}</span>
-                      <span className="text-xs text-zinc-450 font-light mt-0.5">Created on {evt.date}</span>
-                    </td>
-                    <td className="py-4 text-zinc-650 dark:text-zinc-400 font-light">
-                      {evt.photos}
-                    </td>
-                    <td className="py-4 text-zinc-650 dark:text-zinc-400 font-light">
-                      {evt.downloads}
-                    </td>
-                    <td className="py-4">
-                      {evt.pin === "None" ? (
-                        <span className="text-zinc-400 text-xs">Public</span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold text-zinc-650 dark:text-zinc-300">
-                          <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                          </svg>
-                          <span>{evt.pin}</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-4">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold tracking-wider ${
-                        evt.status === "Published" 
-                          ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400" 
-                          : "bg-zinc-100 text-zinc-600 dark:bg-zinc-900 dark:text-zinc-450"
-                      }`}>
-                        {evt.status}
-                      </span>
-                    </td>
+          {isFetching ? (
+            <div className="py-8 text-center text-xs text-zinc-400">Loading events...</div>
+          ) : events.length === 0 ? (
+            <div className="py-12 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl text-center">
+              <p className="text-xs text-zinc-450 font-light">No events exist yet.</p>
+              <Link href="/dashboard/events/new" className="mt-3 inline-block text-xs font-bold text-indigo-650 dark:text-indigo-400 hover:underline">
+                Publish your first event
+              </Link>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-zinc-150 dark:border-zinc-850 text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                    <th className="pb-3 font-semibold">Event Details</th>
+                    <th className="pb-3 font-semibold">Photos</th>
+                    <th className="pb-3 font-semibold">Downloads</th>
+                    <th className="pb-3 font-semibold">Visibility</th>
+                    <th className="pb-3 font-semibold">PIN Code</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-zinc-150 dark:divide-zinc-850 text-sm">
+                  {events.slice(0, 5).map((evt) => (
+                    <tr key={evt.eventId} className="group">
+                      <td className="py-4 font-bold text-zinc-900 dark:text-zinc-100 flex flex-col">
+                        <span>{evt.eventName}</span>
+                        {evt.location && <span className="text-xs text-zinc-450 font-light mt-0.5">{evt.location}</span>}
+                      </td>
+                      <td className="py-4 text-zinc-650 dark:text-zinc-400 font-light">
+                        {evt.photos || 0}
+                      </td>
+                      <td className="py-4 text-zinc-650 dark:text-zinc-400 font-light">
+                        {evt.downloads || 0}
+                      </td>
+                      <td className="py-4">
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          evt.visibility === "public" 
+                            ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400" 
+                            : "bg-amber-50 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400"
+                        }`}>
+                          {evt.visibility === "public" ? "Public" : "Private"}
+                        </span>
+                      </td>
+                      <td className="py-4 font-mono text-zinc-600 dark:text-zinc-300">
+                        {evt.password || "None"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* Right Column: Recent Uploads (span 4) */}
-        <div className="lg:col-span-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
+        <div className="lg:col-span-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20 text-left">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Recent Uploads</h3>
-              <p className="text-xs text-zinc-450 font-light mt-0.5">Asset additions to galleries</p>
+              <p className="text-xs text-zinc-455 font-light mt-0.5">Asset additions to galleries</p>
             </div>
             <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-not-allowed">View All</span>
           </div>
