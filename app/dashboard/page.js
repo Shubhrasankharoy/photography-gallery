@@ -6,12 +6,40 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getProfileByUid } from "@/lib/profileService";
 import { getEventsByPhotographer } from "@/lib/eventService";
+import { getRecentUploads } from "@/lib/photoService";
+
+/**
+ * Format file size in human-readable format
+ */
+function formatFileSize(bytes) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+}
+
+/**
+ * Format date to relative time string
+ */
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+
+  if (seconds < 60) return "just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  return date.toLocaleDateString();
+}
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [studioName, setStudioName] = useState("");
   const [events, setEvents] = useState([]);
+  const [recentUploads, setRecentUploads] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
@@ -33,6 +61,10 @@ export default function Dashboard() {
         // Fetch live events
         const liveEvents = await getEventsByPhotographer(user.uid);
         setEvents(liveEvents);
+
+        // Fetch recent uploads
+        const uploads = await getRecentUploads(user.uid, 4);
+        setRecentUploads(uploads);
       } catch (err) {
         console.error("Failed to load dashboard statistics:", err);
       } finally {
@@ -51,16 +83,13 @@ export default function Dashboard() {
 
   // Calculate dynamic metrics
   const totalEventsCount = events.length;
-  const totalPhotosCount = events.reduce((sum, evt) => sum + (evt.photos || 0), 0);
+  const totalPhotosCount = recentUploads.length + events.reduce((sum, evt) => sum + (evt.photos || 0), 0);
   const totalDownloadsCount = events.reduce((sum, evt) => sum + (evt.downloads || 0), 0);
-
-  // Mock recent uploads list with details and images
-  const mockRecentUploads = [
-    { id: 1, name: "IMG_3092.jpg", event: "Sophie & Daniel Wedding", size: "4.8 MB", date: "2 hrs ago", url: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=300&auto=format&fit=crop" },
-    { id: 2, name: "IMG_3091.jpg", event: "Sophie & Daniel Wedding", size: "5.1 MB", date: "2 hrs ago", url: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=300&auto=format&fit=crop" },
-    { id: 3, name: "DSC_8842.jpg", event: "Urban Summer Fashion", size: "8.4 MB", date: "1 day ago", url: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=300&auto=format&fit=crop" },
-    { id: 4, name: "DSC_8841.jpg", event: "Urban Summer Fashion", size: "7.9 MB", date: "1 day ago", url: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=300&auto=format&fit=crop" },
-  ];
+  
+  // Calculate storage used from uploads
+  const totalStorageBytes = recentUploads.reduce((sum, photo) => sum + (photo.size || 0), 0);
+  const totalStorageGB = (totalStorageBytes / (1024 * 1024 * 1024)).toFixed(2);
+  const storagePercentage = Math.min((totalStorageBytes / (5 * 1024 * 1024 * 1024)) * 100, 100);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-black transition-colors duration-300">
@@ -130,11 +159,11 @@ export default function Dashboard() {
         <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20 text-left">
           <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Storage Used</span>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">0.0 GB</span>
+            <span className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">{isFetching ? "..." : totalStorageGB} GB</span>
             <span className="text-xs text-zinc-400">of 5.0 GB</span>
           </div>
           <div className="mt-3 w-full h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 overflow-hidden">
-            <div className="h-full bg-linear-to-r from-violet-600 to-indigo-600 dark:from-violet-500 dark:to-indigo-500" style={{ width: "0%" }} />
+            <div className="h-full bg-linear-to-r from-violet-600 to-indigo-600 dark:from-violet-500 dark:to-indigo-500" style={{ width: `${isFetching ? 0 : storagePercentage}%` }} />
           </div>
         </div>
       </div>
@@ -215,48 +244,59 @@ export default function Dashboard() {
               <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Recent Uploads</h3>
               <p className="text-xs text-zinc-455 font-light mt-0.5">Asset additions to galleries</p>
             </div>
-            <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-not-allowed">View All</span>
+            <Link href="/dashboard/uploads" className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline">View All</Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {mockRecentUploads.map((file) => (
-              <div key={file.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-150 dark:border-zinc-850 bg-zinc-50/20 dark:bg-zinc-900/10">
-                {/* Thumbnail */}
-                <div className="relative aspect-square w-full overflow-hidden bg-zinc-200 dark:bg-zinc-900">
-                  <img
-                    src={file.url}
-                    alt={file.name}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-1.5 right-1.5 rounded-md bg-black/60 px-1.5 py-0.5 text-[8px] font-bold text-white uppercase select-none">
-                    {file.size}
+          {isFetching ? (
+            <div className="py-8 text-center text-xs text-zinc-400">Loading uploads...</div>
+          ) : recentUploads.length === 0 ? (
+            <div className="py-12 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl text-center">
+              <p className="text-xs text-zinc-450 font-light">No uploads yet.</p>
+              <Link href="/dashboard/uploads" className="mt-3 inline-block text-xs font-bold text-indigo-650 dark:text-indigo-400 hover:underline">
+                Start uploading →
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {recentUploads.map((photo) => (
+                <div key={photo.photoId} className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-150 dark:border-zinc-850 bg-zinc-50/20 dark:bg-zinc-900/10">
+                  {/* Thumbnail */}
+                  <div className="relative aspect-square w-full overflow-hidden bg-zinc-200 dark:bg-zinc-900">
+                    <img
+                      src={photo.thumbnailUrl}
+                      alt={photo.name}
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-1.5 right-1.5 rounded-md bg-black/60 px-1.5 py-0.5 text-[8px] font-bold text-white uppercase select-none">
+                      {formatFileSize(photo.size)}
+                    </div>
+                  </div>
+
+                  {/* Details */}
+                  <div className="p-2 flex flex-col text-left">
+                    <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 truncate leading-tight">
+                      {photo.name}
+                    </span>
+                    <span className="text-[9px] text-zinc-400 truncate mt-0.5">
+                      Event {photo.eventId.substring(0, 8)}...
+                    </span>
+                    <span className="text-[8px] text-zinc-500 font-light mt-1 text-right">
+                      {formatDate(photo.createdAt)}
+                    </span>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
 
-                {/* Details */}
-                <div className="p-2 flex flex-col text-left">
-                  <span className="text-[11px] font-bold text-zinc-800 dark:text-zinc-200 truncate leading-tight">
-                    {file.name}
-                  </span>
-                  <span className="text-[9px] text-zinc-400 truncate mt-0.5">
-                    {file.event}
-                  </span>
-                  <span className="text-[8px] text-zinc-500 font-light mt-1 text-right">
-                    {file.date}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick upload placeholder card */}
-          <div className="mt-6 flex flex-col p-4 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 transition-all cursor-not-allowed bg-zinc-50/10 hover:bg-zinc-50/30 text-center">
-            <svg className="mx-auto h-6 w-6 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          {/* Quick upload card */}
+          <Link href="/dashboard/uploads" className="mt-6 flex flex-col p-4 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 transition-all cursor-pointer bg-zinc-50/10 hover:bg-indigo-50/20 dark:hover:bg-indigo-950/20 text-center">
+            <svg className="mx-auto h-6 w-6 text-zinc-400 group-hover:text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="mt-2 text-xs font-bold text-zinc-800 dark:text-zinc-200">Drop files here to upload</span>
-            <span className="text-[9px] text-zinc-400 mt-0.5">Locked until Phase 5</span>
-          </div>
+            <span className="mt-2 text-xs font-bold text-zinc-800 dark:text-zinc-200">Quick Upload</span>
+            <span className="text-[9px] text-zinc-500 dark:text-zinc-400 mt-0.5">Go to uploads page</span>
+          </Link>
 
         </div>
 

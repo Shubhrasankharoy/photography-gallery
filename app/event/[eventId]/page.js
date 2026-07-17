@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getEventById } from "@/lib/eventService";
+import { getPhotosByEvent } from "@/lib/photoService";
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -27,6 +28,16 @@ export default async function EventGuestView({ params, searchParams }) {
   const clientPin = resolvedSearchParams.pin || "";
 
   const event = await getEventById(eventId);
+  
+  // Fetch photos for this event (will be empty if not authenticated)
+  let photos = [];
+  if (event) {
+    try {
+      photos = await getPhotosByEvent(eventId);
+    } catch (err) {
+      console.error("Failed to load event photos:", err);
+    }
+  }
 
   // 1. Event Space Not Found
   if (!event) {
@@ -64,7 +75,7 @@ export default async function EventGuestView({ params, searchParams }) {
     return (
       <div className="flex min-h-[85vh] flex-col items-center justify-center bg-zinc-50 dark:bg-black px-4 transition-colors duration-300">
         
-        <div className="mx-auto w-full max-w-md rounded-3xl border border-zinc-200/60 bg-white p-8 shadow-2xl dark:border-zinc-850/50 dark:bg-zinc-950/80">
+        <div className="mx-auto w-full max-w-md rounded-3xl border border-zinc-200/60 bg-white p-8 shadow-2xl dark:border-zinc-800/50 dark:bg-zinc-950/80">
           
           {/* Padlock Icon */}
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-650 dark:text-indigo-400">
@@ -73,11 +84,11 @@ export default async function EventGuestView({ params, searchParams }) {
             </svg>
           </div>
 
-          <h2 className="mt-5 text-center text-xl font-extrabold text-zinc-900 dark:text-zinc-55 tracking-tight">
+          <h2 className="mt-5 text-center text-xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">
             Passcode Protected Space
           </h2>
-          <p className="mt-2 text-center text-xs text-zinc-500 font-light leading-relaxed">
-            Enter the access PIN provided by your photographer to view the private client gallery of <span className="font-semibold text-zinc-850 dark:text-zinc-200">{event.eventName}</span>.
+          <p className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400 font-light leading-relaxed">
+            Enter the access PIN provided by your photographer to view the private client gallery of <span className="font-semibold text-zinc-800 dark:text-zinc-200">{event.eventName}</span>.
           </p>
 
           {/* Wrong Password Screen banner */}
@@ -87,8 +98,8 @@ export default async function EventGuestView({ params, searchParams }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <div>
-                <p className="text-xs font-semibold text-rose-800 dark:text-rose-400">Invalid Passcode</p>
-                <p className="text-[10px] text-rose-650 dark:text-rose-455 font-light mt-0.5 leading-relaxed">
+                <p className="text-xs font-semibold text-rose-800 dark:text-rose-300">Invalid Passcode</p>
+                <p className="text-[10px] text-rose-700 dark:text-rose-400 font-light mt-0.5 leading-relaxed">
                   The access code entered is incorrect. Verify the PIN with your photographer.
                 </p>
               </div>
@@ -104,7 +115,7 @@ export default async function EventGuestView({ params, searchParams }) {
                 type="text"
                 name="pin"
                 required
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400 transition-all text-center tracking-widest font-bold"
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400 transition-all text-center tracking-widest font-bold"
                 placeholder="E.g., 5082"
               />
             </div>
@@ -143,15 +154,15 @@ export default async function EventGuestView({ params, searchParams }) {
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 -mt-20 relative z-10 pb-20">
         
         {/* Profile Card Container */}
-        <div className="rounded-3xl border border-zinc-200/60 bg-white/90 p-6 sm:p-10 shadow-2xl backdrop-blur-md dark:border-zinc-850/50 dark:bg-zinc-950/80 transition-all duration-300">
+        <div className="rounded-3xl border border-zinc-200/60 bg-white/90 p-6 sm:p-10 shadow-2xl backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-950/80 transition-all duration-300">
           
           {/* Header information */}
-          <div className="flex flex-col gap-4 pb-6 border-b border-zinc-200/60 dark:border-zinc-850/50 text-left">
+          <div className="flex flex-col gap-4 pb-6 border-b border-zinc-200/60 dark:border-zinc-800/50 text-left">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
               {event.eventName}
             </h1>
             
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-550 dark:text-zinc-400 font-light">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-500 dark:text-zinc-400 font-light">
               {event.eventDate && (
                 <span className="flex items-center gap-1.5">
                   <svg className="h-4 w-4 text-indigo-650 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -183,16 +194,16 @@ export default async function EventGuestView({ params, searchParams }) {
           <div className="mt-6 flex flex-col md:flex-row md:items-start justify-between gap-6 text-left">
             <div className="flex-grow space-y-4 max-w-2xl">
               <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50">Event Details</h3>
-              <p className="text-zinc-650 dark:text-zinc-300 font-light text-sm leading-relaxed whitespace-pre-line">
+              <p className="text-zinc-600 dark:text-zinc-300 font-light text-sm leading-relaxed whitespace-pre-line">
                 {event.description || "Welcome to the custom proofing workspace folder. High-resolution photographs will be visible here for review shortly."}
               </p>
             </div>
 
             {/* Couple names card (if set) */}
             {(event.brideName || event.groomName) && (
-              <div className="w-full md:w-72 shrink-0 rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5 dark:border-zinc-850 dark:bg-zinc-950/40">
+              <div className="w-full md:w-72 shrink-0 rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5 dark:border-zinc-800 dark:bg-zinc-950/40">
                 <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Celebrated Couple</h4>
-                <div className="mt-2 text-sm font-bold text-zinc-800 dark:text-zinc-250 space-y-1">
+                <div className="mt-2 text-sm font-bold text-zinc-800 dark:text-zinc-200 space-y-1">
                   {event.brideName && <div className="flex items-center gap-2">👰 {event.brideName}</div>}
                   {event.groomName && <div className="flex items-center gap-2">🤵 {event.groomName}</div>}
                 </div>
@@ -200,18 +211,46 @@ export default async function EventGuestView({ params, searchParams }) {
             )}
           </div>
 
-          {/* Masonry / Photo grid placeholder (Locked until Phase 6) */}
-          <div className="mt-12 pt-8 border-t border-zinc-200/60 dark:border-zinc-850/50 text-center">
-            <div className="rounded-2xl border border-dashed border-zinc-200 p-16 dark:border-zinc-800 bg-zinc-50/20 dark:bg-transparent">
-              <svg className="mx-auto h-12 w-12 text-zinc-300 dark:text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-              </svg>
-              <h4 className="mt-4 text-sm font-bold text-zinc-800 dark:text-zinc-200">Event Gallery is Empty</h4>
-              <p className="mt-1.5 text-xs text-zinc-500 font-light max-w-xs mx-auto">
-                No client proofing photos have been uploaded to this space yet. Please contact the studio for updates.
-              </p>
-            </div>
+          {/* Masonry / Photo grid */}
+          <div className="mt-12 pt-8 border-t border-zinc-200/60 dark:border-zinc-800/50 text-left">
+            {photos && photos.length > 0 ? (
+              <>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-6">Event Gallery ({photos.length} photos)</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {photos.map((photo) => (
+                    <div
+                      key={photo.photoId}
+                      className="group relative overflow-hidden rounded-xl border border-zinc-200/60 dark:border-zinc-800/50 bg-zinc-100 dark:bg-zinc-900 shadow-sm hover:shadow-lg transition-all"
+                    >
+                      <div className="relative aspect-square w-full overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                        <img
+                          src={photo.thumbnailUrl || photo.url}
+                          alt={photo.name}
+                          className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300" />
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <p className="text-xs font-semibold text-white truncate">{photo.name}</p>
+                        <p className="text-[10px] text-zinc-300 mt-1">Click to download</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-zinc-200 p-16 dark:border-zinc-800 bg-zinc-50/20 dark:bg-transparent text-center">
+                <svg className="mx-auto h-12 w-12 text-zinc-300 dark:text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                </svg>
+                <h4 className="mt-4 text-sm font-bold text-zinc-800 dark:text-zinc-200">Event Gallery is Empty</h4>
+                <p className="mt-1.5 text-xs text-zinc-500 font-light max-w-xs mx-auto">
+                  No client proofing photos have been uploaded to this space yet. Please contact the studio for updates.
+                </p>
+              </div>
+            )}
           </div>
 
         </div>

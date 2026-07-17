@@ -72,10 +72,10 @@
 ---
 
 ## Phase 6 - Photo Upload
-- [ ] Multiple Upload
-- [ ] Progress Bar
-- [ ] Thumbnail Generation
-- [ ] Delete Photo
+- [x] Multiple Upload
+- [x] Progress Bar
+- [x] Thumbnail Generation
+- [x] Delete Photo
 
 ---
 

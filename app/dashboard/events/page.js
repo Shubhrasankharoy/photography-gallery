@@ -76,11 +76,9 @@ export default function EventsList() {
     : events;
 
   const handleCopyLink = (eventId) => {
-    // Generate link format: e.g. capturespace.com/photographer/username/event/eventId
+    // Generate link format: e.g. capturespace.com/event/eventId
     const base = window.location.origin;
-    const link = studioUsername 
-      ? `${base}/photographer/${studioUsername}#event-${eventId}` 
-      : `${base}/event/${eventId}`;
+    const link = `${base}/event/${eventId}`;
       
     navigator.clipboard.writeText(link)
       .then(() => showNotification("Event link copied to clipboard!"))
