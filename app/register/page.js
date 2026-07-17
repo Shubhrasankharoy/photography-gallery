@@ -124,12 +124,12 @@ export default function Register() {
           alt="Vintage camera lens detail"
           className="absolute inset-0 h-full w-full object-cover object-center filter opacity-50 scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10" />
+        <div className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-black/10" />
         
         {/* Decorative Overlay Brand */}
         <div className="relative z-10 p-16 flex flex-col justify-between h-full w-full text-white">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-xl font-bold tracking-wider text-transparent">
+            <span className="bg-linear-to-r from-violet-400 to-indigo-400 bg-clip-text text-xl font-bold tracking-wider text-transparent">
               CAPTURE
             </span>
             <span className="text-xl font-light tracking-widest text-zinc-200">
@@ -165,7 +165,7 @@ export default function Register() {
           {/* Registration Error Banner */}
           {authError && (
             <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
-              <svg className="h-5 w-5 text-rose-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <svg className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <div>
@@ -198,9 +198,9 @@ export default function Register() {
 
           {/* Divider line */}
           <div className="relative my-6 flex items-center">
-            <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800" />
+            <div className="grow border-t border-zinc-200 dark:border-zinc-800" />
             <span className="mx-4 text-xs font-semibold text-zinc-400 dark:text-zinc-650 uppercase tracking-widest">or</span>
-            <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800" />
+            <div className="grow border-t border-zinc-200 dark:border-zinc-800" />
           </div>
 
           {/* Credentials Form */}
@@ -306,7 +306,7 @@ export default function Register() {
                   handleRegister(e);
                 }
               }}
-              className={`w-full mt-6 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center block ${
+              className={`w-full mt-6 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center ${
                 loading ? "opacity-50 pointer-events-none" : ""
               }`}
             >

@@ -4,14 +4,37 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { getProfileByUid } from "@/lib/profileService";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [username, setUsername] = useState("");
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const router = useRouter();
   const dropdownRef = useRef(null);
+
+  // Fetch username for active photographer
+  useEffect(() => {
+    if (user) {
+      getProfileByUid(user.uid)
+        .then((profile) => {
+          if (profile && profile.username) {
+            setUsername(profile.username);
+          } else {
+            setUsername("");
+          }
+        })
+        .catch((err) => {
+          console.error("Error fetching username in Navbar:", err);
+          setUsername("");
+        });
+    } else {
+      // Defer state update to avoid synchronous setState inside the effect body
+      Promise.resolve().then(() => setUsername(""));
+    }
+  }, [user]);
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -56,9 +79,9 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Link href="/" className="group flex items-center space-x-2">
-              <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-xl font-bold tracking-wider text-transparent dark:from-violet-400 dark:to-indigo-400">
+              <span className="bg-linear-to-r from-violet-600 to-indigo-600 bg-clip-text text-xl font-bold tracking-wider text-transparent dark:from-violet-400 dark:to-indigo-400">
                 CAPTURE
               </span>
               <span className="text-xl font-light tracking-widest text-zinc-800 dark:text-zinc-200">
@@ -81,7 +104,7 @@ export default function Navbar() {
               >
                 {link.name}
                 {isActive(link.href) && (
-                  <span className="absolute -bottom-5 left-0 h-0.5 w-full bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400" />
+                  <span className="absolute -bottom-5 left-0 h-0.5 w-full bg-linear-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400" />
                 )}
               </Link>
             ))}
@@ -97,7 +120,7 @@ export default function Navbar() {
               >
                 Dashboard
                 {isActive("/dashboard") && (
-                  <span className="absolute -bottom-5 left-0 h-0.5 w-full bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400" />
+                  <span className="absolute -bottom-5 left-0 h-0.5 w-full bg-linear-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400" />
                 )}
               </Link>
             )}
@@ -135,6 +158,15 @@ export default function Navbar() {
                       >
                         Dashboard
                       </Link>
+                      {username && (
+                        <Link
+                          href={`/photographer/${username}`}
+                          onClick={() => setIsDropdownOpen(false)}
+                          className="flex w-full items-center rounded-lg px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-50 dark:text-zinc-350 dark:hover:bg-zinc-900"
+                        >
+                          View Profile
+                        </Link>
+                      )}
                       <span
                         role="button"
                         tabIndex={0}
@@ -213,7 +245,7 @@ export default function Navbar() {
       >
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-2" onClick={() => setIsOpen(false)}>
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-lg font-bold tracking-wider text-transparent dark:from-violet-400 dark:to-indigo-400">
+            <span className="bg-linear-to-r from-violet-600 to-indigo-600 bg-clip-text text-lg font-bold tracking-wider text-transparent dark:from-violet-400 dark:to-indigo-400">
               CAPTURE
             </span>
             <span className="text-lg font-light tracking-widest text-zinc-800 dark:text-zinc-200">
@@ -264,6 +296,20 @@ export default function Navbar() {
               }`}
             >
               Dashboard
+            </Link>
+          )}
+          
+          {user && username && (
+            <Link
+              href={`/photographer/${username}`}
+              onClick={() => setIsOpen(false)}
+              className={`rounded-lg px-4 py-3 text-base font-semibold transition-colors duration-150 hover:bg-zinc-100 dark:hover:bg-zinc-900 ${
+                isActive(`/photographer/${username}`)
+                  ? "bg-indigo-50/50 text-indigo-600 dark:bg-indigo-950/20 dark:text-indigo-400"
+                  : "text-zinc-700 dark:text-zinc-300"
+              }`}
+            >
+              View Profile
             </Link>
           )}
 

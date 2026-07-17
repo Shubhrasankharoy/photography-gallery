@@ -82,7 +82,7 @@ export default function Home() {
             alt="Hero Background"
             className="h-full w-full object-cover object-center filter scale-105 animate-subtle-zoom"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20 dark:from-black dark:via-black/60 dark:to-black/30" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-black/20 dark:from-black dark:via-black/60 dark:to-black/30" />
         </div>
 
         {/* Content Container */}
@@ -93,7 +93,7 @@ export default function Home() {
           </span>
           <h1 className="max-w-4xl text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl leading-tight">
             Your Art. Delivered in{" "}
-            <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-indigo-300 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient-flow">
+            <span className="bg-linear-to-r from-indigo-300 via-violet-300 to-indigo-300 bg-clip-text text-transparent bg-size-[200%_auto] animate-gradient-flow">
               Pure Elegance
             </span>
           </h1>
@@ -239,7 +239,7 @@ export default function Home() {
                 className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
                 {/* Image Wrap */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-200 dark:bg-zinc-900">
+                <div className="relative aspect-4/3 w-full overflow-hidden bg-zinc-200 dark:bg-zinc-900">
                   <img
                     src={gallery.image}
                     alt={gallery.title}
@@ -302,19 +302,19 @@ export default function Home() {
                 </div>
                 <ul className="mt-8 space-y-4 text-sm text-zinc-660 dark:text-zinc-400 font-light">
                   <li className="flex items-center gap-3">
-                    <svg className="h-4.5 w-4.5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="h-4.5 w-4.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span>3 Active Galleries</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <svg className="h-4.5 w-4.5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="h-4.5 w-4.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span>Basic Proofing Controls</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <svg className="h-4.5 w-4.5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="h-4.5 w-4.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span>5 GB File Storage</span>
@@ -331,7 +331,7 @@ export default function Home() {
 
             {/* Tier 2 (Featured) */}
             <div className="relative rounded-3xl border-2 border-indigo-600 bg-white p-8 dark:bg-black flex flex-col justify-between shadow-xl shadow-indigo-500/5 dark:shadow-indigo-500/10">
-              <span className="absolute top-0 right-8 -translate-y-1/2 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-1 text-xs font-bold text-white tracking-widest uppercase">
+              <span className="absolute top-0 right-8 -translate-y-1/2 rounded-full bg-linear-to-r from-violet-600 to-indigo-600 px-4 py-1 text-xs font-bold text-white tracking-widest uppercase">
                 POPULAR
               </span>
               <div>
@@ -343,25 +343,25 @@ export default function Home() {
                 </div>
                 <ul className="mt-8 space-y-4 text-sm text-zinc-660 dark:text-zinc-400 font-light">
                   <li className="flex items-center gap-3">
-                    <svg className="h-4.5 w-4.5 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="h-4.5 w-4.5 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span>Unlimited Active Galleries</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <svg className="h-4.5 w-4.5 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="h-4.5 w-4.5 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span>AI Face Search Enabled</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <svg className="h-4.5 w-4.5 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="h-4.5 w-4.5 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span>Google Drive Auto-Sync</span>
                   </li>
                   <li className="flex items-center gap-3">
-                    <svg className="h-4.5 w-4.5 text-indigo-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="h-4.5 w-4.5 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                     <span>Custom Domain Branding</span>
@@ -370,7 +370,7 @@ export default function Home() {
               </div>
               <Link 
                 href="/login"
-                className="mt-8 flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200"
+                className="mt-8 flex items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200"
               >
                 Go Pro Now
               </Link>

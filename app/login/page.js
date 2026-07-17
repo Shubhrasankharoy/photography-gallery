@@ -139,12 +139,12 @@ export default function Login() {
           alt="Vintage camera lens detail"
           className="absolute inset-0 h-full w-full object-cover object-center filter opacity-50 scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10" />
+        <div className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-black/10" />
         
         {/* Decorative Overlay Brand */}
         <div className="relative z-10 p-16 flex flex-col justify-between h-full w-full text-white">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-xl font-bold tracking-wider text-transparent">
+            <span className="bg-linear-to-r from-violet-400 to-indigo-400 bg-clip-text text-xl font-bold tracking-wider text-transparent">
               CAPTURE
             </span>
             <span className="text-xl font-light tracking-widest text-zinc-200">
@@ -182,7 +182,7 @@ export default function Login() {
               {/* Authentication Error Banner */}
               {authError && (
                 <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
-                  <svg className="h-5 w-5 text-rose-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   <div>
@@ -215,9 +215,9 @@ export default function Login() {
 
               {/* Divider line */}
               <div className="relative my-6 flex items-center">
-                <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800" />
+                <div className="grow border-t border-zinc-200 dark:border-zinc-800" />
                 <span className="mx-4 text-xs font-semibold text-zinc-400 dark:text-zinc-650 uppercase tracking-widest">or</span>
-                <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800" />
+                <div className="grow border-t border-zinc-200 dark:border-zinc-800" />
               </div>
 
               {/* Credentials Form */}
@@ -293,7 +293,7 @@ export default function Login() {
                       handleEmailLogin(e);
                     }
                   }}
-                  className={`w-full mt-4 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center block ${
+                  className={`w-full mt-4 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center ${
                     loading ? "opacity-50 pointer-events-none" : ""
                   }`}
                 >
@@ -334,7 +334,7 @@ export default function Login() {
               {/* Alerts */}
               {forgotError && (
                 <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
-                  <svg className="h-5 w-5 text-rose-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   <p className="text-xs text-rose-650 dark:text-rose-455 font-light leading-relaxed">{forgotError}</p>
@@ -343,7 +343,7 @@ export default function Login() {
 
               {forgotSuccess && (
                 <div className="mb-6 rounded-2xl bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3 animate-fade-in">
-                  <svg className="h-5 w-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                   </svg>
                   <p className="text-xs text-emerald-650 dark:text-emerald-455 font-light leading-relaxed">{forgotSuccess}</p>
@@ -365,7 +365,7 @@ export default function Login() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleForgotPassword(e);
                     }}
-                    className="rounded-xl border border-zinc-200 bg-transparent px-4 py-3.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400"
+                    className="rounded-xl border border-zinc-200 bg-transparent px-4 py-3.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -377,7 +377,7 @@ export default function Login() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") handleForgotPassword(e);
                   }}
-                  className={`w-full mt-4 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center block ${
+                  className={`w-full mt-4 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center ${
                     loading ? "opacity-50 pointer-events-none" : ""
                   }`}
                 >

@@ -91,13 +91,13 @@ export default function About() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Story Image */}
-            <div className="relative overflow-hidden rounded-3xl aspect-[4/3] bg-zinc-150 dark:bg-zinc-900 shadow-xl">
+            <div className="relative overflow-hidden rounded-3xl aspect-4/3 bg-zinc-150 dark:bg-zinc-900 shadow-xl">
               <img
                 src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1200&auto=format&fit=crop"
                 alt="Photographer checking camera settings"
                 className="w-full h-full object-cover object-center"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent pointer-events-none" />
             </div>
 
             {/* Narrative text */}
@@ -180,7 +180,7 @@ export default function About() {
                     className="flex w-full items-center justify-between px-6 py-5 text-left text-zinc-800 dark:text-zinc-250 focus:outline-none"
                   >
                     <span className="font-semibold text-zinc-900 dark:text-zinc-100">{faq.question}</span>
-                    <span className="ml-4 flex-shrink-0 text-zinc-400 hover:text-indigo-500">
+                    <span className="ml-4 shrink-0 text-zinc-400 hover:text-indigo-500">
                       <svg
                         className={`h-5 w-5 transform transition-transform duration-250 ${isOpen ? "rotate-180" : ""}`}
                         fill="none"

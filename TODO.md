@@ -22,11 +22,11 @@
 ---
 
 ## Phase 2 - Photographer Profile
-- [ ] Create Profile
-- [ ] Upload Logo
-- [ ] Upload Cover Photo
-- [ ] Public Profile Page
-- [ ] Edit Profile
+- [x] Create Profile
+- [x] Upload Logo
+- [x] Upload Cover Photo
+- [x] Public Profile Page
+- [x] Edit Profile
 
 ---
 

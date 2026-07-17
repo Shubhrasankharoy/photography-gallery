@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Dashboard() {
@@ -51,6 +52,13 @@ export default function Dashboard() {
           </div>
           
           <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard/profile"
+              className="rounded-full bg-indigo-600 hover:bg-indigo-500 px-5 py-2 text-xs font-bold text-white transition-all select-none"
+            >
+              Edit Profile
+            </Link>
+            
             <span
               role="button"
               tabIndex={0}
@@ -94,7 +102,7 @@ export default function Dashboard() {
             </div>
             {/* Progress bar */}
             <div className="mt-4 w-full h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-500 dark:to-indigo-500" style={{ width: "28%" }} />
+              <div className="h-full bg-linear-to-r from-violet-600 to-indigo-600 dark:from-violet-500 dark:to-indigo-500" style={{ width: "28%" }} />
             </div>
           </div>
 
@@ -195,20 +203,26 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* AI Search settings */}
-                <div className="group flex items-center justify-between p-3 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 transition-all cursor-not-allowed">
+                {/* Photographer Profile settings */}
+                <Link
+                  href="/dashboard/profile"
+                  className="group flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-all"
+                >
                   <div className="flex items-center gap-3">
                     <div className="rounded-lg bg-indigo-50 p-2 text-indigo-650 dark:bg-indigo-950/30 dark:text-indigo-400">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                     <div className="flex flex-col text-left">
-                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-200">Face Recognition AI</span>
-                      <span className="text-[10px] text-zinc-400">Scheduled for Phase 8</span>
+                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-200">Photographer Profile</span>
+                      <span className="text-[10px] text-zinc-555">Configure public branding & contact info</span>
                     </div>
                   </div>
-                </div>
+                  <svg className="h-4 w-4 text-zinc-400 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
               </div>
             </div>
 
