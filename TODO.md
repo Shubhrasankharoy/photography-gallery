@@ -1,14 +1,14 @@
 # Photography Gallery Website
 
 ## Phase 0 - Project Setup
-- [ ] Create Next.js project
-- [ ] Configure Tailwind CSS
-- [ ] Configure Firebase
-- [ ] Create Navbar
-- [ ] Create Footer
-- [ ] Create Home Page
-- [ ] Create Contact Page
-- [ ] Create About Page
+- [x] Create Next.js project
+- [x] Configure Tailwind CSS
+- [x] Configure Firebase
+- [x] Create Navbar
+- [x] Create Footer
+- [x] Create Home Page
+- [x] Create Contact Page
+- [x] Create About Page
 
 ---
 
