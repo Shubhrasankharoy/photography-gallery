@@ -74,6 +74,8 @@ export default function Navbar() {
     return "U";
   };
 
+  if (pathname?.startsWith("/dashboard")) return null;
+
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/70 backdrop-blur-md dark:border-zinc-800/50 dark:bg-black/70 transition-all duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

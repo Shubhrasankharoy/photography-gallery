@@ -7,7 +7,7 @@ export default function AuthLoadingWrapper({ children }) {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-black transition-colors duration-300">
+      <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center bg-white dark:bg-black transition-colors duration-300">
         {/* Sleek rotating ring loader */}
         <div className="relative flex items-center justify-center">
           <div className="h-16 w-16 rounded-full border-2 border-zinc-150 dark:border-zinc-900" />

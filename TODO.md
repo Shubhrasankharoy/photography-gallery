@@ -31,10 +31,10 @@
 ---
 
 ## Phase 3 - Dashboard
-- [ ] Dashboard UI
-- [ ] Sidebar
-- [ ] Event Counter
-- [ ] Recent Uploads
+- [x] Dashboard UI
+- [x] Sidebar
+- [x] Event Counter
+- [x] Recent Uploads
 
 ---
 

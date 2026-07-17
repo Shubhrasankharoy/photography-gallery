@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 export default function Footer() {
+  const pathname = usePathname();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [error, setError] = useState("");
+
+  if (pathname?.startsWith("/dashboard")) return null;
 
   const handleSubscribe = (e) => {
     e.preventDefault();
@@ -38,7 +42,7 @@ export default function Footer() {
           {/* Brand Info */}
           <div className="flex flex-col space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-lg font-bold tracking-wider text-transparent dark:from-violet-400 dark:to-indigo-400">
+              <span className="bg-linear-to-r from-violet-600 to-indigo-600 bg-clip-text text-lg font-bold tracking-wider text-transparent dark:from-violet-400 dark:to-indigo-400">
                 CAPTURE
               </span>
               <span className="text-lg font-light tracking-widest text-zinc-800 dark:text-zinc-200">
@@ -128,7 +132,7 @@ export default function Footer() {
                     }
                   }}
                   placeholder="Enter email address"
-                  className="w-full rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-600 dark:focus:border-indigo-400 dark:focus:ring-indigo-400 transition-colors"
+                  className="w-full rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-900 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-600 dark:focus:border-indigo-400 dark:focus:ring-indigo-400 transition-colors"
                 />
               </div>
               <span
