@@ -585,7 +585,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
               <button
                 onClick={handleDownloadMultiple}
                 disabled={selectedPhotoIds.size === 0 || bulkDownloading}
-                className="text-xs font-bold px-4 py-1.5 rounded-xl bg-indigo-650 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 shadow-md shadow-indigo-600/10 cursor-pointer"
+                className="text-xs font-bold px-4 py-1.5 rounded-xl bg-indigo-650 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 shadow-md shadow-indigo-600/10"
               >
                 {bulkDownloading ? (
                   <>

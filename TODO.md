@@ -110,10 +110,10 @@
 ---
 
 ## Phase 10 - Photographer Directory
-- [ ] Search
-- [ ] Filter
-- [ ] Sort
-- [ ] Pagination
+- [x] Search
+- [x] Filter
+- [x] Sort
+- [x] Pagination
 
 ---
 
