@@ -88,14 +88,14 @@
 ---
 
 ## Phase 8 - Google Drive Integration
-- [ ] Google OAuth
-- [ ] Connect Google Drive
-- [ ] Choose Upload Folder
-- [ ] Upload Images to Google Drive
-- [ ] Save Drive File ID
-- [ ] Save Metadata
-- [ ] Generate Thumbnails
-- [ ] Disconnect Google Drive
+- [x] Google OAuth
+- [x] Connect Google Drive
+- [x] Choose Upload Folder
+- [x] Upload Images to Google Drive
+- [x] Save Drive File ID
+- [x] Save Metadata
+- [x] Generate Thumbnails
+- [x] Disconnect Google Drive
 
 ---
 

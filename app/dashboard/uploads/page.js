@@ -41,17 +41,12 @@ async function generateThumbnail(file, maxWidth = 300, maxHeight = 300, quality 
         }
         ctx.drawImage(img, 0, 0, width, height);
 
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              reject(new Error("Thumbnail generation returned no blob."));
-            } else {
-              resolve(blob);
-            }
-          },
-          file.type,
-          quality
-        );
+        try {
+          const dataUrl = canvas.toDataURL(file.type, quality);
+          resolve(dataUrl);
+        } catch (err) {
+          reject(new Error("Failed to generate thumbnail Data URL."));
+        }
       };
       img.onerror = (err) => reject(new Error("Thumbnail image load failed."));
       img.src = e.target.result;
