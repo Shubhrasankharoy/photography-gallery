@@ -100,12 +100,12 @@
 ---
 
 ## Phase 9 - Downloads
-- [ ] Download Single Photo
-- [ ] Download Multiple Photos
-- [ ] Select Images
-- [ ] Download Counter
-- [ ] Download History
-- [ ] Dashboard Statistics
+- [x] Download Single Photo
+- [x] Download Multiple Photos
+- [x] Select Images
+- [x] Download Counter
+- [x] Download History
+- [x] Dashboard Statistics
 
 ---
 

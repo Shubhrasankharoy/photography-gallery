@@ -28,13 +28,20 @@ export async function GET(request, { params }) {
 
     // Mock Image Response
     if (token.isMock || fileId.startsWith("mock_")) {
-      // Fetch a beautiful placeholder photography image from Unsplash
-      const placeholderUrl = "https://images.unsplash.com/photo-1452587925148-ce544e77e60d?q=80&w=1200&auto=format&fit=crop";
-      const response = await fetch(placeholderUrl);
-      const blob = await response.blob();
-      return new Response(blob, {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+        <rect width="100%" height="100%" fill="#18181b"/>
+        <circle cx="400" cy="260" r="60" fill="none" stroke="#6366f1" stroke-width="4" stroke-dasharray="8 4"/>
+        <path d="M380 260l15 15 30-30" fill="none" stroke="#6366f1" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="50%" y="380" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="bold" fill="#f4f4f5">
+          CaptureSpace Sandbox
+        </text>
+        <text x="50%" y="420" dominant-baseline="middle" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#a1a1aa">
+          Mock file streamed successfully via proxy
+        </text>
+      </svg>`;
+      return new Response(svg, {
         headers: {
-          "Content-Type": "image/jpeg",
+          "Content-Type": "image/svg+xml",
           "Cache-Control": "public, max-age=31536000",
         },
       });
