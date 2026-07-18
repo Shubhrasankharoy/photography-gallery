@@ -126,13 +126,13 @@
 ---
 
 ## Phase 12 - Settings
-- [ ] Edit Profile
-- [ ] Change Password
-- [ ] Delete Account
-- [ ] Connect Google Drive
-- [ ] Disconnect Google Drive
-- [ ] Theme Toggle
-- [ ] Notification Preferences
+- [x] Edit Profile
+- [x] Change Password
+- [x] Delete Account
+- [x] Connect Google Drive
+- [x] Disconnect Google Drive
+- [x] Theme Toggle
+- [x] Notification Preferences
 
 ---
 
