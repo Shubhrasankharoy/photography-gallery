@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { db, auth } from "@/lib/firebase";
-import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, deleteDoc, writeBatch, query, collection, where, getDocs } from "firebase/firestore";
 import { 
   updatePassword, 
   deleteUser, 
@@ -391,9 +391,43 @@ export default function SettingsPage() {
         await reauthenticateWithCredential(activeUser, credential);
       }
 
-      // 1. Delete Firestore Document
-      const docRef = doc(db, "photographers", user.uid);
-      await deleteDoc(docRef);
+      // 1. Delete Firestore Documents & Cascade Content
+      const batch = writeBatch(db);
+
+      // Delete users document
+      const userDocRef = doc(db, "users", user.uid);
+      batch.delete(userDocRef);
+
+      // Delete photographers document
+      const photographerDocRef = doc(db, "photographers", user.uid);
+      batch.delete(photographerDocRef);
+
+      // Retrieve and delete photographer's events, photos, downloads, and views
+      const eventsQuery = query(collection(db, "events"), where("photographerId", "==", user.uid));
+      const eventsSnap = await getDocs(eventsQuery);
+      eventsSnap.forEach((docSnap) => {
+        batch.delete(doc(db, "events", docSnap.id));
+      });
+
+      const photosQuery = query(collection(db, "photos"), where("photographerId", "==", user.uid));
+      const photosSnap = await getDocs(photosQuery);
+      photosSnap.forEach((docSnap) => {
+        batch.delete(doc(db, "photos", docSnap.id));
+      });
+
+      const downloadsQuery = query(collection(db, "downloads"), where("photographerId", "==", user.uid));
+      const downloadsSnap = await getDocs(downloadsQuery);
+      downloadsSnap.forEach((docSnap) => {
+        batch.delete(doc(db, "downloads", docSnap.id));
+      });
+
+      const viewsQuery = query(collection(db, "views"), where("photographerId", "==", user.uid));
+      const viewsSnap = await getDocs(viewsQuery);
+      viewsSnap.forEach((docSnap) => {
+        batch.delete(doc(db, "views", docSnap.id));
+      });
+
+      await batch.commit();
 
       // 2. Delete Auth User Credentials
       await deleteUser(activeUser);

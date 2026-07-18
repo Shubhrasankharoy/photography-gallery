@@ -10,7 +10,7 @@ export default function Footer() {
   const [subscribed, setSubscribed] = useState(false);
   const [error, setError] = useState("");
 
-  if (pathname?.startsWith("/dashboard")) return null;
+  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin")) return null;
 
   const handleSubscribe = (e) => {
     e.preventDefault();

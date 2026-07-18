@@ -11,11 +11,48 @@ import {
   sendPasswordResetEmail,
   updateProfile,
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 
 const AuthContext = createContext({});
 
 export const useAuth = () => useContext(AuthContext);
+
+/**
+ * Ensures a users/{uid} document exists in Firestore.
+ * Called after every successful sign-in so new and existing accounts
+ * are always synced. Uses merge:true to preserve existing fields
+ * (e.g. isAdmin) without overwriting them.
+ */
+async function ensureUserDocument(firebaseUser) {
+  if (!db || !firebaseUser) return;
+  try {
+    const userRef = doc(db, "users", firebaseUser.uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) {
+      // First time — create the document with defaults
+      await setDoc(userRef, {
+        uid: firebaseUser.uid,
+        displayName: firebaseUser.displayName || "",
+        email: firebaseUser.email || "",
+        isAdmin: false,
+        createdAt: new Date().toISOString(),
+      });
+    } else {
+      // Subsequent logins — keep existing fields, just refresh mutable ones
+      await setDoc(
+        userRef,
+        {
+          displayName: firebaseUser.displayName || snap.data().displayName || "",
+          email: firebaseUser.email || snap.data().email || "",
+        },
+        { merge: true }
+      );
+    }
+  } catch (err) {
+    console.error("Failed to sync user document:", err);
+  }
+}
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -24,7 +61,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!auth) return;
 
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        // Sync users document whenever auth state resolves to a logged-in user
+        await ensureUserDocument(currentUser);
+      }
       setUser(currentUser);
       setLoading(false);
     });
@@ -35,12 +76,12 @@ export const AuthProvider = ({ children }) => {
   const register = async (email, password, name) => {
     if (!auth) throw new Error("Firebase Authentication is not initialized.");
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // Update user display name
     if (name && userCredential.user) {
       await updateProfile(userCredential.user, { displayName: name });
-      // Force user object update in state by clone
       setUser({ ...auth.currentUser });
     }
+    // Explicitly create the Firestore document right after registration
+    await ensureUserDocument({ ...userCredential.user, displayName: name });
     return userCredential;
   };
 

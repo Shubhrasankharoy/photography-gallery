@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useState, useEffect } from "react";
 
 export default function DashboardSidebar({ isOpen, onClose }) {
   const pathname = usePathname();
@@ -89,6 +90,43 @@ export default function DashboardSidebar({ isOpen, onClose }) {
     },
   ];
 
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    async function checkAdmin() {
+      try {
+        const res = await fetch("/api/admin/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid: user.uid }),
+        });
+        const data = await res.json();
+        if (data.isAdmin) {
+          setIsAdmin(true);
+        }
+      } catch (err) {
+        console.error("Error verifying admin status:", err);
+      }
+    }
+    checkAdmin();
+  }, [user]);
+
+  const activeNavItems = [...navItems];
+  if (isAdmin) {
+    activeNavItems.push({
+      name: "Admin Panel",
+      href: "/admin",
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+        </svg>
+      ),
+      active: pathname.startsWith("/admin"),
+      locked: false,
+    });
+  }
+
   return (
     <>
       {/* Mobile Drawer Overlay Backdrop */}
@@ -132,7 +170,7 @@ export default function DashboardSidebar({ isOpen, onClose }) {
 
           {/* Nav List */}
           <nav className="flex flex-col space-y-1.5">
-            {navItems.map((item) => (
+            {activeNavItems.map((item) => (
               <span key={item.name} className="block w-full">
                 {item.locked ? (
                   <div className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-zinc-400 dark:text-zinc-600 select-none cursor-not-allowed">

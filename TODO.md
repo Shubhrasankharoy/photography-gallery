@@ -146,13 +146,13 @@
 ---
 
 ## Phase 14 - Admin Panel
-- [ ] Manage Users
-- [ ] Manage Photographers
-- [ ] Manage Events
-- [ ] Delete Content
-- [ ] Reports
-- [ ] Storage Overview
-- [ ] Search Everything
+- [x] Manage Users
+- [x] Manage Photographers
+- [x] Manage Events
+- [x] Delete Content
+- [x] Reports
+- [x] Storage Overview
+- [x] Search Everything
 
 ---
 
