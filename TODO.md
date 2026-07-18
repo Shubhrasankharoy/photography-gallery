@@ -137,11 +137,11 @@
 ---
 
 ## Phase 13 - Analytics
-- [ ] Uploads Chart
-- [ ] Downloads Chart
-- [ ] Visitors Chart
-- [ ] Popular Events Chart
-- [ ] Storage Usage Chart
+- [x] Uploads Chart
+- [x] Downloads Chart
+- [x] Visitors Chart
+- [x] Popular Events Chart
+- [x] Storage Usage Chart
 
 ---
 

@@ -45,7 +45,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white text-zinc-900 dark:bg-black dark:text-zinc-50 transition-colors duration-300">
+      <body className="min-h-full flex flex-col bg-white dark:text-zinc-50 transition-colors duration-300">
         <AuthProvider>
           <AuthLoadingWrapper>
             <Navbar />

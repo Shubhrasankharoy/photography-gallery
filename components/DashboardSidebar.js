@@ -78,15 +78,14 @@ export default function DashboardSidebar({ isOpen, onClose }) {
     },
     {
       name: "Analytics",
-      href: "#",
+      href: "/dashboard/analytics",
       icon: (
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10a2 2 0 01-2 2h-2a2 2 0 01-2-2zm9-1V4a2 2 0 00-2-2h-2a2 2 0 00-2 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
         </svg>
       ),
-      active: false,
-      locked: true,
-      phase: "Phase 11",
+      active: pathname === "/dashboard/analytics",
+      locked: false,
     },
   ];
 

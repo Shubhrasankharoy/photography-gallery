@@ -68,6 +68,30 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
     };
   }, [visiblePhotos.length, initialPhotos.length]);
 
+  // Record Event View (Pageview tracking)
+  useEffect(() => {
+    if (!event?.eventId || !event?.photographerId) return;
+
+    const recordView = async () => {
+      try {
+        await fetch("/api/views/record", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            eventId: event.eventId,
+            photographerId: event.photographerId,
+          }),
+        });
+      } catch (err) {
+        console.error("Error recording event view:", err);
+      }
+    };
+
+    recordView();
+  }, [event?.eventId, event?.photographerId]);
+
   const openLightbox = (index) => {
     setLightboxIndex(index);
     setZoom(1);
