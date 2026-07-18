@@ -355,6 +355,18 @@ export default function SettingsPage() {
       await updatePassword(activeUser, securityForm.newPassword);
       setSecurityForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
       setSuccess("Password updated successfully.");
+
+      // Trigger Password Changed Notification
+      try {
+        const { createNotification } = await import("@/lib/notificationService");
+        await createNotification(activeUser.uid, {
+          type: "password_changed",
+          title: "Password Updated 🔐",
+          message: "Your CaptureSpace account password was changed successfully. If you did not make this change, please reset your password immediately."
+        });
+      } catch (err) {
+        console.error("Failed to trigger password changed notification:", err);
+      }
     } catch (err) {
       console.error(err);
       if (err.code === "auth/requires-recent-login" || err.code === "auth/wrong-password") {
@@ -366,6 +378,7 @@ export default function SettingsPage() {
       setSaving(false);
     }
   };
+
 
   // Delete Account Action
   const handleDeleteAccount = async (e) => {

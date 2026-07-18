@@ -82,8 +82,22 @@ export const AuthProvider = ({ children }) => {
     }
     // Explicitly create the Firestore document right after registration
     await ensureUserDocument({ ...userCredential.user, displayName: name });
+
+    // Trigger Welcome Notification
+    try {
+      const { createNotification } = await import("@/lib/notificationService");
+      await createNotification(userCredential.user.uid, {
+        type: "welcome",
+        title: "Welcome to CaptureSpace! 🎉",
+        message: `Hi ${name || "there"}, we are thrilled to have you here. Let's start by creating your first photography gallery event under the Events tab!`
+      });
+    } catch (err) {
+      console.error("Failed to trigger welcome notification:", err);
+    }
+
     return userCredential;
   };
+
 
   const login = async (email, password) => {
     if (!auth) throw new Error("Firebase Authentication is not initialized.");

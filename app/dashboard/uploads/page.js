@@ -176,6 +176,25 @@ export default function UploadsPage() {
 
     if (!queuedFile) {
       setIsUploading(false);
+      
+      // Trigger Upload Complete Notification if we had uploads
+      const successCount = uploadList.filter(u => u.status === "success").length;
+      if (successCount > 0) {
+        try {
+          const { createNotification } = await import("@/lib/notificationService");
+          const eventObj = events.find(e => e.eventId === selectedEventId);
+          const eventName = eventObj ? eventObj.eventName : "your gallery event";
+          
+          await createNotification(user.uid, {
+            type: "upload_complete",
+            title: "Uploads Complete 📤",
+            message: `Successfully uploaded ${successCount} photo(s) to "${eventName}".`,
+            metadata: { eventId: selectedEventId, count: successCount }
+          });
+        } catch (err) {
+          console.error("Failed to trigger upload complete notification:", err);
+        }
+      }
       return;
     }
 

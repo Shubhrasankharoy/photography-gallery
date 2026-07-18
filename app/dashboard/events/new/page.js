@@ -90,7 +90,21 @@ export default function NewEvent() {
         coverImage: coverImageUrl
       };
 
-      await createEvent(user.uid, finalEventData);
+      const eventId = await createEvent(user.uid, finalEventData);
+
+      // Trigger Event Created Notification
+      try {
+        const { createNotification } = await import("@/lib/notificationService");
+        await createNotification(user.uid, {
+          type: "event_created",
+          title: "New Event Created 📸",
+          message: `The event "${formData.eventName}" has been successfully published. You can now copy the link and share it with your clients.`,
+          metadata: { eventId, eventName: formData.eventName }
+        });
+      } catch (err) {
+        console.error("Failed to trigger event created notification:", err);
+      }
+
       router.push("/dashboard/events");
     } catch (err) {
       console.error("Failed to create event:", err);

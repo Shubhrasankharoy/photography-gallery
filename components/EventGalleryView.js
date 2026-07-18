@@ -183,6 +183,16 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
           photographerId: event.photographerId,
           photoIds: [photo.photoId],
         }),
+      }).then(() => {
+        // Trigger Download Notification
+        import("@/lib/notificationService").then(({ createNotification }) => {
+          createNotification(event.photographerId, {
+            type: "download",
+            title: "Photo Downloaded 📥",
+            message: `A client downloaded 1 photo from your gallery "${event.eventName}".`,
+            metadata: { eventId: event.eventId, count: 1 }
+          });
+        }).catch(err => console.error("Notification import error:", err));
       }).catch((err) => console.error("Failed to log download history:", err));
     } catch (error) {
       console.error("Blob download failed, opening URL in new window instead:", error);
@@ -210,6 +220,19 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
           photoIds: idsArray,
         }),
       });
+
+      // Trigger Download Notification
+      try {
+        const { createNotification } = await import("@/lib/notificationService");
+        await createNotification(event.photographerId, {
+          type: "download",
+          title: "Photos Downloaded 📥",
+          message: `A client downloaded ${idsArray.length} photos from your gallery "${event.eventName}".`,
+          metadata: { eventId: event.eventId, count: idsArray.length }
+        });
+      } catch (err) {
+        console.error("Failed to trigger bulk download notification:", err);
+      }
     } catch (err) {
       console.error("Failed to log bulk download stats:", err);
     }

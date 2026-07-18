@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect } from "react";
 import { getProfileByUid } from "@/lib/profileService";
 import Link from "next/link";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function DashboardHeader({ onMenuClick }) {
   const { user } = useAuth();
@@ -46,7 +47,7 @@ export default function DashboardHeader({ onMenuClick }) {
         </div>
       </div>
 
-      {/* Right side: Greeting & Quick Profile link */}
+      {/* Right side: Greeting, Notifications & Quick Profile link */}
       <div className="flex items-center gap-4">
         {user && (
           <div className="hidden sm:flex flex-col text-right">
@@ -59,6 +60,8 @@ export default function DashboardHeader({ onMenuClick }) {
           </div>
         )}
 
+        <NotificationBell />
+
         <Link
           href="/dashboard/profile"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-650 text-white hover:bg-indigo-600 shadow-sm transition-all text-sm font-bold uppercase select-none border border-indigo-500/20"
@@ -70,3 +73,4 @@ export default function DashboardHeader({ onMenuClick }) {
     </header>
   );
 }
+

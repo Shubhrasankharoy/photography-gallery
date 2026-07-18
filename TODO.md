@@ -157,12 +157,12 @@
 ---
 
 ## Phase 15 - Notifications
-- [ ] Event Created Notification
-- [ ] Upload Complete Notification
-- [ ] Download Notification
-- [ ] Welcome Email
-- [ ] Password Changed Notification
-- [ ] In-app Notification Center
+- [x] Event Created Notification
+- [x] Upload Complete Notification
+- [x] Download Notification
+- [x] Welcome Email
+- [x] Password Changed Notification
+- [x] In-app Notification Center
 
 ---
 
