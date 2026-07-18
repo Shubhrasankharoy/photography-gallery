@@ -136,7 +136,7 @@ export default function PhotographersDirectory() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3 pl-11 pr-4 text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-zinc-400"
+              className="w-full bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3 pl-11 pr-4 text-xs focus:ring-2 focus:ring-indigo-500/20 transition-all placeholder:text-zinc-400"
             />
           </div>
 
@@ -149,7 +149,7 @@ export default function PhotographersDirectory() {
                 setSelectedLocation(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3 px-4 text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-zinc-700 dark:text-zinc-300"
+              className="bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3 px-4 text-xs focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium text-zinc-700 dark:text-zinc-300"
             >
               <option value="all">All Locations</option>
               {locationsList.map((loc) => (
@@ -166,7 +166,7 @@ export default function PhotographersDirectory() {
                 setSortBy(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3 px-4 text-xs focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium text-zinc-700 dark:text-zinc-300"
+              className="bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl py-3 px-4 text-xs focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium text-zinc-700 dark:text-zinc-300"
             >
               <option value="alphabetical-asc">Studio Name (A-Z)</option>
               <option value="alphabetical-desc">Studio Name (Z-A)</option>

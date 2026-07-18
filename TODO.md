@@ -118,10 +118,10 @@
 ---
 
 ## Phase 11 - Event Search
-- [ ] Autocomplete
-- [ ] Filters
-- [ ] Pagination
-- [ ] Responsive Results
+- [x] Autocomplete
+- [x] Filters
+- [x] Pagination
+- [x] Responsive Results
 
 ---
 
