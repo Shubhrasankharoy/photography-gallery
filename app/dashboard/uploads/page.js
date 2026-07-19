@@ -3,8 +3,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { getEventsByPhotographer } from "@/lib/eventService";
-import { uploadPhoto, deletePhoto } from "@/lib/photoService";
+import { useStudio } from "@/context/StudioContext";
+import { getEvents, getStudioSettings } from "@/lib/eventService";
+import { uploadPhoto, deletePhoto, canPerformPhotoAction } from "@/lib/photoService";
 import Link from "next/link";
 
 /**
@@ -57,6 +58,55 @@ async function generateThumbnail(file, maxWidth = 300, maxHeight = 300, quality 
 }
 
 /**
+ * Extract image metadata: width, height, orientation, dominantColor
+ */
+async function getImageMetadata(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const width = img.width;
+      const height = img.height;
+      const orientation = width >= height ? "landscape" : "portrait";
+      
+      let dominantColor = "#ffffff";
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1;
+        canvas.height = 1;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, 1, 1);
+          const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+          dominantColor = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+      } catch (e) {
+        // Safe fallback
+      }
+      resolve({ width, height, orientation, dominantColor });
+    };
+    img.onerror = () => {
+      resolve({ width: 0, height: 0, orientation: "landscape", dominantColor: "#ffffff" });
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+/**
+ * Generate a file checksum on the client (SHA-255 / SHA-256 equivalent hash representation)
+ */
+async function getFileChecksum(file) {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch (err) {
+    console.warn("Failed to generate file checksum:", err);
+    return "";
+  }
+}
+
+/**
  * Format file size in human-readable format
  */
 function formatFileSize(bytes) {
@@ -70,8 +120,9 @@ function formatFileSize(bytes) {
 /**
  * Format date to relative time string
  */
-function formatDate(dateString) {
-  const date = new Date(dateString);
+function formatDate(dateValue) {
+  if (!dateValue) return "just now";
+  const date = dateValue.seconds ? new Date(dateValue.seconds * 1000) : new Date(dateValue);
   const now = new Date();
   const seconds = Math.floor((now - date) / 1000);
 
@@ -82,9 +133,14 @@ function formatDate(dateString) {
   return date.toLocaleDateString();
 }
 
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_UPLOAD_COUNT = 50; // Max files allowed in a single selection batch
+
 export default function UploadsPage() {
   const { user, loading: authLoading } = useAuth();
+  const { currentStudio, currentRole, isLoading: studioLoading } = useStudio();
   const router = useRouter();
+  
   const [events, setEvents] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState("");
   const [uploads, setUploads] = useState([]); // Array of { id, file, status, progress, error, photoData }
@@ -92,6 +148,7 @@ export default function UploadsPage() {
   const [isFetching, setIsFetching] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [studioSettings, setStudioSettings] = useState(null);
 
   const updateUploads = (nextUploads) => {
     uploadsRef.current = nextUploads;
@@ -105,48 +162,98 @@ export default function UploadsPage() {
     }
   }, [user, authLoading, router]);
 
-  // Load photographer's events
+  // Load events for the selected Studio
   useEffect(() => {
-    async function loadEvents() {
-      if (!user) return;
+    async function loadEventsAndSettings() {
+      if (!user || !currentStudio) {
+        setEvents([]);
+        setIsFetching(false);
+        return;
+      }
       try {
-        const photographerEvents = await getEventsByPhotographer(user.uid);
-        setEvents(photographerEvents);
-        if (photographerEvents.length > 0) {
-          setSelectedEventId(photographerEvents[0].eventId);
+        setIsFetching(true);
+        const [studioEvents, settings] = await Promise.all([
+          getEvents({ studioId: currentStudio.studioId }),
+          getStudioSettings(currentStudio.studioId)
+        ]);
+        setEvents(studioEvents);
+        setStudioSettings(settings);
+        if (studioEvents.length > 0) {
+          setSelectedEventId(studioEvents[0].eventId);
+        } else {
+          setSelectedEventId("");
         }
       } catch (err) {
-        console.error("Failed to load events:", err);
+        console.error("Failed to load events/settings:", err);
       } finally {
         setIsFetching(false);
       }
     }
 
-    if (user) {
-      loadEvents();
+    if (user && currentStudio) {
+      loadEventsAndSettings();
     }
-  }, [user]);
+  }, [user, currentStudio]);
 
-  // Handle file selection
+  // Sync ref
+  useEffect(() => {
+    uploadsRef.current = uploads;
+  }, [uploads]);
+
+  // Handle file selection and validation
   const handleFileSelect = async (files) => {
-    console.log("handleFileSelect", { selectedEventId, fileCount: files.length });
+    if (!currentStudio) {
+      alert("No active studio selected. Please select or create a studio first.");
+      return;
+    }
+
     if (!selectedEventId) {
       alert("Please select an event first");
       return;
     }
 
+    // Role Validation
+    if (["viewer"].includes(currentRole) || !currentRole) {
+      alert("You do not have permission to upload files (Viewer role is read-only).");
+      return;
+    }
+
+    // Supported File Types Check
     const imageFiles = Array.from(files).filter((file) =>
       file.type.startsWith("image/")
     );
 
     if (imageFiles.length === 0) {
-      alert("Please select image files");
+      alert("Please select valid image files.");
       return;
     }
 
-    // Add files to uploads with initial state
-    const newUploads = imageFiles.map((file) => ({
-      id: Math.random().toString(36).substr(2, 9),
+    // Maximum Upload Count Check
+    if (imageFiles.length > MAX_UPLOAD_COUNT) {
+      alert(`Maximum upload batch limit is ${MAX_UPLOAD_COUNT} files. Please select fewer files.`);
+      return;
+    }
+
+    // Size check
+    const validFiles = [];
+    const oversizedFiles = [];
+    for (const f of imageFiles) {
+      if (f.size > MAX_FILE_SIZE) {
+        oversizedFiles.push(f.name);
+      } else {
+        validFiles.push(f);
+      }
+    }
+
+    if (oversizedFiles.length > 0) {
+      alert(`The following files exceed the 50MB limit and will be skipped:\n- ${oversizedFiles.join("\n- ")}`);
+    }
+
+    if (validFiles.length === 0) return;
+
+    // Add files to uploads with initial state: 'queued'
+    const newUploads = validFiles.map((file) => ({
+      id: Math.random().toString(36).substring(2, 11),
       file,
       status: "queued",
       progress: 0,
@@ -157,126 +264,153 @@ export default function UploadsPage() {
     const nextUploads = [...uploadsRef.current, ...newUploads];
     updateUploads(nextUploads);
     if (!isUploading) {
-      uploadNextFile(nextUploads);
+      processQueue(nextUploads);
     }
   };
 
-  // Keep ref in sync with uploads state
-  useEffect(() => {
-    uploadsRef.current = uploads;
-  }, [uploads]);
-
-  const uploadNextFile = async (uploadList = uploadsRef.current) => {
-    const queuedFile = uploadList.find((u) => u.status === "queued");
-    console.log("uploadNextFile", {
-      queuedFileId: queuedFile?.id,
-      uploadCount: uploadList.length,
-      uploading: isUploading,
-    });
-
-    if (!queuedFile) {
-      setIsUploading(false);
-      
-      // Trigger Upload Complete Notification if we had uploads
-      const successCount = uploadList.filter(u => u.status === "success").length;
-      if (successCount > 0) {
-        try {
-          const { createNotification } = await import("@/lib/notificationService");
-          const eventObj = events.find(e => e.eventId === selectedEventId);
-          const eventName = eventObj ? eventObj.eventName : "your gallery event";
-          
-          await createNotification(user.uid, {
-            type: "upload_complete",
-            title: "Uploads Complete 📤",
-            message: `Successfully uploaded ${successCount} photo(s) to "${eventName}".`,
-            metadata: { eventId: selectedEventId, count: successCount }
-          });
-        } catch (err) {
-          console.error("Failed to trigger upload complete notification:", err);
-        }
-      }
-      return;
-    }
-
+  // Sequential chunked queue processing (batch size: 5)
+  const processQueue = async (currentQueue = uploadsRef.current) => {
+    if (isUploading) return;
     setIsUploading(true);
 
-    try {
-      // Update status to uploading
+    let queue = [...currentQueue];
+    const batchSize = 5;
+
+    // Retrieve only files with 'queued' status
+    let queuedItems = queue.filter((u) => u.status === "queued");
+
+    while (queuedItems.length > 0) {
+      const currentBatch = queuedItems.slice(0, batchSize);
+      
+      // Update UI state of batch items to 'uploading'
       setUploads((prev) =>
         prev.map((u) =>
-          u.id === queuedFile.id ? { ...u, status: "uploading", progress: 0 } : u
+          currentBatch.some((b) => b.id === u.id)
+            ? { ...u, status: "uploading", progress: 0 }
+            : u
         )
       );
 
-      // Generate thumbnail
-      const thumbnail = await generateThumbnail(queuedFile.file);
-      console.log("thumbnail generated", { fileName: queuedFile.file.name, thumbnailType: thumbnail?.type, thumbnailSize: thumbnail?.size });
+      // Map batch files to upload promises
+      const uploadPromises = currentBatch.map(async (item) => {
+        try {
+          // 1. Generate local thumbnail blob
+          const thumbnail = await generateThumbnail(item.file);
+          
+          // 2. Extract dimensions/color & compute checksum on the client
+          const [meta, checksum] = await Promise.all([
+            getImageMetadata(item.file),
+            getFileChecksum(item.file)
+          ]);
 
-      // Upload photo
-      const photoData = await uploadPhoto(
-        selectedEventId,
-        user.uid,
-        queuedFile.file,
-        thumbnail,
-        (percent) => {
-          console.log("upload progress callback", queuedFile.id, Math.round(percent));
+          // Update UI state to 'processing' before server saving
           setUploads((prev) =>
             prev.map((u) =>
-              u.id === queuedFile.id ? { ...u, progress: Math.round(percent) } : u
+              u.id === item.id ? { ...u, status: "processing" } : u
+            )
+          );
+
+          // 3. Perform upload
+          const photoData = await uploadPhoto({
+            eventId: selectedEventId,
+            studioId: currentStudio.studioId,
+            uploaderId: user.uid,
+            file: item.file,
+            thumbnail,
+            onProgress: (percent) => {
+              setUploads((prev) =>
+                prev.map((u) =>
+                  u.id === item.id ? { ...u, progress: Math.round(percent) } : u
+                )
+              );
+            },
+            width: meta.width,
+            height: meta.height,
+            orientation: meta.orientation,
+            dominantColor: meta.dominantColor,
+            checksum
+          });
+
+          // Mark completed
+          setUploads((prev) =>
+            prev.map((u) =>
+              u.id === item.id ? { ...u, status: "completed", progress: 100, photoData } : u
+            )
+          );
+        } catch (error) {
+          console.error("Upload error:", error);
+          setUploads((prev) =>
+            prev.map((u) =>
+              u.id === item.id
+                ? { ...u, status: "failed", error: error.message }
+                : u
             )
           );
         }
-      );
+      });
 
-      // Update status to success
-      setUploads((prev) =>
-        prev.map((u) =>
-          u.id === queuedFile.id
-            ? { ...u, status: "success", progress: 100, photoData }
-            : u
-        )
-      );
+      await Promise.all(uploadPromises);
+      
+      // Advance chunk
+      queuedItems = queuedItems.slice(batchSize);
+    }
 
-      // Upload next file (use the ref-based function so it reads latest state)
-      setTimeout(() => uploadNextFile(), 500);
-    } catch (error) {
-      console.error("Upload error:", error);
+    setIsUploading(false);
 
-      // Update status to failed
-      setUploads((prev) =>
-        prev.map((u) =>
-          u.id === queuedFile.id
-            ? { ...u, status: "failed", error: error.message }
-            : u
-        )
-      );
-
-      // Continue with next file even if one fails
-      setTimeout(() => uploadNextFile(), 500);
+    // Trigger Notification for successfully completed files
+    const successCount = uploadsRef.current.filter(u => u.status === "completed").length;
+    if (successCount > 0) {
+      try {
+        const { createNotification } = await import("@/lib/notificationService");
+        const eventObj = events.find(e => e.eventId === selectedEventId);
+        const eventName = eventObj ? eventObj.eventName : "your gallery event";
+        
+        await createNotification(user.uid, {
+          type: "upload_complete",
+          title: "Uploads Complete 📤",
+          message: `Successfully uploaded ${successCount} photo(s) to "${eventName}".`,
+          metadata: { eventId: selectedEventId, count: successCount }
+        });
+      } catch (err) {
+        console.error("Failed to trigger upload complete notification:", err);
+      }
     }
   };
 
   // Retry failed upload
   const handleRetry = async (uploadId) => {
-    setUploads((prev) =>
-      prev.map((u) =>
-        u.id === uploadId
-          ? { ...u, status: "queued", progress: 0, error: null }
-          : u
-      )
+    const updated = uploadsRef.current.map((u) =>
+      u.id === uploadId ? { ...u, status: "queued", progress: 0, error: null } : u
     );
+    updateUploads(updated);
+    if (!isUploading) {
+      processQueue(updated);
+    }
   };
 
-  // Delete photo
+  // Delete photo (soft-delete with permissions checks)
   const handleDeletePhoto = async (upload) => {
     if (!confirm("Are you sure you want to delete this photo?")) return;
 
     try {
       if (upload.photoData) {
+        const hasPermission = await canPerformPhotoAction(
+          currentStudio.studioId,
+          user.uid,
+          "delete",
+          upload.photoData,
+          studioSettings
+        );
+
+        if (!hasPermission) {
+          alert("You do not have permission to delete this photo.");
+          return;
+        }
+
         await deletePhoto(
           upload.photoData.photoId,
-          upload.photoData.originalStoragePath,
-          upload.photoData.thumbnailStoragePath
+          currentStudio.studioId,
+          user.uid
         );
       }
 
@@ -287,7 +421,7 @@ export default function UploadsPage() {
     }
   };
 
-  // Handle drag and drop
+  // Drag-and-drop mechanics
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -309,14 +443,23 @@ export default function UploadsPage() {
     handleFileSelect(files);
   };
 
-  // Handle file input
   const handleInputChange = (e) => {
     const { files } = e.currentTarget;
     handleFileSelect(files);
   };
 
-  if (authLoading || !user) {
-    return null;
+  if (authLoading || studioLoading || !user) {
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center bg-zinc-50 dark:bg-black transition-colors duration-300">
+        <div className="flex flex-col items-center gap-2">
+          <svg className="animate-spin h-8 w-8 text-indigo-650" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <span className="text-sm text-zinc-550">Loading uploads interface...</span>
+        </div>
+      </div>
+    );
   }
 
   const selectedEvent = events.find((e) => e.eventId === selectedEventId);
@@ -329,9 +472,22 @@ export default function UploadsPage() {
           Photo Upload Manager
         </h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 font-light max-w-2xl">
-          Drag and drop your images or select files from your computer. Thumbnails are generated automatically.
+          Drag and drop your images or select files from your computer. Uploads belong to the selected studio, event, and uploader.
         </p>
       </div>
+
+      {/* Studio Banner info */}
+      {currentStudio && (
+        <div className="mb-6 rounded-xl bg-indigo-50/50 border border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50 p-4 flex justify-between items-center">
+          <div>
+            <span className="text-xs uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400">Selected Studio</span>
+            <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{currentStudio.studioName}</h4>
+          </div>
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-750 dark:bg-indigo-900/50 dark:text-indigo-300 capitalize">
+            Role: {currentRole}
+          </span>
+        </div>
+      )}
 
       {/* Event Selector */}
       <div className="mb-8 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
@@ -343,7 +499,7 @@ export default function UploadsPage() {
         ) : events.length === 0 ? (
           <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 p-4">
             <p className="text-sm text-amber-900 dark:text-amber-400 font-light">
-              No events found. Create an event first to start uploading photos.
+              No events found for this studio. Create an event first to start uploading photos.
             </p>
             <Link
               href="/dashboard/events/new"
@@ -371,55 +527,63 @@ export default function UploadsPage() {
       {/* Drag and Drop Zone */}
       {selectedEvent && (
         <>
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`mb-8 rounded-3xl border-2 border-dashed p-12 text-center transition-all ${
-              isDragging
-                ? "border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/20"
-                : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950/20"
-            }`}
-          >
-            <div className="flex flex-col items-center justify-center">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400">
-                <svg
-                  className="h-8 w-8"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-                {isDragging ? "Drop your images here" : "Drag & drop images here"}
-              </h3>
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 font-light">
-                or
-              </p>
-              <label className="mt-2">
-                <span className="cursor-pointer text-sm font-bold text-indigo-650 dark:text-indigo-400 hover:underline">
-                  Click to select files
-                </span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleInputChange}
-                  className="hidden"
-                />
-              </label>
-              <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-500">
-                Supported formats: JPG, PNG, WebP, GIF (max 50 MB each)
+          {["viewer"].includes(currentRole) ? (
+            <div className="mb-8 rounded-3xl border-2 border-dashed border-rose-300 dark:border-rose-900/50 bg-rose-50/20 p-12 text-center">
+              <p className="text-rose-700 dark:text-rose-400 font-semibold">
+                You have Viewer access only. Uploading is disabled.
               </p>
             </div>
-          </div>
+          ) : (
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`mb-8 rounded-3xl border-2 border-dashed p-12 text-center transition-all ${
+                isDragging
+                  ? "border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/20"
+                  : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950/20"
+              }`}
+            >
+              <div className="flex flex-col items-center justify-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400">
+                  <svg
+                    className="h-8 w-8"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  {isDragging ? "Drop your images here" : "Drag & drop images here"}
+                </h3>
+                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 font-light">
+                  or
+                </p>
+                <label className="mt-2">
+                  <span className="cursor-pointer text-sm font-bold text-indigo-650 dark:text-indigo-400 hover:underline">
+                    Click to select files
+                  </span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleInputChange}
+                    className="hidden"
+                  />
+                </label>
+                <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-500">
+                  Supported formats: JPG, PNG, WebP, GIF (max 50 MB each, up to 50 files at once)
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Upload Manager */}
           {uploads.length > 0 && (
@@ -430,14 +594,14 @@ export default function UploadsPage() {
                     Upload Queue
                   </h3>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400 font-light mt-0.5">
-                    {uploads.filter((u) => u.status === "success").length} of{" "}
+                    {uploads.filter((u) => u.status === "completed").length} of{" "}
                     {uploads.length} uploaded
                   </p>
                 </div>
                 <div className="text-right">
                   <div className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-50">
                     {Math.round(
-                      (uploads.filter((u) => u.status === "success").length /
+                      (uploads.filter((u) => u.status === "completed").length /
                         uploads.length) *
                         100
                     )}
@@ -480,17 +644,22 @@ export default function UploadsPage() {
                           </span>
                         )}
                         {upload.status === "uploading" && (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400">
+                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-155 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400">
                             Uploading
                           </span>
                         )}
-                        {upload.status === "success" && (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400">
+                        {upload.status === "processing" && (
+                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 animate-pulse">
+                            Processing
+                          </span>
+                        )}
+                        {upload.status === "completed" && (
+                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-emerald-105 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
                             Success
                           </span>
                         )}
                         {upload.status === "failed" && (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-rose-100 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400">
+                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-rose-105 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400">
                             Failed
                           </span>
                         )}
@@ -498,7 +667,7 @@ export default function UploadsPage() {
                     </div>
 
                     {/* Progress Bar */}
-                    {(upload.status === "uploading" || upload.status === "queued") && (
+                    {(upload.status === "uploading" || upload.status === "queued" || upload.status === "processing") && (
                       <div className="w-full">
                         <div className="flex justify-between items-center mb-1">
                           <span className="text-xs text-zinc-500 dark:text-zinc-400 font-light">
@@ -549,14 +718,14 @@ export default function UploadsPage() {
                       {upload.status === "failed" && (
                         <button
                           onClick={() => handleRetry(upload.id)}
-                          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20 hover:bg-indigo-100 dark:hover:bg-indigo-950/40 transition-colors"
+                          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-55 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 transition-colors"
                         >
                           Retry
                         </button>
                       )}
                       <button
                         onClick={() => handleDeletePhoto(upload)}
-                        className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors"
+                        className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-55 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 transition-colors"
                       >
                         Delete
                       </button>

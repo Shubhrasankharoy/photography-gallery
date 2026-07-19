@@ -226,10 +226,10 @@ Studio Event Migration
 
 Studio Upload System
 
-- [ ] uploadedBy
-- [ ] studioId
-- [ ] Member Upload Permissions
-- [ ] Upload Activity
+- [x] uploadedBy
+- [x] studioId
+- [x] Member Upload Permissions
+- [x] Upload Activity
 
 ---
 
