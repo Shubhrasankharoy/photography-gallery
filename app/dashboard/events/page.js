@@ -4,15 +4,18 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useStudio } from "@/context/StudioContext";
 import { getProfileByUid } from "@/lib/profileService";
 import { 
-  getEventsByPhotographer, 
+  getEvents, 
   deleteEvent, 
-  duplicateEvent 
+  duplicateEvent,
+  getStudioSettings
 } from "@/lib/eventService";
 
 export default function EventsList() {
   const { user, loading: authLoading } = useAuth();
+  const { currentStudio } = useStudio();
   const router = useRouter();
 
   const [events, setEvents] = useState([]);
@@ -21,6 +24,7 @@ export default function EventsList() {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [notification, setNotification] = useState("");
   const [studioUsername, setStudioUsername] = useState("");
+  const [studioSettings, setStudioSettings] = useState(null);
 
   // Helper to show notifications
   const showNotification = (msg) => {
@@ -46,7 +50,15 @@ export default function EventsList() {
         setStudioUsername(profile.username);
       }
       
-      const list = await getEventsByPhotographer(user.uid);
+      let list = [];
+      if (currentStudio) {
+        list = await getEvents({ studioId: currentStudio.studioId });
+        const settings = await getStudioSettings(currentStudio.studioId);
+        setStudioSettings(settings);
+      } else {
+        list = await getEvents({ photographerId: user.uid });
+        setStudioSettings(null);
+      }
       setEvents(list);
     } catch (err) {
       console.error("Failed to load events:", err);
@@ -54,14 +66,44 @@ export default function EventsList() {
     } finally {
       setIsFetching(false);
     }
-  }, [user]);
+  }, [user, currentStudio]);
 
   useEffect(() => {
     if (user) {
       // Defer execution to avoid synchronous setState inside effect body
       Promise.resolve().then(() => loadData());
     }
-  }, [user, loadData]);
+  }, [user, loadData, currentStudio]);
+
+  // Derive permissions
+  const canCreateEvent = !currentStudio || (
+    currentStudio.userRole === "owner" ||
+    currentStudio.userRole === "admin" ||
+    (currentStudio.userRole === "photographer" && studioSettings?.allowPhotographerCreateEvent !== false)
+  );
+
+  const canEditEvent = (event) => {
+    if (!event.studioId) {
+      return event.photographerId === user?.uid;
+    }
+    if (!currentStudio) return false;
+    return (
+      currentStudio.userRole === "owner" ||
+      currentStudio.userRole === "admin" ||
+      (currentStudio.userRole === "photographer" && event.createdBy === user?.uid)
+    );
+  };
+
+  const canDeleteEvent = (event) => {
+    if (!event.studioId) {
+      return event.photographerId === user?.uid;
+    }
+    if (!currentStudio) return false;
+    return (
+      currentStudio.userRole === "owner" ||
+      currentStudio.userRole === "admin"
+    );
+  };
 
   // Derive filtered events list in render phase (avoids useEffect + setState sync issues)
   const q = searchQuery.toLowerCase().trim();
@@ -91,7 +133,7 @@ export default function EventsList() {
   const handleDuplicate = async (eventId) => {
     setIsActionLoading(true);
     try {
-      await duplicateEvent(eventId);
+      await duplicateEvent(eventId, user.uid);
       showNotification("Event duplicated successfully.");
       await loadData();
     } catch (err) {
@@ -147,15 +189,17 @@ export default function EventsList() {
           </p>
         </div>
         
-        <Link
-          href="/dashboard/events/new"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-650 hover:bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all select-none"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7-7H5" />
-          </svg>
-          <span>Create New Event</span>
-        </Link>
+        {canCreateEvent && (
+          <Link
+            href="/dashboard/events/new"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-650 hover:bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all select-none"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7-7H5" />
+            </svg>
+            <span>Create New Event</span>
+          </Link>
+        )}
       </div>
 
       {/* Floating Action Notifications */}
@@ -280,42 +324,48 @@ export default function EventsList() {
                         </svg>
                       </span>
 
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => handleDuplicate(evt.eventId)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") handleDuplicate(evt.eventId);
-                        }}
-                        className="rounded-lg border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-850 dark:hover:bg-zinc-900 p-2 text-zinc-650 dark:text-zinc-400 cursor-pointer select-none"
-                        title="Duplicate Event"
-                      >
-                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376A8.965 8.965 0 0012 12.75a8.965 8.965 0 00-3.75 3.375m7.5 1.125V21a9 9 0 01-9-9V7.875M9 3.75h.008v.008H9V3.75z" />
-                        </svg>
-                      </span>
+                      {canCreateEvent && (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleDuplicate(evt.eventId)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") handleDuplicate(evt.eventId);
+                          }}
+                          className="rounded-lg border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-850 dark:hover:bg-zinc-900 p-2 text-zinc-650 dark:text-zinc-400 cursor-pointer select-none"
+                          title="Duplicate Event"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376A8.965 8.965 0 0012 12.75a8.965 8.965 0 00-3.75 3.375m7.5 1.125V21a9 9 0 01-9-9V7.875M9 3.75h.008v.008H9V3.75z" />
+                          </svg>
+                        </span>
+                      )}
                     </div>
 
                     {/* Edit & Delete */}
                     <div className="flex gap-2">
-                      <Link
-                        href={`/dashboard/events/edit/${evt.eventId}`}
-                        className="rounded-lg border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-850 dark:hover:bg-zinc-900 px-3 py-2 text-xs font-bold text-zinc-700 dark:text-zinc-350"
-                      >
-                        Edit
-                      </Link>
+                      {canEditEvent(evt) && (
+                        <Link
+                          href={`/dashboard/events/edit/${evt.eventId}`}
+                          className="rounded-lg border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-850 dark:hover:bg-zinc-900 px-3 py-2 text-xs font-bold text-zinc-700 dark:text-zinc-350"
+                        >
+                          Edit
+                        </Link>
+                      )}
 
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => handleDelete(evt.eventId, evt.eventName)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") handleDelete(evt.eventId, evt.eventName);
-                        }}
-                        className="rounded-lg border border-rose-100 hover:bg-rose-50 dark:border-rose-950/20 dark:hover:bg-rose-950/30 px-3 py-2 text-xs font-bold text-rose-600 cursor-pointer select-none"
-                      >
-                        Delete
-                      </span>
+                      {canDeleteEvent(evt) && (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleDelete(evt.eventId, evt.eventName)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") handleDelete(evt.eventId, evt.eventName);
+                          }}
+                          className="rounded-lg border border-rose-100 hover:bg-rose-50 dark:border-rose-950/20 dark:hover:bg-rose-950/30 px-3 py-2 text-xs font-bold text-rose-600 cursor-pointer select-none"
+                        >
+                          Delete
+                        </span>
+                      )}
                     </div>
 
                   </div>

@@ -160,8 +160,7 @@ export default function StudioHub() {
   // Sent invites
   const handleSendInvite = async (e) => {
     e.preventDefault();
-    if (studios.length === 0) return;
-    const currentStudio = studios[0];
+    if (!currentStudio) return;
 
     if (!inviteEmail.trim()) {
       setInviteError("Email is required.");
@@ -189,8 +188,7 @@ export default function StudioHub() {
 
   const handleCancelInvite = async (inviteId) => {
     if (!confirm("Are you sure you want to cancel this invitation?")) return;
-    if (studios.length === 0) return;
-    const currentStudio = studios[0];
+    if (!currentStudio) return;
 
     try {
       setActionError("");
@@ -206,8 +204,7 @@ export default function StudioHub() {
 
   // Member role updates
   const handlePromote = async (member) => {
-    if (studios.length === 0) return;
-    const currentStudio = studios[0];
+    if (!currentStudio) return;
     const nextRole = member.role === "viewer" ? "photographer" : "admin";
 
     try {
@@ -221,8 +218,7 @@ export default function StudioHub() {
   };
 
   const handleDemote = async (member) => {
-    if (studios.length === 0) return;
-    const currentStudio = studios[0];
+    if (!currentStudio) return;
     const nextRole = member.role === "admin" ? "photographer" : "viewer";
 
     try {
@@ -237,8 +233,7 @@ export default function StudioHub() {
 
   const handleRemoveMember = async (member) => {
     if (!confirm(`Are you sure you want to remove ${member.displayName} from the studio?`)) return;
-    if (studios.length === 0) return;
-    const currentStudio = studios[0];
+    if (!currentStudio) return;
 
     try {
       setActionError("");
@@ -252,8 +247,7 @@ export default function StudioHub() {
 
   const handleTransferOwnership = async (member) => {
     if (!confirm(`Are you sure you want to transfer ownership to ${member.displayName}? You will be demoted to Admin.`)) return;
-    if (studios.length === 0) return;
-    const currentStudio = studios[0];
+    if (!currentStudio) return;
 
     try {
       setActionError("");
@@ -267,8 +261,7 @@ export default function StudioHub() {
   };
 
   const handleLeaveStudio = async () => {
-    if (studios.length === 0) return;
-    const currentStudio = studios[0];
+    if (!currentStudio) return;
 
     const ownerCount = members.filter(m => m.role === "owner").length;
     if (currentStudio.userRole === "owner" && ownerCount <= 1) {

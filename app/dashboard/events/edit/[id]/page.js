@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useStudio } from "@/context/StudioContext";
 import { uploadProfileImage } from "@/lib/profileService";
 import { getEventById, updateEvent } from "@/lib/eventService";
 
@@ -12,6 +13,7 @@ export default function EditEvent({ params }) {
   const eventId = resolvedParams.id;
 
   const { user, loading: authLoading } = useAuth();
+  const { currentStudio } = useStudio();
   const router = useRouter();
 
   // Redirect if unauthenticated
@@ -52,10 +54,33 @@ export default function EditEvent({ params }) {
           return;
         }
 
-        // Verify ownership
-        if (user && details.photographerId !== user.uid) {
-          router.replace("/dashboard/events");
-          return;
+        // Verify ownership and role-based editing permissions
+        if (user) {
+          if (details.studioId) {
+            if (!currentStudio) {
+              // Wait for currentStudio context to resolve
+              return;
+            }
+            if (currentStudio.studioId !== details.studioId) {
+              router.replace("/dashboard/events");
+              return;
+            }
+            const role = currentStudio.userRole;
+            if (role === "viewer") {
+              router.replace("/dashboard/events");
+              return;
+            }
+            if (role === "photographer" && details.createdBy !== user.uid) {
+              router.replace("/dashboard/events");
+              return;
+            }
+          } else {
+            // Legacy check
+            if (details.photographerId !== user.uid) {
+              router.replace("/dashboard/events");
+              return;
+            }
+          }
         }
 
         setFormData({
@@ -84,7 +109,7 @@ export default function EditEvent({ params }) {
     if (user && eventId) {
       loadEvent();
     }
-  }, [user, eventId, router]);
+  }, [user, eventId, router, currentStudio]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -139,7 +164,8 @@ export default function EditEvent({ params }) {
 
       const finalEventData = {
         ...formData,
-        coverImage: finalCoverUrl
+        coverImage: finalCoverUrl,
+        updatedBy: user.uid
       };
 
       await updateEvent(eventId, finalEventData);

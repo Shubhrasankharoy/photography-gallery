@@ -29,13 +29,50 @@ export default async function EventGuestView({ params, searchParams }) {
 
   const event = await getEventById(eventId);
   
-  // Fetch photos for this event (will be empty if not authenticated)
+  // Fetch photos, studio branding details, and creator profile concurrently
   let photos = [];
+  let studio = null;
+  let creatorName = "";
+
   if (event) {
     try {
-      photos = await getPhotosByEvent(eventId);
+      const fetches = [];
+      
+      // 1. Fetch photos
+      fetches.push(getPhotosByEvent(eventId).catch(err => {
+        console.error("Failed to load event photos:", err);
+        return [];
+      }));
+
+      // 2. Fetch studio details if exists
+      if (event.studioId) {
+        const { getStudioById } = await import("@/lib/studioService");
+        fetches.push(getStudioById(event.studioId).catch(err => {
+          console.error("Failed to load studio details:", err);
+          return null;
+        }));
+      } else {
+        fetches.push(Promise.resolve(null));
+      }
+
+      // 3. Fetch creator profile info
+      const creatorUid = event.createdBy || event.photographerId;
+      if (creatorUid) {
+        const { getProfileByUid } = await import("@/lib/profileService");
+        fetches.push(getProfileByUid(creatorUid).catch(err => {
+          console.error("Failed to load creator profile:", err);
+          return null;
+        }));
+      } else {
+        fetches.push(Promise.resolve(null));
+      }
+
+      const [resolvedPhotos, resolvedStudio, resolvedCreator] = await Promise.all(fetches);
+      photos = resolvedPhotos || [];
+      studio = resolvedStudio;
+      creatorName = resolvedCreator?.displayName || resolvedCreator?.name || "Member";
     } catch (err) {
-      console.error("Failed to load event photos:", err);
+      console.error("Failed loading event page data concurrently:", err);
     }
   }
 
@@ -199,16 +236,51 @@ export default async function EventGuestView({ params, searchParams }) {
               </p>
             </div>
 
-            {/* Couple names card (if set) */}
-            {(event.brideName || event.groomName) && (
-              <div className="w-full md:w-72 shrink-0 rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5 dark:border-zinc-800 dark:bg-zinc-950/40">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Celebrated Couple</h4>
-                <div className="mt-2 text-sm font-bold text-zinc-800 dark:text-zinc-200 space-y-1">
-                  {event.brideName && <div className="flex items-center gap-2">👰 {event.brideName}</div>}
-                  {event.groomName && <div className="flex items-center gap-2">🤵 {event.groomName}</div>}
+            {/* Sidebar Cards */}
+            <div className="w-full md:w-72 shrink-0 space-y-4">
+              {(event.brideName || event.groomName) && (
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5 dark:border-zinc-800 dark:bg-zinc-950/40">
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Celebrated Couple</h4>
+                  <div className="mt-2 text-sm font-bold text-zinc-800 dark:text-zinc-200 space-y-1">
+                    {event.brideName && <div className="flex items-center gap-2">👰 {event.brideName}</div>}
+                    {event.groomName && <div className="flex items-center gap-2">🤵 {event.groomName}</div>}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {(studio || creatorName) && (
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5 dark:border-zinc-800 dark:bg-zinc-950/40 space-y-4">
+                  {studio && (
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Published By</h4>
+                      <Link 
+                        href={`/studio/${studio.studioSlug}`}
+                        className="mt-1.5 flex items-center gap-2 group"
+                      >
+                        {studio.logo ? (
+                          <img src={studio.logo} alt={studio.studioName} className="h-6 w-6 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="h-6 w-6 rounded-full bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-[10px] font-bold text-indigo-650 dark:text-indigo-400 shrink-0">
+                            {studio.studioName.charAt(0)}
+                          </div>
+                        )}
+                        <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                          {studio.studioName}
+                        </span>
+                      </Link>
+                    </div>
+                  )}
+                  {creatorName && (
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Created By</h4>
+                      <div className="mt-1 text-xs font-bold text-zinc-800 dark:text-zinc-250">
+                        {creatorName}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Masonry / Photo grid */}

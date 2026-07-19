@@ -215,10 +215,10 @@ Studio Context
 
 Studio Event Migration
 
-- [ ] Events belong to Studio
-- [ ] createdBy
-- [ ] Backward Compatibility
-- [ ] Studio Event Dashboard
+- [x] Events belong to Studio
+- [x] createdBy
+- [x] Backward Compatibility
+- [x] Studio Event Dashboard
 
 ---
 
