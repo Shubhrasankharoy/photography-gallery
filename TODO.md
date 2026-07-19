@@ -174,13 +174,13 @@
 
 Studio Foundation
 
-- [ ] Create Studio
-- [ ] Edit Studio
-- [ ] Delete Studio
-- [ ] Studio Profile
-- [ ] Studio Logo
-- [ ] Studio Cover
-- [ ] Public Studio Page
+- [x] Create Studio
+- [x] Edit Studio
+- [x] Delete Studio
+- [x] Studio Profile
+- [x] Studio Logo
+- [x] Studio Cover
+- [x] Public Studio Page
 
 ---
 
@@ -188,14 +188,14 @@ Studio Foundation
 
 Studio Members
 
-- [ ] Invite Members
-- [ ] Accept Invitation
-- [ ] Reject Invitation
-- [ ] Remove Member
-- [ ] Promote
-- [ ] Demote
-- [ ] Transfer Ownership
-- [ ] Leave Studio
+- [x] Invite Members
+- [x] Accept Invitation
+- [x] Reject Invitation
+- [x] Remove Member
+- [x] Promote
+- [x] Demote
+- [x] Transfer Ownership
+- [x] Leave Studio
 
 ---
 
