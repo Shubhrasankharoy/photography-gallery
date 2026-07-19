@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getProfileByUid } from "@/lib/profileService";
+import StudioSwitcher from "@/components/StudioSwitcher";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -83,7 +84,7 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <div className="shrink-0">
+          <div className="flex items-center gap-4 shrink-0">
             <Link href="/" className="group flex items-center space-x-2">
               <span className="bg-linear-to-r from-violet-600 to-indigo-600 bg-clip-text text-xl font-bold tracking-wider text-transparent dark:from-violet-400 dark:to-indigo-400">
                 CAPTURE
@@ -92,6 +93,12 @@ export default function Navbar() {
                 SPACE
               </span>
             </Link>
+
+            {user && (
+              <div className="hidden md:block pl-4 border-l border-zinc-200 dark:border-zinc-800">
+                <StudioSwitcher />
+              </div>
+            )}
           </div>
 
           {/* Desktop Navigation */}
@@ -274,6 +281,13 @@ export default function Navbar() {
         </div>
 
         <div className="mt-8 flex flex-col space-y-4">
+          {user && (
+            <div className="px-4 pb-4 border-b border-zinc-150 dark:border-zinc-900 flex flex-col gap-1.5">
+              <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Active Workspace</span>
+              <StudioSwitcher />
+            </div>
+          )}
+
           {navLinks.map((link) => (
             <Link
               key={link.name}

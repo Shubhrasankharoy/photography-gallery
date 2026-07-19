@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
+import { StudioProvider } from "@/context/StudioContext";
 import AuthLoadingWrapper from "@/components/AuthLoadingWrapper";
 
 const geistSans = Geist({
@@ -47,11 +48,13 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-full flex flex-col bg-white dark:text-zinc-50 transition-colors duration-300">
         <AuthProvider>
-          <AuthLoadingWrapper>
-            <Navbar />
-            <main className="grow flex flex-col">{children}</main>
-            <Footer />
-          </AuthLoadingWrapper>
+          <StudioProvider>
+            <AuthLoadingWrapper>
+              <Navbar />
+              <main className="grow flex flex-col">{children}</main>
+              <Footer />
+            </AuthLoadingWrapper>
+          </StudioProvider>
         </AuthProvider>
       </body>
     </html>

@@ -203,11 +203,11 @@ Studio Members
 
 Studio Context
 
-- [ ] Studio Provider
-- [ ] Studio Switcher
-- [ ] Current Studio
-- [ ] Current Role
-- [ ] Permission System
+- [x] Studio Provider
+- [x] Studio Switcher
+- [x] Current Studio
+- [x] Current Role
+- [x] Permission System
 
 ---
 
