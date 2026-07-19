@@ -2,6 +2,7 @@
 
 import { useStudio } from "@/context/StudioContext";
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 
 export default function StudioSwitcher() {
   const { studios, currentStudio, switchStudio } = useStudio();
@@ -73,6 +74,19 @@ export default function StudioSwitcher() {
                 <span className="text-[9px] text-zinc-400 uppercase font-bold">{studio.userRole}</span>
               </button>
             ))}
+          </div>
+
+          <div className="border-t border-zinc-150 dark:border-zinc-900 mt-2 pt-2">
+            <Link
+              href="/dashboard/studio/new"
+              onClick={() => setIsOpen(false)}
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-xs font-semibold text-indigo-650 hover:bg-zinc-50 dark:text-indigo-400 dark:hover:bg-zinc-900"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              <span>Create New Studio</span>
+            </Link>
           </div>
         </div>
       )}

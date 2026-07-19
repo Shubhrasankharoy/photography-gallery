@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useStudio } from "@/context/StudioContext";
 import { createStudio, isStudioSlugUnique, uploadStudioImage } from "@/lib/studioService";
 
 export default function NewStudio() {
   const { user, loading: authLoading } = useAuth();
+  const { refreshStudios } = useStudio();
   const router = useRouter();
 
   // Redirect if unauthenticated
@@ -90,7 +92,7 @@ export default function NewStudio() {
 
     if (formData.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
+      if (!emailRegex.test(formData.email.trim())) {
         tempErrors.email = "Please enter a valid email address.";
       }
     }
@@ -130,7 +132,9 @@ export default function NewStudio() {
         coverImage: coverUrl,
       };
 
-      await createStudio(user.uid, studioPayload);
+      const created = await createStudio(user.uid, studioPayload);
+      localStorage.setItem(`activeStudioId_${user.uid}`, created.studioId);
+      await refreshStudios();
       router.push("/dashboard/studio");
     } catch (err) {
       console.error("Failed to create studio:", err);

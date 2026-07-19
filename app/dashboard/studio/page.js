@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useStudio } from "@/context/StudioContext";
 import { 
   getUserStudios, 
   getStudioMembers, 
@@ -20,8 +21,8 @@ import {
 
 export default function StudioHub() {
   const { user, loading: authLoading } = useAuth();
+  const { studios, currentStudio, refreshStudios } = useStudio();
   const router = useRouter();
-  const [studios, setStudios] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   
   // Incoming invites to the current user
@@ -61,8 +62,7 @@ export default function StudioHub() {
       setIsFetching(true);
       setIsFetchingInvites(true);
       
-      const userStudios = await getUserStudios(user.uid);
-      setStudios(userStudios);
+      await refreshStudios();
 
       // Load pending invites sent to this user's email
       if (user.email) {
@@ -75,7 +75,7 @@ export default function StudioHub() {
       setIsFetching(false);
       setIsFetchingInvites(false);
     }
-  }, [user]);
+  }, [user, refreshStudios]);
 
   useEffect(() => {
     let active = true;
@@ -93,8 +93,7 @@ export default function StudioHub() {
 
   // Load studio members & invitations if user is in a studio
   const loadStudioDetails = useCallback(async () => {
-    if (studios.length === 0) return;
-    const currentStudio = studios[0];
+    if (!currentStudio) return;
     try {
       setLoadingMembers(true);
       const memberList = await getStudioMembers(currentStudio.studioId);
@@ -110,13 +109,13 @@ export default function StudioHub() {
     } finally {
       setLoadingMembers(false);
     }
-  }, [studios]);
+  }, [currentStudio]);
 
   useEffect(() => {
     let active = true;
     async function run() {
       await Promise.resolve();
-      if (active && studios.length > 0) {
+      if (active && currentStudio) {
         loadStudioDetails();
       }
     }
@@ -124,7 +123,7 @@ export default function StudioHub() {
     return () => {
       active = false;
     };
-  }, [studios, activeTab, loadStudioDetails]);
+  }, [currentStudio, activeTab, loadStudioDetails]);
 
   // Handle invitation responses
   const handleAcceptInvite = async (inviteId) => {
@@ -342,7 +341,7 @@ export default function StudioHub() {
   };
 
   // Case 1: User has no studio
-  if (studios.length === 0) {
+  if (studios.length === 0 || !currentStudio) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-black min-h-[80vh] flex flex-col justify-center items-center transition-colors duration-300">
         <div className="w-full max-w-md">
@@ -374,7 +373,6 @@ export default function StudioHub() {
   }
 
   // Case 2: User belongs to a studio
-  const currentStudio = studios[0];
   const coverUrl = currentStudio.coverImage || "https://images.unsplash.com/photo-1452587925148-ce544e77e60d?q=80&w=1200&auto=format&fit=crop";
   const isOwnerOrAdmin = currentStudio.userRole === "owner" || currentStudio.userRole === "admin";
 

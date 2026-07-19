@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { getProfileByUid } from "@/lib/profileService";
 import Link from "next/link";
 import NotificationBell from "@/components/NotificationBell";
+import StudioSwitcher from "@/components/StudioSwitcher";
 
 export default function DashboardHeader({ onMenuClick }) {
   const { user } = useAuth();
@@ -38,12 +39,8 @@ export default function DashboardHeader({ onMenuClick }) {
 
         <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-zinc-400">
           <span className="text-zinc-800 dark:text-zinc-200">Console</span>
-          {studioName && (
-            <>
-              <span className="text-zinc-300 dark:text-zinc-700">/</span>
-              <span className="text-xs text-zinc-500 font-medium truncate max-w-[120px] sm:max-w-none">{studioName}</span>
-            </>
-          )}
+          <span className="text-zinc-300 dark:text-zinc-700">/</span>
+          <StudioSwitcher />
         </div>
       </div>
 

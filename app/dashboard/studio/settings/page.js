@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { getUserStudios, updateStudio, isStudioSlugUnique, uploadStudioImage } from "@/lib/studioService";
+import { useStudio } from "@/context/StudioContext";
 
 export default function StudioSettings() {
   const { user, loading: authLoading } = useAuth();
+  const { currentStudio, refreshStudios } = useStudio();
   const router = useRouter();
 
   const [studio, setStudio] = useState(null);
@@ -43,28 +45,26 @@ export default function StudioSettings() {
 
   useEffect(() => {
     async function loadStudioData() {
-      if (!user) return;
+      if (!currentStudio) {
+        setIsFetching(false);
+        return;
+      }
       try {
-        const userStudios = await getUserStudios(user.uid);
-        if (userStudios.length > 0) {
-          const s = userStudios[0];
-          setStudio(s);
-          setFormData({
-            studioName: s.studioName || "",
-            studioSlug: s.studioSlug || "",
-            description: s.description || "",
-            email: s.email || "",
-            phone: s.phone || "",
-            location: s.location || "",
-            website: s.website || "",
-            instagram: s.instagram || "",
-            facebook: s.facebook || "",
-          });
-          setLogoPreview(s.logo || "");
-          setCoverPreview(s.coverImage || "");
-        } else {
-          router.replace("/dashboard/studio/new");
-        }
+        const s = currentStudio;
+        setStudio(s);
+        setFormData({
+          studioName: s.studioName || "",
+          studioSlug: s.studioSlug || "",
+          description: s.description || "",
+          email: s.email || "",
+          phone: s.phone || "",
+          location: s.location || "",
+          website: s.website || "",
+          instagram: s.instagram || "",
+          facebook: s.facebook || "",
+        });
+        setLogoPreview(s.logo || "");
+        setCoverPreview(s.coverImage || "");
       } catch (err) {
         console.error("Failed to load studio details:", err);
         setSaveError("Error loading studio details.");
@@ -72,10 +72,8 @@ export default function StudioSettings() {
         setIsFetching(false);
       }
     }
-    if (user) {
-      loadStudioData();
-    }
-  }, [user, router]);
+    loadStudioData();
+  }, [currentStudio]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -130,7 +128,7 @@ export default function StudioSettings() {
 
     if (formData.email.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
+      if (!emailRegex.test(formData.email.trim())) {
         tempErrors.email = "Please enter a valid email address.";
       }
     }
@@ -166,6 +164,7 @@ export default function StudioSettings() {
       };
 
       await updateStudio(studio.studioId, updatedPayload);
+      await refreshStudios();
       setSaveSuccess(true);
       
       // Update local preview states with final URL
