@@ -166,32 +166,170 @@
 
 ---
 
-## Phase 16 - AI Face Search
-- [ ] Upload Selfie
-- [ ] Detect Face
-- [ ] Generate Face Embeddings
-- [ ] Compare Against Event Photos
-- [ ] Return Matching Images
-- [ ] Confidence Score
-- [ ] Progress Indicator
-- [ ] Download Matched Photos
+# --------------------------
+# STUDIO ARCHITECTURE
+# --------------------------
+
+# Phase 16
+
+Studio Foundation
+
+- [ ] Create Studio
+- [ ] Edit Studio
+- [ ] Delete Studio
+- [ ] Studio Profile
+- [ ] Studio Logo
+- [ ] Studio Cover
+- [ ] Public Studio Page
 
 ---
 
-## Phase 17 - Production & Deployment
-- [ ] SEO
-- [ ] Metadata
-- [ ] OpenGraph
-- [ ] Sitemap
-- [ ] robots.txt
-- [ ] Error Boundaries
-- [ ] Skeleton Loaders
-- [ ] Image Optimization
-- [ ] Accessibility
+# Phase 17
+
+Studio Members
+
+- [ ] Invite Members
+- [ ] Accept Invitation
+- [ ] Reject Invitation
+- [ ] Remove Member
+- [ ] Promote
+- [ ] Demote
+- [ ] Transfer Ownership
+- [ ] Leave Studio
+
+---
+
+# Phase 18
+
+Studio Context
+
+- [ ] Studio Provider
+- [ ] Studio Switcher
+- [ ] Current Studio
+- [ ] Current Role
+- [ ] Permission System
+
+---
+
+# Phase 19
+
+Studio Event Migration
+
+- [ ] Events belong to Studio
+- [ ] createdBy
+- [ ] Backward Compatibility
+- [ ] Studio Event Dashboard
+
+---
+
+# Phase 20
+
+Studio Upload System
+
+- [ ] uploadedBy
+- [ ] studioId
+- [ ] Member Upload Permissions
+- [ ] Upload Activity
+
+---
+
+# Phase 21
+
+Gallery Migration
+
+- [ ] Studio Gallery
+- [ ] Compatibility with old events
+- [ ] Activity Feed
+
+---
+
+# Phase 22
+
+Drive Connections
+
+- [ ] Per-user Google Drive
+- [ ] Connect Drive
+- [ ] Disconnect Drive
+- [ ] Upload to uploader's Drive
+
+---
+
+# Phase 23
+
+Advanced Gallery
+
+- [ ] Favorites
+- [ ] Slideshow
+- [ ] Keyboard Navigation
+- [ ] Watermark Preview
+- [ ] Download Selected
+
+---
+
+# Phase 24
+
+Global Search
+
+- [ ] Studios
+- [ ] Members
+- [ ] Events
+- [ ] Bride
+- [ ] Groom
+- [ ] Locations
+
+---
+
+# Phase 25
+
+Sharing
+
+- [ ] QR Code
+- [ ] Share Link
+- [ ] Expiry
+- [ ] Access Counter
+
+---
+
+# Phase 26
+
+Activity Timeline
+
+- [ ] Activity Feed
+- [ ] Member Actions
+- [ ] Upload Logs
+- [ ] Event Logs
+
+---
+
+# Phase 27
+
+Backup & Recovery
+
+- [ ] Trash
+- [ ] Restore
+- [ ] Permanent Delete
+
+---
+
+# Phase 28
+
+AI Face Search
+
+- [ ] Face Detection
+- [ ] Face Embeddings
+- [ ] Matching
+- [ ] Confidence Score
+- [ ] Batch Download
+
+---
+
+# Phase 29
+
+Final Production
+
+- [ ] Performance
+- [ ] Security
 - [ ] Rate Limiting
-- [ ] Security Headers
-- [ ] Environment Variables
-- [ ] README
-- [ ] Deployment to Vercel
-- [ ] Code Cleanup
-- [ ] Performance Optimization
+- [ ] Image Optimization
+- [ ] Monitoring
+- [ ] Deployment
