@@ -161,7 +161,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
     if (downloadingId) return;
     setDownloadingId(photo.photoId);
     try {
-      const response = await fetch(photo.url);
+      const response = await fetch(`${photo.url}&filename=${encodeURIComponent(photo.name || "photo.jpg")}`);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       
@@ -244,7 +244,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
       if (!photo) continue;
 
       try {
-        const response = await fetch(photo.url);
+        const response = await fetch(`${photo.url}&filename=${encodeURIComponent(photo.name || "photo.jpg")}`);
         const blob = await response.blob();
         const blobUrl = URL.createObjectURL(blob);
         

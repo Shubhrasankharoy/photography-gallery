@@ -8,6 +8,7 @@ export async function GET(request, { params }) {
   const fileId = resolvedParams.fileId;
   const { searchParams } = new URL(request.url);
   const uid = searchParams.get("uid");
+  const filename = searchParams.get("filename") || "";
 
   if (!uid) {
     return NextResponse.json({ error: "Missing uid parameter" }, { status: 400 });
@@ -62,16 +63,31 @@ export async function GET(request, { params }) {
       throw new Error(`Failed to stream from Google Drive: ${errText}`);
     }
 
-    // Get Content-Type of the file from Drive response or default to image/jpeg
+    // Get Content-Type and Content-Length from the Drive response
     const contentType = driveResponse.headers.get("content-type") || "image/jpeg";
+    const contentLength = driveResponse.headers.get("content-length");
     const fileStream = driveResponse.body;
 
-    return new Response(fileStream, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000",
-      },
-    });
+    // Build response headers
+    const responseHeaders = {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=31536000",
+    };
+
+    // Forward Content-Length so the browser can show real download progress
+    if (contentLength) {
+      responseHeaders["Content-Length"] = contentLength;
+    }
+
+    // When a filename is provided, force a file-download attachment with the real name
+    if (filename) {
+      const safeFilename = filename.replace(/["\\]/g, ""); // strip quotes/backslashes
+      const encodedFilename = encodeURIComponent(safeFilename);
+      responseHeaders["Content-Disposition"] =
+        `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodedFilename}`;
+    }
+
+    return new Response(fileStream, { headers: responseHeaders });
   } catch (error) {
     console.error("Proxy file stream error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -40,8 +40,7 @@ export async function POST(request) {
     // Real Google Drive multipart upload
     const accessToken = await getValidToken(uid);
     const boundary = "-------314159265358979323846";
-    const delimiter = `\r\n--${boundary}\r\n`;
-    const closeDelimiter = `\r\n--${boundary}--`;
+    const CRLF = "\r\n";
 
     const parents = folderId && folderId !== "root" && folderId !== "mock_root_folder_id" ? [folderId] : [];
     const metadata = {
@@ -50,24 +49,31 @@ export async function POST(request) {
       parents: parents,
     };
 
-    const metadataPart = `${delimiter}Content-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}`;
-    
     const arrayBuffer = await file.arrayBuffer();
     const fileBuffer = Buffer.from(arrayBuffer);
-    
-    const headerPart = `${metadataPart}\r\n${delimiter}Content-Type: ${file.type}\r\nContent-Transfer-Encoding: base64\r\n\r\n`;
-    
+
+    // Build proper multipart/related body with raw binary content
+    const metadataJson = JSON.stringify(metadata);
+    const preamble =
+      `--${boundary}${CRLF}` +
+      `Content-Type: application/json; charset=UTF-8${CRLF}${CRLF}` +
+      `${metadataJson}${CRLF}` +
+      `--${boundary}${CRLF}` +
+      `Content-Type: ${file.type}${CRLF}${CRLF}`;
+    const postamble = `${CRLF}--${boundary}--`;
+
     const body = Buffer.concat([
-      Buffer.from(headerPart, "utf-8"),
-      Buffer.from(fileBuffer.toString("base64"), "base64"),
-      Buffer.from(closeDelimiter, "utf-8"),
+      Buffer.from(preamble, "utf-8"),
+      fileBuffer,
+      Buffer.from(postamble, "utf-8"),
     ]);
 
-    const uploadResponse = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+    const uploadResponse = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": `multipart/related; boundary=${boundary}`,
+        "Content-Length": String(body.length),
       },
       body: body,
     });

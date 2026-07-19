@@ -60,13 +60,18 @@ export async function GET(request) {
       googleDriveToken: tokenData,
     };
 
-    // If it's a new connection, reset selected folder
+    // If it's a new connection, reset selected folder to Drive root
     if (code === "mock_auth_code_success") {
       updatePayload.googleDriveFolderId = "mock_root_folder_id";
+      updatePayload.googleDriveFolderName = "Root (My Drive)";
+    } else {
+      // Real connection: default to Drive root so photographer can pick a folder in Settings
+      updatePayload.googleDriveFolderId = "root";
       updatePayload.googleDriveFolderName = "Root (My Drive)";
     }
 
     await setDoc(photographerRef, updatePayload, { merge: true });
+
 
     return NextResponse.redirect(`${request.nextUrl.origin}/dashboard/settings?status=success`);
   } catch (error) {
