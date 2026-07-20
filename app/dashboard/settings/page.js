@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useStudio } from "@/context/StudioContext";
 import { db, auth } from "@/lib/firebase";
-import { doc, getDoc, setDoc, deleteDoc, writeBatch, query, collection, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, deleteDoc, writeBatch, query, collection, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { 
   updatePassword, 
   deleteUser, 
@@ -20,6 +21,7 @@ import {
 
 export default function SettingsPage() {
   const { user, loading: authLoading, logout } = useAuth();
+  const { currentStudio } = useStudio();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -79,6 +81,10 @@ export default function SettingsPage() {
 
   // Storage State (Google Drive)
   const [connected, setConnected] = useState(false);
+  const [connectedEmail, setConnectedEmail] = useState("");
+  const [connectionStatus, setConnectionStatus] = useState("Disconnected");
+  const [lastSync, setLastSync] = useState("");
+  const [provider, setProvider] = useState("google-drive");
   const [folders, setFolders] = useState([]);
   const [selectedFolderId, setSelectedFolderId] = useState("");
   const [selectedFolderName, setSelectedFolderName] = useState("");
@@ -129,9 +135,9 @@ export default function SettingsPage() {
   }, [previews]);
 
   // Retrieve folders from Google Drive
-  const fetchFolders = async (uid) => {
+  const fetchFolders = async (uid, studioId = "") => {
     try {
-      const response = await fetch(`/api/drive/folders?uid=${uid}`);
+      const response = await fetch(`/api/drive/folders?uid=${uid}&studioId=${studioId}`);
       if (!response.ok) {
         throw new Error("Failed to retrieve Google Drive folders");
       }
@@ -173,14 +179,64 @@ export default function SettingsPage() {
             weeklyDigest: profile.weeklyDigest !== undefined ? profile.weeklyDigest : false,
           });
 
-          // Load Google Drive state
-          if (profile.googleDriveConnected) {
+          // Load Google Drive state from driveConnections
+          let driveConnected = false;
+          let folderId = "root";
+          let folderName = "Root (My Drive)";
+          let email = "";
+          let statusStr = "Disconnected";
+          let syncTimeStr = "";
+          let providerStr = "google-drive";
+
+          if (currentStudio) {
+            const q = query(
+              collection(db, "driveConnections"),
+              where("userId", "==", user.uid),
+              where("studioId", "==", currentStudio.studioId),
+              where("status", "==", "connected")
+            );
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+              const data = snap.docs[0].data();
+              driveConnected = true;
+              folderId = data.rootFolderId || "root";
+              folderName = data.googleDriveFolderName || "Root (My Drive)";
+              email = data.driveEmail || "";
+              statusStr = data.status || "connected";
+              providerStr = data.provider || "google-drive";
+              if (data.lastSyncAt) {
+                const d = data.lastSyncAt.toDate ? data.lastSyncAt.toDate() : new Date(data.lastSyncAt);
+                syncTimeStr = d.toLocaleString();
+              } else if (data.updatedAt) {
+                const d = data.updatedAt.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt);
+                syncTimeStr = d.toLocaleString();
+              }
+            }
+          }
+
+          // Fallback to legacy profile if not found
+          if (!driveConnected && profile.googleDriveConnected) {
+            driveConnected = true;
+            folderId = profile.googleDriveFolderId || "root";
+            folderName = profile.googleDriveFolderName || "Root (My Drive)";
+            email = profile.email || user.email || "";
+            statusStr = "Connected (Legacy)";
+            providerStr = "google-drive";
+          }
+
+          if (driveConnected) {
             setConnected(true);
-            setSelectedFolderId(profile.googleDriveFolderId || "root");
-            setSelectedFolderName(profile.googleDriveFolderName || "Root (My Drive)");
-            await fetchFolders(user.uid);
+            setConnectedEmail(email);
+            setConnectionStatus(statusStr);
+            setProvider(providerStr);
+            setLastSync(syncTimeStr);
+            setSelectedFolderId(folderId);
+            setSelectedFolderName(folderName);
+            await fetchFolders(user.uid, currentStudio?.studioId || "");
           } else {
             setConnected(false);
+            setConnectedEmail("");
+            setConnectionStatus("Disconnected");
           }
         } else {
           setProfileForm((prev) => ({ ...prev, email: user.email || "" }));
@@ -202,7 +258,7 @@ export default function SettingsPage() {
     if (user && !authLoading) {
       loadAllSettings();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, currentStudio]);
 
   // Handle Input Changes for Profile Form
   const handleProfileInputChange = (e) => {
@@ -463,7 +519,8 @@ export default function SettingsPage() {
   // Google Drive Connection Handler
   const handleConnect = () => {
     if (!user) return;
-    window.location.href = `/api/oauth/google?uid=${user.uid}`;
+    const studioParam = currentStudio ? `&studioId=${currentStudio.studioId}` : "";
+    window.location.href = `/api/oauth/google?uid=${user.uid}${studioParam}`;
   };
 
   const handleDisconnect = async () => {
@@ -476,19 +533,17 @@ export default function SettingsPage() {
     setSuccess("");
 
     try {
-      const docRef = doc(db, "photographers", user.uid);
-      await setDoc(
-        docRef,
-        {
-          googleDriveConnected: false,
-          googleDriveToken: null,
-          googleDriveFolderId: null,
-          googleDriveFolderName: null,
-        },
-        { merge: true }
-      );
+      const studioId = currentStudio ? currentStudio.studioId : "";
+      const response = await fetch(`/api/drive/disconnect?uid=${user.uid}&studioId=${studioId}`, {
+        method: "POST"
+      });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
 
       setConnected(false);
+      setConnectedEmail("");
+      setConnectionStatus("Disconnected");
       setFolders([]);
       setSelectedFolderId("");
       setSelectedFolderName("");
@@ -510,6 +565,25 @@ export default function SettingsPage() {
       const targetFolder = folders.find((f) => f.id === selectedFolderId);
       const folderName = targetFolder ? targetFolder.name : "Root (My Drive)";
 
+      // Update new driveConnections schema
+      if (currentStudio) {
+        const q = query(
+          collection(db, "driveConnections"),
+          where("userId", "==", user.uid),
+          where("studioId", "==", currentStudio.studioId),
+          where("status", "==", "connected")
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          await setDoc(snap.docs[0].ref, {
+            rootFolderId: selectedFolderId,
+            googleDriveFolderName: folderName, // Cached display name
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+        }
+      }
+
+      // Maintain legacy photographer profile
       const docRef = doc(db, "photographers", user.uid);
       await setDoc(
         docRef,
@@ -539,11 +613,13 @@ export default function SettingsPage() {
     setSuccess("");
 
     try {
+      const studioId = currentStudio ? currentStudio.studioId : "";
       const res = await fetch("/api/drive/folders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           uid: user.uid,
+          studioId,
           folderName: newFolderName.trim(),
         }),
       });
@@ -558,6 +634,24 @@ export default function SettingsPage() {
       setSelectedFolderId(newFolder.id);
       setSelectedFolderName(newFolder.name);
       setNewFolderName("");
+
+      // Update new driveConnections schema
+      if (currentStudio) {
+        const q = query(
+          collection(db, "driveConnections"),
+          where("userId", "==", user.uid),
+          where("studioId", "==", currentStudio.studioId),
+          where("status", "==", "connected")
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          await setDoc(snap.docs[0].ref, {
+            rootFolderId: newFolder.id,
+            googleDriveFolderName: newFolder.name,
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+        }
+      }
 
       const docRef = doc(db, "photographers", user.uid);
       await setDoc(
@@ -1096,13 +1190,21 @@ export default function SettingsPage() {
 
                 <div>
                   {connected ? (
-                    <button
-                      onClick={handleDisconnect}
-                      disabled={saving}
-                      className="w-full md:w-auto px-5 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all border border-rose-200 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-900/50"
-                    >
-                      {saving ? "Processing..." : "Disconnect Drive"}
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleConnect}
+                        className="w-full md:w-auto px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all border border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/50"
+                      >
+                        Reconnect
+                      </button>
+                      <button
+                        onClick={handleDisconnect}
+                        disabled={saving}
+                        className="w-full md:w-auto px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all border border-rose-200 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-900/50"
+                      >
+                        {saving ? "Processing..." : "Disconnect Drive"}
+                      </button>
+                    </div>
                   ) : (
                     <button
                       onClick={handleConnect}
@@ -1116,6 +1218,34 @@ export default function SettingsPage() {
                   )}
                 </div>
               </div>
+
+              {/* Connection Information Panel */}
+              {connected && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-50 dark:bg-zinc-900/30 p-5 rounded-2xl border border-zinc-100 dark:border-zinc-850 text-xs">
+                  <div>
+                    <span className="font-semibold text-zinc-400">Connected Email:</span>{" "}
+                    <span className="text-zinc-800 dark:text-zinc-200">{connectedEmail || "N/A"}</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-zinc-400">Connection Status:</span>{" "}
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-450 capitalize">
+                      {connectionStatus}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-zinc-400">Last Sync:</span>{" "}
+                    <span className="text-zinc-800 dark:text-zinc-200">{lastSync || "Just now"}</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-zinc-400">Provider:</span>{" "}
+                    <span className="text-zinc-800 dark:text-zinc-200 uppercase">{provider}</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-zinc-400">Root Folder:</span>{" "}
+                    <span className="text-zinc-800 dark:text-zinc-200 font-semibold">{selectedFolderName}</span>
+                  </div>
+                </div>
+              )}
 
               {/* Folder Preferences Customization */}
               {connected && (

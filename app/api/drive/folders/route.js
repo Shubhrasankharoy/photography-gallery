@@ -1,84 +1,28 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore";
+import { storageFactory } from "@/lib/storageFactory";
 
-// Shared helper to retrieve or refresh access token
-export async function getValidToken(uid) {
-  const docRef = doc(db, "photographers", uid);
-  const docSnap = await getDoc(docRef);
-  if (!docSnap.exists()) {
-    throw new Error("Photographer profile not found");
-  }
-  const data = docSnap.data();
-  const token = data.googleDriveToken;
-  if (!token) {
-    throw new Error("Google Drive not connected");
-  }
-
-  if (token.isMock) {
-    return "mock_access_token";
-  }
-
-  // Refresh token if expired or close to expiring (within 5 minutes)
-  if (Date.now() + 300 * 1000 >= token.expiry_date) {
-    console.log("Refreshing expired Google OAuth token...");
-    if (!token.refresh_token) {
-      throw new Error("Missing refresh token. Re-authorization required.");
-    }
-
-    const response = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        refresh_token: token.refresh_token,
-        grant_type: "refresh_token",
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Token refresh failed: ${errText}`);
-    }
-
-    const refreshed = await response.json();
-    const updatedToken = {
-      ...token,
-      access_token: refreshed.access_token,
-      expiry_date: Date.now() + (refreshed.expires_in || 3600) * 1000,
-    };
-
-    await setDoc(docRef, { googleDriveToken: updatedToken }, { merge: true });
-    return refreshed.access_token;
-  }
-
-  return token.access_token;
+// Keep exported getValidToken helper for other endpoints but update it to use storageFactory
+export async function getValidToken(uid, studioId = "") {
+  const providerDetails = await storageFactory.getProvider(uid, studioId);
+  return providerDetails.accessToken;
 }
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const uid = searchParams.get("uid");
+  const studioId = searchParams.get("studioId") || "";
 
   if (!uid) {
     return NextResponse.json({ error: "Missing uid parameter" }, { status: 400 });
   }
 
   try {
-    const docRef = doc(db, "photographers", uid);
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-      return NextResponse.json({ error: "Photographer profile not found" }, { status: 404 });
-    }
-    const profile = docSnap.data();
-    const token = profile.googleDriveToken;
-
-    if (!token) {
-      return NextResponse.json({ error: "Google Drive is not connected" }, { status: 401 });
-    }
-
-    // Mock folder list
-    if (token.isMock) {
+    const providerDetails = await storageFactory.getProvider(uid, studioId);
+    
+    // Handle mock connection
+    if (providerDetails.isMock) {
       const mockFolders = [
         { id: "mock_root_folder_id", name: "Root (My Drive)" },
         { id: "mock_folder_events", name: "CaptureSpace_Uploads" },
@@ -88,8 +32,8 @@ export async function GET(request) {
       return NextResponse.json({ folders: mockFolders });
     }
 
-    // Real Google Drive API call
-    const accessToken = await getValidToken(uid);
+    // Call provider's list folder equivalent
+    const accessToken = providerDetails.accessToken;
     const q = "mimeType = 'application/vnd.google-apps.folder' and trashed = false";
     const driveUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=100`;
 
@@ -105,8 +49,6 @@ export async function GET(request) {
     }
 
     const data = await response.json();
-    
-    // Always include a root folder option
     const folders = [{ id: "root", name: "Root (My Drive)" }, ...data.files];
     return NextResponse.json({ folders });
   } catch (error) {
@@ -118,26 +60,16 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { uid, folderName } = body;
+    const { uid, studioId, folderName, parentFolderId } = body;
 
     if (!uid || !folderName) {
       return NextResponse.json({ error: "Missing uid or folderName" }, { status: 400 });
     }
 
-    const docRef = doc(db, "photographers", uid);
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-      return NextResponse.json({ error: "Photographer profile not found" }, { status: 404 });
-    }
-    const profile = docSnap.data();
-    const token = profile.googleDriveToken;
-
-    if (!token) {
-      return NextResponse.json({ error: "Google Drive is not connected" }, { status: 401 });
-    }
+    const providerDetails = await storageFactory.getProvider(uid, studioId);
 
     // Mock folder creation
-    if (token.isMock) {
+    if (providerDetails.isMock) {
       const newMockFolder = {
         id: `mock_folder_${Date.now()}`,
         name: folderName,
@@ -145,27 +77,26 @@ export async function POST(request) {
       return NextResponse.json(newMockFolder);
     }
 
-    // Real Google Drive folder creation
-    const accessToken = await getValidToken(uid);
-    const response = await fetch("https://www.googleapis.com/drive/v3/files", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: folderName,
-        mimeType: "application/vnd.google-apps.folder",
-      }),
-    });
+    // Create real folder via resolved provider
+    const accessToken = providerDetails.accessToken;
+    const result = await providerDetails.provider.createFolder(folderName, accessToken, parentFolderId);
 
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error?.message || "Failed to create folder in Google Drive");
+    // Log folder creation activity
+    try {
+      const activityRef = doc(collection(db, "activities"));
+      await setDoc(activityRef, {
+        activityId: activityRef.id,
+        userId: uid,
+        studioId: studioId || "",
+        action: "Folder Created",
+        details: `Folder "${folderName}" created in Google Drive`,
+        createdAt: serverTimestamp(),
+      });
+    } catch (e) {
+      console.warn("Non-fatal: Failed to log folder creation activity:", e);
     }
 
-    const data = await response.json();
-    return NextResponse.json({ id: data.id, name: data.name });
+    return NextResponse.json({ id: result.id, name: result.name });
   } catch (error) {
     console.error("Create folder error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

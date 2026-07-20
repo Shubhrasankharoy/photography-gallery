@@ -247,10 +247,10 @@ Gallery Migration
 
 Drive Connections
 
-- [ ] Per-user Google Drive
-- [ ] Connect Drive
-- [ ] Disconnect Drive
-- [ ] Upload to uploader's Drive
+- [x] Per-user Google Drive
+- [x] Connect Drive
+- [x] Disconnect Drive
+- [x] Upload to uploader's Drive
 
 ---
 
