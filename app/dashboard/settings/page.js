@@ -300,9 +300,6 @@ export default function SettingsPage() {
   // Profile Form Validation
   const validateProfileForm = () => {
     const tempErrors = {};
-    if (!profileForm.studioName.trim()) {
-      tempErrors.studioName = "Studio Name is required.";
-    }
     if (!profileForm.photographerName.trim()) {
       tempErrors.photographerName = "Photographer Name is required.";
     }
@@ -898,20 +895,6 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
-                    Studio Name
-                  </label>
-                  <input
-                    type="text"
-                    name="studioName"
-                    value={profileForm.studioName}
-                    onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                  {errors.studioName && <p className="text-[10px] text-rose-500 font-semibold mt-1">{errors.studioName}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
                     Photographer Name
                   </label>
                   <input
@@ -965,19 +948,6 @@ export default function SettingsPage() {
                     type="text"
                     name="phone"
                     value={profileForm.phone}
-                    onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
-                    Studio Location
-                  </label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={profileForm.location}
                     onChange={handleProfileInputChange}
                     className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   />

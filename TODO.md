@@ -258,11 +258,11 @@ Drive Connections
 
 Advanced Gallery
 
-- [ ] Favorites
-- [ ] Slideshow
-- [ ] Keyboard Navigation
-- [ ] Watermark Preview
-- [ ] Download Selected
+- [x] Favorites
+- [x] Slideshow
+- [x] Keyboard Navigation
+- [x] Watermark Preview
+- [x] Download Selected
 
 ---
 

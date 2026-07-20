@@ -153,9 +153,6 @@ export default function ProfileEditor() {
 
   const validateForm = () => {
     const tempErrors = {};
-    if (!formData.studioName.trim()) {
-      tempErrors.studioName = "Studio Name is required.";
-    }
     if (!formData.photographerName.trim()) {
       tempErrors.photographerName = "Photographer Name is required.";
     }
@@ -435,23 +432,6 @@ export default function ProfileEditor() {
                   <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-150 dark:border-zinc-850">Branding</h3>
                   
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Studio Name */}
-                    <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="studioName" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Studio Name</label>
-                      <input
-                        id="studioName"
-                        name="studioName"
-                        type="text"
-                        value={formData.studioName}
-                        onChange={handleInputChange}
-                        className={`rounded-xl border bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all ${
-                          errors.studioName ? "border-rose-500 focus:ring-rose-500" : "border-zinc-200 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
-                        }`}
-                        placeholder="Aura Studios"
-                      />
-                      {errors.studioName && <span className="text-xs text-rose-500 mt-1 font-medium">{errors.studioName}</span>}
-                    </div>
-
                     {/* Photographer Name */}
                     <div className="flex flex-col space-y-1.5">
                       <label htmlFor="photographerName" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Photographer Name</label>
@@ -546,20 +526,6 @@ export default function ProfileEditor() {
                         onChange={handleInputChange}
                         className="rounded-xl border border-zinc-200 bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400"
                         placeholder="+1 (555) 000-0000"
-                      />
-                    </div>
-
-                    {/* Location */}
-                    <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="location" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Studio Location</label>
-                      <input
-                        id="location"
-                        name="location"
-                        type="text"
-                        value={formData.location}
-                        onChange={handleInputChange}
-                        className="rounded-xl border border-zinc-200 bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400"
-                        placeholder="Brooklyn, NY"
                       />
                     </div>
 

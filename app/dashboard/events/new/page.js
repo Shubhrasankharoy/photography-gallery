@@ -23,18 +23,22 @@ export default function NewEvent() {
         return;
       }
 
-      if (currentStudio) {
-        const role = currentStudio.userRole;
-        if (role === "viewer") {
+      if (!currentStudio) {
+        alert("You don't have any studio. Create a studio first.");
+        router.replace("/dashboard/studio/new");
+        return;
+      }
+
+      const role = currentStudio.userRole;
+      if (role === "viewer") {
+        router.replace("/dashboard/events");
+        return;
+      }
+      if (role === "photographer") {
+        const settings = await getStudioSettings(currentStudio.studioId);
+        if (settings.allowPhotographerCreateEvent === false) {
           router.replace("/dashboard/events");
           return;
-        }
-        if (role === "photographer") {
-          const settings = await getStudioSettings(currentStudio.studioId);
-          if (settings.allowPhotographerCreateEvent === false) {
-            router.replace("/dashboard/events");
-            return;
-          }
         }
       }
       setCheckingPermission(false);
@@ -276,6 +280,13 @@ export default function NewEvent() {
               name="eventDate"
               value={formData.eventDate}
               onChange={handleInputChange}
+              onClick={(e) => {
+                try {
+                  e.target.showPicker();
+                } catch (err) {
+                  // Fallback for browsers that don't support showPicker
+                }
+              }}
               className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400"
             />
           </div>
