@@ -213,8 +213,8 @@ export default function UploadsPage() {
     }
 
     // Role Validation
-    if (["viewer"].includes(currentRole) || !currentRole) {
-      alert("You do not have permission to upload files (Viewer role is read-only).");
+    if (!currentRole) {
+      alert("You do not have permission to upload files (Membership in studio is required).");
       return;
     }
 
@@ -527,10 +527,10 @@ export default function UploadsPage() {
       {/* Drag and Drop Zone */}
       {selectedEvent && (
         <>
-          {["viewer"].includes(currentRole) ? (
+          {!currentRole ? (
             <div className="mb-8 rounded-3xl border-2 border-dashed border-rose-300 dark:border-rose-900/50 bg-rose-50/20 p-12 text-center">
               <p className="text-rose-700 dark:text-rose-400 font-semibold">
-                You have Viewer access only. Uploading is disabled.
+                You do not have member access to this studio. Uploading is disabled.
               </p>
             </div>
           ) : (
