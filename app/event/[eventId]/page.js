@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getEventById } from "@/lib/eventService";
-import { getPhotosByEvent } from "@/lib/photoService";
+import { getGalleryPhotos } from "@/lib/galleryService";
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -39,7 +39,7 @@ export default async function EventGuestView({ params, searchParams }) {
       const fetches = [];
       
       // 1. Fetch photos
-      fetches.push(getPhotosByEvent(eventId).catch(err => {
+      fetches.push(getGalleryPhotos({ eventId }).catch(err => {
         console.error("Failed to load event photos:", err);
         return [];
       }));

@@ -88,11 +88,11 @@ export default function Dashboard() {
 
   // Calculate dynamic metrics
   const totalEventsCount = events.length;
-  const totalPhotosCount = recentUploads.length + events.reduce((sum, evt) => sum + (evt.photos || 0), 0);
+  const totalPhotosCount = events.reduce((sum, evt) => sum + (evt.photoCount || evt.photos || 0), 0);
   const totalDownloadsCount = events.reduce((sum, evt) => sum + (evt.downloads || 0), 0);
   
-  // Calculate storage used from uploads
-  const totalStorageBytes = recentUploads.reduce((sum, photo) => sum + (photo.size || 0), 0);
+  // Calculate storage used from events totalSize stats
+  const totalStorageBytes = events.reduce((sum, evt) => sum + (evt.totalSize || 0), 0);
   const totalStorageGB = (totalStorageBytes / (1024 * 1024 * 1024)).toFixed(2);
   const storagePercentage = Math.min((totalStorageBytes / (5 * 1024 * 1024 * 1024)) * 100, 100);
 
@@ -217,7 +217,7 @@ export default function Dashboard() {
                         {evt.location && <span className="text-xs text-zinc-455 font-light mt-0.5">{evt.location}</span>}
                       </td>
                       <td className="py-4 text-zinc-650 dark:text-zinc-400 font-light">
-                        {evt.photos || 0}
+                        {evt.photoCount !== undefined ? evt.photoCount : (evt.photos || 0)}
                       </td>
                       <td className="py-4 text-zinc-650 dark:text-zinc-400 font-light">
                         {evt.downloads || 0}
@@ -270,7 +270,7 @@ export default function Dashboard() {
                   <div key={photo.photoId} className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-150 dark:border-zinc-850 bg-zinc-50/20 dark:bg-zinc-900/10">
                     <div className="relative aspect-square w-full overflow-hidden bg-zinc-200 dark:bg-zinc-900">
                       <img
-                        src={photo.thumbnailUrl}
+                        src={photo.thumbnailUrl || photo.url || null}
                         alt={photo.name}
                         className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

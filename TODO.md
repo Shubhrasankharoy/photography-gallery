@@ -237,9 +237,9 @@ Studio Upload System
 
 Gallery Migration
 
-- [ ] Studio Gallery
-- [ ] Compatibility with old events
-- [ ] Activity Feed
+- [x] Studio Gallery
+- [x] Compatibility with old events
+- [x] Activity Feed
 
 ---
 

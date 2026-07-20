@@ -2,8 +2,13 @@
 
 import { useState, useEffect, useRef, useTransition, useCallback } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { useStudio } from "@/context/StudioContext";
 
 export default function EventGalleryView({ event, initialPhotos = [], clientPin = "" }) {
+  const { user } = useAuth();
+  const { currentRole } = useStudio();
+
   const [page, setPage] = useState(1);
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [zoom, setZoom] = useState(1);
@@ -13,6 +18,129 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedPhotoIds, setSelectedPhotoIds] = useState(new Set());
   const [bulkDownloading, setBulkDownloading] = useState(false);
+
+  // Extensible and permissions state
+  const [allowDownload, setAllowDownload] = useState(true);
+  const [canManagePhoto, setCanManagePhoto] = useState(false);
+  const [favoritedPhotos, setFavoritedPhotos] = useState(new Set());
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    let active = true;
+    const loadSettings = async () => {
+      if (!event?.studioId) {
+        if (active) setAllowDownload(true);
+        return;
+      }
+      try {
+        const { getStudioSettings } = await import("@/lib/eventService");
+        const settings = await getStudioSettings(event.studioId);
+        const isMember = currentRole === "owner" || currentRole === "admin" || currentRole === "photographer";
+        if (active) {
+          setAllowDownload(settings.allowGuestDownload || isMember);
+        }
+      } catch (err) {
+        console.error("Failed to load studio settings for download checks:", err);
+      }
+    };
+    loadSettings();
+    return () => {
+      active = false;
+    };
+  }, [event?.studioId, currentRole]);
+
+  const currentPhoto = lightboxIndex !== null ? initialPhotos[lightboxIndex] : null;
+
+  useEffect(() => {
+    let active = true;
+    const checkPerms = async () => {
+      if (!currentPhoto || !event?.studioId || !user?.uid) {
+        if (active) setCanManagePhoto(false);
+        return;
+      }
+      try {
+        const { canPerformPhotoAction } = await import("@/lib/photoService");
+        const allowed = await canPerformPhotoAction(event.studioId, user.uid, "delete", currentPhoto);
+        if (active) {
+          setCanManagePhoto(allowed);
+        }
+      } catch (err) {
+        console.error("Failed to check photo manager perms:", err);
+      }
+    };
+    checkPerms();
+    return () => {
+      active = false;
+    };
+  }, [currentPhoto, user?.uid, event?.studioId]);
+
+  const handleDeletePhotoFromGallery = async (photo) => {
+    if (!photo || !user?.uid) return;
+    if (!confirm("Are you sure you want to delete this photo from the gallery?")) return;
+    try {
+      const { deletePhoto } = await import("@/lib/photoService");
+      await deletePhoto(photo.photoId, event.studioId, user.uid);
+      alert("Photo deleted successfully.");
+      window.location.reload();
+    } catch (err) {
+      alert("Failed to delete photo: " + err.message);
+    }
+  };
+
+  const handleTriggerReplace = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleReplaceFileSelected = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentPhoto || !user?.uid) return;
+    try {
+      const { replacePhoto } = await import("@/lib/photoService");
+      alert("Uploading replacement photo...");
+      await replacePhoto({
+        photoId: currentPhoto.photoId,
+        studioId: event.studioId,
+        userId: user.uid,
+        newFile: file
+      });
+      alert("Photo replaced successfully!");
+      window.location.reload();
+    } catch (err) {
+      alert("Failed to replace photo: " + err.message);
+    }
+  };
+
+  const handleToggleFavorite = (photoId) => {
+    setFavoritedPhotos(prev => {
+      const next = new Set(prev);
+      if (next.has(photoId)) {
+        next.delete(photoId);
+      } else {
+        next.add(photoId);
+      }
+      return next;
+    });
+  };
+
+  const handleSharePhoto = (photo) => {
+    if (navigator.share) {
+      navigator.share({
+        title: photo.name,
+        text: `Check out this photo: ${photo.name}`,
+        url: photo.url
+      }).catch(err => console.log(err));
+    } else {
+      navigator.clipboard.writeText(photo.url);
+      alert("Link copied to clipboard for sharing!");
+    }
+  };
+
+  const handleCopyLink = (photo) => {
+    navigator.clipboard.writeText(photo.url);
+    alert("Photo direct link copied!");
+  };
 
   const togglePhotoSelection = (photoId) => {
     setSelectedPhotoIds((prev) => {
@@ -272,7 +400,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
     setSelectedPhotoIds(new Set());
   };
 
-  const currentPhoto = lightboxIndex !== null ? initialPhotos[lightboxIndex] : null;
+
 
   return (
     <div className="w-full min-h-screen flex flex-col">
@@ -475,33 +603,111 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                   </button>
                 )}
               </div>
-
               {/* Details toggle */}
               <button
                 onClick={() => setIsDetailsOpen((prev) => !prev)}
-                className={`p-2 rounded-full transition-all ${isDetailsOpen ? "bg-indigo-600 text-white" : "hover:bg-white/10 text-white/80 hover:text-white"}`}
-                title="Details"
+                className={`p-2 rounded-full transition-all ${isDetailsOpen ? "bg-indigo-650 text-white" : "hover:bg-white/10 text-white/80 hover:text-white"}`}
+                title="Photo Info"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </button>
 
-              {/* Download */}
+              {/* Extensible Toolbar Placeholders */}
               <button
-                onClick={() => handleDownload(currentPhoto)}
-                disabled={downloadingId !== null}
-                className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-all disabled:opacity-50"
-                title="Download Photo"
+                onClick={() => handleToggleFavorite(currentPhoto.photoId)}
+                className={`p-2 rounded-full transition-all ${favoritedPhotos.has(currentPhoto.photoId) ? "text-rose-500 hover:text-rose-600" : "text-white/80 hover:text-white hover:bg-white/10"}`}
+                title="Favorite"
               >
-                {downloadingId === currentPhoto.photoId ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                ) : (
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                )}
+                <svg className="h-5 w-5" fill={favoritedPhotos.has(currentPhoto.photoId) ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
               </button>
+
+              <button
+                onClick={() => handleSharePhoto(currentPhoto)}
+                className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-all"
+                title="Share"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 10.742l5.084-2.542m0 5.6l-5.084-2.542M19 12a3 3 0 11-6 0 3 3 0 016 0zM6 12a3 3 0 11-6 0 3 3 0 016 0zm12-7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+
+              <button
+                onClick={() => handleCopyLink(currentPhoto)}
+                className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-all"
+                title="Copy Link"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-5 10v-5a1 1 0 011-1h1m-6 5a2 2 0 002 2h2a2 2 0 002-2v-5a2 2 0 00-2-2H8a2 2 0 00-2 2v5z" />
+                </svg>
+              </button>
+
+              {/* Future AI Search Similar Placeholder */}
+              <button
+                onClick={() => alert("AI Face Search similar feature is coming soon in a future phase!")}
+                className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white/60 transition-all"
+                title="AI Search Similar (Future)"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+
+              {/* Replace Action */}
+              {canManagePhoto && (
+                <>
+                  <button
+                    onClick={handleTriggerReplace}
+                    className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-all"
+                    title="Replace Photo"
+                  >
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18" />
+                    </svg>
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleReplaceFileSelected}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </>
+              )}
+
+              {/* Delete Action */}
+              {canManagePhoto && (
+                <button
+                  onClick={() => handleDeletePhotoFromGallery(currentPhoto)}
+                  className="p-2 rounded-full hover:bg-white/10 text-rose-450 hover:text-rose-550 transition-all"
+                  title="Delete Photo"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Download */}
+              {allowDownload && (
+                <button
+                  onClick={() => handleDownload(currentPhoto)}
+                  disabled={downloadingId !== null}
+                  className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-all disabled:opacity-50"
+                  title="Download Photo"
+                >
+                  {downloadingId === currentPhoto.photoId ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  ) : (
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
@@ -556,61 +762,73 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
               </button>
             </div>
 
-            {/* Details Panel Side Drawer */}
-            {isDetailsOpen && (
-              <div
-                className="w-full md:w-80 shrink-0 bg-zinc-900 border-t md:border-t-0 md:border-l border-zinc-800 p-6 text-left flex flex-col justify-between overflow-y-auto animate-fade-in-left z-10"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div>
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-5">Image Specifications</h3>
-                  
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">File Name</label>
-                      <p className="text-xs text-zinc-300 font-medium break-all mt-1">{currentPhoto.name}</p>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">File Size</label>
-                      <p className="text-xs text-zinc-300 font-medium mt-1">{formatBytes(currentPhoto.size)}</p>
-                    </div>
-
-                    <div>
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Media Type</label>
-                      <p className="text-xs text-zinc-300 font-medium mt-1 uppercase">{currentPhoto.type || "Unknown Format"}</p>
-                    </div>
-
-                    {currentPhoto.createdAt && (
-                      <div>
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Uploaded On</label>
-                        <p className="text-xs text-zinc-300 font-medium mt-1">
-                          {new Date(currentPhoto.createdAt).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-8 border-t border-zinc-800 pt-5">
-                  <button
-                    onClick={() => handleDownload(currentPhoto)}
-                    className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-600 active:bg-indigo-700 text-xs font-bold text-white rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Download Original File
-                  </button>
-                </div>
-              </div>
-            )}
+             {/* Details Panel Side Drawer */}
+             {isDetailsOpen && (
+               <div
+                 className="w-full md:w-80 shrink-0 bg-zinc-900 border-t md:border-t-0 md:border-l border-zinc-800 p-6 text-left flex flex-col justify-between overflow-y-auto animate-fade-in-left z-10"
+                 onClick={(e) => e.stopPropagation()}
+               >
+                 <div>
+                   <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-5">Image Specifications</h3>
+                   
+                   <div className="space-y-4">
+                     <div>
+                       <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Uploader Name</label>
+                       <p className="text-xs text-zinc-300 font-medium break-all mt-1">{currentPhoto.uploaderName || "Unknown"}</p>
+                     </div>
+ 
+                     <div>
+                       <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Studio Name</label>
+                       <p className="text-xs text-zinc-300 font-medium mt-1">{currentPhoto.studioName || "Legacy (No Studio)"}</p>
+                     </div>
+ 
+                     <div>
+                       <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Upload Date</label>
+                       <p className="text-xs text-zinc-300 font-medium mt-1">
+                         {currentPhoto.createdAt ? (
+                           new Date(currentPhoto.createdAt.seconds ? currentPhoto.createdAt.seconds * 1000 : currentPhoto.createdAt).toLocaleDateString(undefined, {
+                             year: 'numeric',
+                             month: 'long',
+                             day: 'numeric'
+                           })
+                         ) : "Unknown"}
+                       </p>
+                     </div>
+ 
+                     <div>
+                       <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">File Size</label>
+                       <p className="text-xs text-zinc-300 font-medium mt-1">{formatBytes(currentPhoto.fileSize || currentPhoto.size)}</p>
+                     </div>
+ 
+                     <div>
+                       <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Image Resolution</label>
+                       <p className="text-xs text-zinc-300 font-medium mt-1">
+                         {currentPhoto.width && currentPhoto.height ? `${currentPhoto.width} x ${currentPhoto.height}` : "Unknown"}
+                       </p>
+                     </div>
+ 
+                     <div>
+                       <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Status</label>
+                       <p className="text-xs text-zinc-300 font-medium mt-1 uppercase">{currentPhoto.status || "Active"}</p>
+                     </div>
+                   </div>
+                 </div>
+ 
+                 {allowDownload && (
+                   <div className="mt-8 border-t border-zinc-800 pt-5">
+                     <button
+                       onClick={() => handleDownload(currentPhoto)}
+                       className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-600 active:bg-indigo-700 text-xs font-bold text-white rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
+                     >
+                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                       </svg>
+                       Download Original File
+                     </button>
+                   </div>
+                 )}
+               </div>
+             )}
           </div>
         </div>
       )}

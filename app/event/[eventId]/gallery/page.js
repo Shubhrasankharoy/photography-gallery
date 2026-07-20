@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getEventById } from "@/lib/eventService";
-import { getPhotosByEvent } from "@/lib/photoService";
+import { getGalleryPhotos } from "@/lib/galleryService";
 import EventGalleryView from "@/components/EventGalleryView";
 
 export async function generateMetadata({ params }) {
@@ -125,7 +125,7 @@ export default async function EventGalleryPage({ params, searchParams }) {
   // Fetch photos for the unlocked event gallery
   let photos = [];
   try {
-    photos = await getPhotosByEvent(eventId);
+    photos = await getGalleryPhotos({ eventId });
   } catch (err) {
     console.error("Failed to load event photos for gallery workspace:", err);
   }
