@@ -305,9 +305,9 @@ Activity Timeline
 
 Backup & Recovery
 
-- [ ] Trash
-- [ ] Restore
-- [ ] Permanent Delete
+- [x] Trash
+- [x] Restore
+- [x] Permanent Delete
 
 ---
 
