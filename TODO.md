@@ -283,10 +283,10 @@ Global Search
 
 Sharing
 
-- [ ] QR Code
-- [ ] Share Link
-- [ ] Expiry
-- [ ] Access Counter
+- [x] QR Code
+- [x] Share Link
+- [x] Expiry
+- [x] Access Counter
 
 ---
 

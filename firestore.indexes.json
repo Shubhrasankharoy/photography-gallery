@@ -85,6 +85,22 @@
         { "fieldPath": "eventId", "order": "ASCENDING" },
         { "fieldPath": "actorId", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "sharedResources",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "token", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sharedResources",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "createdBy", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

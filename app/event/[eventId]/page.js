@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getEventById } from "@/lib/eventService";
 import { getGalleryPhotos } from "@/lib/galleryService";
+import ShareEventButton from "@/components/share/ShareEventButton";
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -195,9 +196,17 @@ export default async function EventGuestView({ params, searchParams }) {
           
           {/* Header information */}
           <div className="flex flex-col gap-4 pb-6 border-b border-zinc-200/60 dark:border-zinc-800/50 text-left">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
-              {event.eventName}
-            </h1>
+            <div className="flex items-center justify-between gap-4">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
+                {event.eventName}
+              </h1>
+              <ShareEventButton
+                eventId={eventId}
+                studioId={event.studioId}
+                createdBy={event.createdBy || event.photographerId}
+                eventName={event.eventName}
+              />
+            </div>
             
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-500 dark:text-zinc-400 font-light">
               {event.eventDate && (
