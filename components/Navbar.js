@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getProfileByUid } from "@/lib/profileService";
 import StudioSwitcher from "@/components/StudioSwitcher";
+import SearchTrigger from "@/components/SearchTrigger";
+import useSearchManager from "@/hooks/useSearchManager";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -77,6 +79,8 @@ export default function Navbar() {
     return "U";
   };
 
+  const { setIsModalOpen } = useSearchManager();
+
   if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin")) return null;
 
   return (
@@ -99,6 +103,11 @@ export default function Navbar() {
                 <StudioSwitcher />
               </div>
             )}
+          </div>
+
+          {/* Search Trigger (Desktop) */}
+          <div className="hidden md:block flex-1 max-w-xs mx-6">
+            <SearchTrigger />
           </div>
 
           {/* Desktop Navigation */}
@@ -203,9 +212,21 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="flex md:hidden">
+          {/* Mobile menu and search buttons */}
+          <div className="flex md:hidden items-center gap-1.5">
             <button
+              onClick={() => setIsModalOpen(true)}
+              type="button"
+              className="rounded-full p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 focus:outline-hidden"
+              aria-label="Open Search Command Palette"
+            >
+              <svg className="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+
+            <button
+
               onClick={() => setIsOpen(!isOpen)}
               type="button"
               suppressHydrationWarning

@@ -4,6 +4,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
 import { StudioProvider } from "@/context/StudioContext";
+import { SearchProvider } from "@/context/SearchContext";
+import GlobalSearch from "@/components/GlobalSearch";
 import AuthLoadingWrapper from "@/components/AuthLoadingWrapper";
 
 const geistSans = Geist({
@@ -49,14 +51,18 @@ export default function RootLayout({ children }) {
       <body className="min-h-full flex flex-col bg-white dark:text-zinc-50 transition-colors duration-300">
         <AuthProvider>
           <StudioProvider>
-            <AuthLoadingWrapper>
-              <Navbar />
-              <main className="grow flex flex-col">{children}</main>
-              <Footer />
-            </AuthLoadingWrapper>
+            <SearchProvider>
+              <AuthLoadingWrapper>
+                <Navbar />
+                <main className="grow flex flex-col">{children}</main>
+                <Footer />
+                <GlobalSearch />
+              </AuthLoadingWrapper>
+            </SearchProvider>
           </StudioProvider>
         </AuthProvider>
       </body>
     </html>
   );
 }
+

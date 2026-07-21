@@ -6,10 +6,13 @@ import { getProfileByUid } from "@/lib/profileService";
 import Link from "next/link";
 import NotificationBell from "@/components/NotificationBell";
 import StudioSwitcher from "@/components/StudioSwitcher";
+import SearchTrigger from "@/components/SearchTrigger";
+import { useSearchManager } from "@/hooks/useSearchManager";
 
 export default function DashboardHeader({ onMenuClick }) {
   const { user } = useAuth();
   const [studioName, setStudioName] = useState("");
+  const { setIsModalOpen } = useSearchManager();
 
   useEffect(() => {
     if (user) {
@@ -29,7 +32,7 @@ export default function DashboardHeader({ onMenuClick }) {
         <button
           onClick={onMenuClick}
           type="button"
-          className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 lg:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 lg:hidden focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
         >
           <span className="sr-only">Open sidebar</span>
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -44,8 +47,25 @@ export default function DashboardHeader({ onMenuClick }) {
         </div>
       </div>
 
+      {/* Middle: Search Trigger (Desktop/Tablet) */}
+      <div className="hidden sm:block flex-1 max-w-xs md:max-w-sm lg:max-w-md mx-4">
+        <SearchTrigger />
+      </div>
+
       {/* Right side: Greeting, Notifications & Quick Profile link */}
       <div className="flex items-center gap-4">
+        {/* Mobile search button */}
+        <button
+          onClick={() => setIsModalOpen(true)}
+          type="button"
+          className="sm:hidden rounded-full p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 focus:outline-hidden"
+          aria-label="Open Search"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+
         {user && (
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate">

@@ -266,16 +266,16 @@ Advanced Gallery
 
 ---
 
-# Phase 24
+## Phase 24
 
 Global Search
 
-- [ ] Studios
-- [ ] Members
-- [ ] Events
-- [ ] Bride
-- [ ] Groom
-- [ ] Locations
+- [x] Studios
+- [x] Members
+- [x] Events
+- [x] Bride
+- [x] Groom
+- [x] Locations
 
 ---
 
