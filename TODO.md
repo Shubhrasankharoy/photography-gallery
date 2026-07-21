@@ -294,10 +294,10 @@ Sharing
 
 Activity Timeline
 
-- [ ] Activity Feed
-- [ ] Member Actions
-- [ ] Upload Logs
-- [ ] Event Logs
+- [x] Activity Feed
+- [x] Member Actions
+- [x] Upload Logs
+- [x] Event Logs
 
 ---
 
