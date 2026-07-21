@@ -30,16 +30,9 @@ export default function NewEvent() {
       }
 
       const role = currentStudio.userRole;
-      if (role === "viewer") {
+      if (role === "viewer" || role === "photographer") {
         router.replace("/dashboard/events");
         return;
-      }
-      if (role === "photographer") {
-        const settings = await getStudioSettings(currentStudio.studioId);
-        if (settings.allowPhotographerCreateEvent === false) {
-          router.replace("/dashboard/events");
-          return;
-        }
       }
       setCheckingPermission(false);
     }

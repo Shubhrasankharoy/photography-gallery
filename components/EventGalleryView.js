@@ -109,6 +109,19 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
     };
   }, [event?.studioId, currentRole]);
 
+  // Auto-open lightbox if photoId query parameter is present (used by face search redirects)
+  useEffect(() => {
+    if (typeof window === "undefined" || !initialPhotos || initialPhotos.length === 0) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const photoIdParam = urlParams.get("photoId");
+    if (photoIdParam) {
+      const idx = initialPhotos.findIndex(p => p.photoId === photoIdParam);
+      if (idx !== -1) {
+        Promise.resolve().then(() => setLightboxIndex(idx));
+      }
+    }
+  }, [initialPhotos]);
+
   // Determine current active photolist based on favorites filter
   const filteredPhotos = filterFavorites 
     ? initialPhotos.filter(p => favoritedPhotos.has(p.photoId)) 
@@ -688,6 +701,19 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
             <span className="text-xs font-semibold text-zinc-555 bg-zinc-100 dark:bg-zinc-900 px-3 py-1.5 rounded-full">
               {filteredPhotos.length} {filteredPhotos.length === 1 ? "Photo" : "Photos"}
             </span>
+
+            {/* Face Search Button */}
+            {(studioSettings?.allowFaceSearch !== false || currentRole === "owner" || currentRole === "admin" || currentRole === "photographer") && (
+              <Link
+                href={`/event/${event.eventId}/face-search${clientPin ? `?pin=${clientPin}` : ""}`}
+                className="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 text-xs font-bold px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 select-none cursor-pointer"
+              >
+                <svg className="h-3.5 w-3.5 animate-pulse text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Face Search
+              </Link>
+            )}
 
             {filteredPhotos.length > 0 && (
               <button

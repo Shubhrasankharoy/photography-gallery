@@ -24,17 +24,23 @@ export async function POST(request) {
     for (const photoId of photoIds) {
       const photoRef = doc(db, "photos", photoId);
       const photoSnap = await getDoc(photoRef);
-      const photoName = photoSnap.exists() ? photoSnap.data().name : "Unknown Photo";
+      const photoData = photoSnap.exists() ? photoSnap.data() : null;
+      const photoName = photoData ? (photoData.name || photoData.fileName || "Unknown Photo") : "Unknown Photo";
+      const studioId = photoData ? photoData.studioId : null;
 
       const downloadRef = doc(collection(db, "downloads"));
-      batch.set(downloadRef, {
+      const downloadPayload = {
         eventId,
         photoId,
         photoName,
         photographerId,
         timestamp,
         userAgent
-      });
+      };
+      if (studioId) {
+        downloadPayload.studioId = studioId;
+      }
+      batch.set(downloadRef, downloadPayload);
 
       batch.update(photoRef, {
         downloadCount: increment(1)

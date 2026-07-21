@@ -78,8 +78,7 @@ export default function EventsList() {
   // Derive permissions
   const canCreateEvent = !currentStudio || (
     currentStudio.userRole === "owner" ||
-    currentStudio.userRole === "admin" ||
-    (currentStudio.userRole === "photographer" && studioSettings?.allowPhotographerCreateEvent !== false)
+    currentStudio.userRole === "admin"
   );
 
   const canEditEvent = (event) => {
@@ -89,8 +88,7 @@ export default function EventsList() {
     if (!currentStudio) return false;
     return (
       currentStudio.userRole === "owner" ||
-      currentStudio.userRole === "admin" ||
-      (currentStudio.userRole === "photographer" && event.createdBy === user?.uid)
+      currentStudio.userRole === "admin"
     );
   };
 

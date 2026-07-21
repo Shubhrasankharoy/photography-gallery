@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useStudio } from "@/context/StudioContext";
 import { getProfileByUid } from "@/lib/profileService";
-import { getEventsByPhotographer } from "@/lib/eventService";
+import { getEvents } from "@/lib/eventService";
 import { getRecentUploads, getRecentDownloads } from "@/lib/photoService";
 
 /**
@@ -36,6 +37,7 @@ function formatDate(dateString) {
 
 export default function Dashboard() {
   const { user, loading: authLoading } = useAuth();
+  const { currentStudio, isLoading: studioLoading } = useStudio();
   const router = useRouter();
   const [studioName, setStudioName] = useState("");
   const [events, setEvents] = useState([]);
@@ -53,22 +55,30 @@ export default function Dashboard() {
     async function loadDashboardData() {
       if (!user) return;
       try {
+        setIsFetching(true);
         // Fetch profile
         const profile = await getProfileByUid(user.uid);
         if (profile && profile.studioName) {
           setStudioName(profile.studioName);
         }
 
-        // Fetch live events
-        const liveEvents = await getEventsByPhotographer(user.uid);
+        // Fetch live events, recent uploads, and downloads based on currentStudio
+        let liveEvents = [];
+        let uploads = [];
+        let downloads = [];
+
+        if (currentStudio) {
+          liveEvents = await getEvents({ studioId: currentStudio.studioId });
+          uploads = await getRecentUploads({ studioId: currentStudio.studioId }, 4);
+          downloads = await getRecentDownloads({ studioId: currentStudio.studioId }, 5);
+        } else {
+          liveEvents = await getEvents({ photographerId: user.uid });
+          uploads = await getRecentUploads({ photographerId: user.uid }, 4);
+          downloads = await getRecentDownloads({ photographerId: user.uid }, 5);
+        }
+
         setEvents(liveEvents);
-
-        // Fetch recent uploads
-        const uploads = await getRecentUploads(user.uid, 4);
         setRecentUploads(uploads);
-
-        // Fetch recent downloads
-        const downloads = await getRecentDownloads(user.uid, 5);
         setRecentDownloads(downloads);
       } catch (err) {
         console.error("Failed to load dashboard statistics:", err);
@@ -77,12 +87,12 @@ export default function Dashboard() {
       }
     }
 
-    if (user) {
+    if (user && !studioLoading) {
       loadDashboardData();
     }
-  }, [user]);
+  }, [user, currentStudio, studioLoading]);
 
-  if (authLoading || !user) {
+  if (authLoading || studioLoading || !user) {
     return null;
   }
 

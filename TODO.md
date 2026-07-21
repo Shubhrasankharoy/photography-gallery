@@ -315,11 +315,11 @@ Backup & Recovery
 
 AI Face Search
 
-- [ ] Face Detection
-- [ ] Face Embeddings
-- [ ] Matching
-- [ ] Confidence Score
-- [ ] Batch Download
+- [x] Face Detection
+- [x] Face Embeddings
+- [x] Matching
+- [x] Confidence Score
+- [x] Batch Download
 
 ---
 

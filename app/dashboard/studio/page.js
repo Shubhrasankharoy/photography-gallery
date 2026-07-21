@@ -18,6 +18,8 @@ import {
   updateMemberRole,
   transferStudioOwnership
 } from "@/lib/studioService";
+import { getStudioSettings } from "@/lib/eventService";
+
 
 export default function StudioHub() {
   const { user, loading: authLoading } = useAuth();
@@ -34,8 +36,9 @@ export default function StudioHub() {
 
   // Studio management states
   const [members, setMembers] = useState([]);
-  const [invitations, setInvitations] = useState([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const [studioSettings, setStudioSettings] = useState(null);
+  const [invitations, setInvitations] = useState([]);
 
   // Invite member form state
   const [inviteEmail, setInviteEmail] = useState("");
@@ -96,8 +99,12 @@ export default function StudioHub() {
     if (!currentStudio) return;
     try {
       setLoadingMembers(true);
-      const memberList = await getStudioMembers(currentStudio.studioId);
+      const [memberList, settings] = await Promise.all([
+        getStudioMembers(currentStudio.studioId),
+        getStudioSettings(currentStudio.studioId)
+      ]);
       setMembers(memberList);
+      setStudioSettings(settings);
 
       // Retrieve sent invitations if owner/admin
       if (currentStudio.userRole === "owner" || currentStudio.userRole === "admin") {
@@ -627,6 +634,7 @@ export default function StudioHub() {
                             <th className="py-3 px-4">Name</th>
                             <th className="py-3 px-4">Email</th>
                             <th className="py-3 px-4">Role</th>
+                            <th className="py-3 px-4">Permissions</th>
                             <th className="py-3 px-4 text-right">Actions</th>
                           </tr>
                         </thead>
@@ -644,6 +652,12 @@ export default function StudioHub() {
                                 }`}>
                                   {member.role}
                                 </span>
+                              </td>
+                              <td className="py-3 px-4 text-[11px] text-zinc-550 dark:text-zinc-400">
+                                {member.role === "owner" && "Upload, Delete, Replace, View (Full Access)"}
+                                {member.role === "admin" && "Upload, Delete, Replace, View"}
+                                {member.role === "photographer" && `Upload, Replace own, Delete own (${studioSettings?.allowPhotographerDeletePhoto ? "Allowed" : "Disabled"}), View`}
+                                {member.role === "viewer" && "View (Read-only)"}
                               </td>
                               <td className="py-3 px-4 text-right space-x-2">
                                 {/* Promote/Demote Actions */}
@@ -704,6 +718,14 @@ export default function StudioHub() {
                             }`}>
                               {member.role}
                             </span>
+                          </div>
+                          
+                          <div className="text-[11px] text-zinc-500 dark:text-zinc-400 bg-zinc-100/50 dark:bg-zinc-900/40 p-2.5 rounded-lg font-light">
+                            <span className="font-bold text-zinc-700 dark:text-zinc-300">Permissions: </span>
+                            {member.role === "owner" && "Upload, Delete, Replace, View (Full Access)"}
+                            {member.role === "admin" && "Upload, Delete, Replace, View"}
+                            {member.role === "photographer" && `Upload, Replace own, Delete own (${studioSettings?.allowPhotographerDeletePhoto ? "Allowed" : "Disabled"}), View`}
+                            {member.role === "viewer" && "View (Read-only)"}
                           </div>
 
                           {/* Member actions panel */}

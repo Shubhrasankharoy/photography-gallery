@@ -58,7 +58,7 @@ export default function GlobalSearch() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       // 1. Toggle modal on Cmd+K, Ctrl+K or Ctrl+/
-      const isK = e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey);
+      const isK = e.key && e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey);
       const isSlash = e.key === "/" && e.ctrlKey;
       
       if (isK || isSlash) {
