@@ -94,6 +94,21 @@ class InsightFaceProvider(BaseProvider):
         if img_bgr is None:
           raise ValueError(f"Could not read image using OpenCV: {image_path}")
 
+        # Check if we need to downscale to preserve RAM (max width 2048px)
+        orig_height, orig_width = img_bgr.shape[:2]
+        scale_x = 1.0
+        scale_y = 1.0
+        if orig_width > 2048:
+          scale = 2048.0 / orig_width
+          new_width = 2048
+          new_height = int(orig_height * scale)
+          img_bgr = cv2.resize(img_bgr, (new_width, new_height), interpolation=cv2.INTER_AREA)
+          scale_x = orig_width / new_width
+          scale_y = orig_height / new_height
+          print(f"[InsightFaceProvider] Resized large image from {orig_width}x{orig_height} to {new_width}x{new_height}")
+
+        processed_height, processed_width = img_bgr.shape[:2]
+
         faces = self.detectFaces(img_bgr)
         
         # Sort detected faces by size (larger area first)
@@ -108,14 +123,14 @@ class InsightFaceProvider(BaseProvider):
           bbox = face.bbox # [x1, y1, x2, y2]
           x1 = float(max(0, bbox[0]))
           y1 = float(max(0, bbox[1]))
-          x2 = float(min(img_width, bbox[2]))
-          y2 = float(min(img_height, bbox[3]))
+          x2 = float(min(processed_width, bbox[2]))
+          y2 = float(min(processed_height, bbox[3]))
 
           # Normalized coordinates (0.0 to 1.0)
-          norm_x = x1 / img_width
-          norm_y = y1 / img_height
-          norm_w = (x2 - x1) / img_width
-          norm_h = (y2 - y1) / img_height
+          norm_x = x1 / processed_width
+          norm_y = y1 / processed_height
+          norm_w = (x2 - x1) / processed_width
+          norm_h = (y2 - y1) / processed_height
 
           embedding = self.generateEmbedding(img_bgr, face)
           confidence = float(face.det_score)
@@ -125,13 +140,14 @@ class InsightFaceProvider(BaseProvider):
           if hasattr(face, "pose") and face.pose is not None:
             pose = [float(p) for p in face.pose]
 
-          # Landmarks
+          # Landmarks scaled back to original image coordinates
           landmarks = []
           if hasattr(face, "kps") and face.kps is not None:
-            landmarks = [{"x": float(pt[0]), "y": float(pt[1])} for pt in face.kps]
+            landmarks = [{"x": float(pt[0] * scale_x), "y": float(pt[1] * scale_y)} for pt in face.kps]
 
-          face_width = float(x2 - x1)
-          face_height = float(y2 - y1)
+          # Face size scaled back to original image coordinates
+          face_width = float(x2 - x1) * scale_x
+          face_height = float(y2 - y1) * scale_y
 
           # Quality score based on detection confidence and relative resolution
           quality_score = confidence

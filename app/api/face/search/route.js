@@ -13,15 +13,22 @@ export async function POST(request) {
 
     // Call Python worker API endpoint /search
     const pythonUrl = process.env.PYTHON_WORKER_URL || 'http://localhost:5000';
+    const bearerToken = process.env.WORKER_BEARER_TOKEN;
     
     const pyFormData = new FormData();
     pyFormData.append('image', image);
     pyFormData.append('eventId', eventId);
     pyFormData.append('minimumConfidence', minimumConfidence);
 
+    const headers = {};
+    if (bearerToken) {
+      headers['Authorization'] = `Bearer ${bearerToken}`;
+    }
+
     const response = await fetch(`${pythonUrl}/search`, {
       method: 'POST',
-      body: pyFormData
+      body: pyFormData,
+      headers
     });
 
     if (!response.ok) {
