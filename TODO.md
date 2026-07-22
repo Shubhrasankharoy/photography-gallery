@@ -322,14 +322,27 @@ AI Face Search
 - [x] Batch Download
 
 ---
-
 # Phase 29
 
-Final Production
+AI Processing Queue
 
-- [ ] Performance
-- [ ] Security
-- [ ] Rate Limiting
-- [ ] Image Optimization
-- [ ] Monitoring
-- [ ] Deployment
+- [x] Firestore Job Queue
+- [x] Python Worker
+- [x] Cloud Run Deployment
+- [x] Background Processing
+- [x] Automatic Retry
+- [x] Job Monitoring
+
+---
+
+# Phase 30
+
+Production InsightFace Face Recognition
+
+- [x] Integrate buffalo_l model and ONNX Runtime
+- [x] Multi-face detection and unit-normalized 512-dim embedding docs
+- [x] Separate indexing queue pipeline and real-time Flask API search server
+- [x] NumPy vector similarity search with customizable confidence thresholds
+- [x] Dedicated faceIndexJobs Firestore collection and extended embedding schema
+- [x] Enhanced event indexing status badges and timeline logger integration
+- [x] Recovery integration (trash/restore/delete synchronization)

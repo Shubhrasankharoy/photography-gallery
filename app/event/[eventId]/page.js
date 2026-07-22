@@ -8,7 +8,7 @@ export async function generateMetadata({ params }) {
   const eventId = resolvedParams.eventId;
   const event = await getEventById(eventId);
   
-  if (!event) {
+  if (!event || event.status === "trashed") {
     return {
       title: "Event Gallery Not Found | CaptureSpace",
       description: "The requested proofing gallery could not be located.",
@@ -35,7 +35,7 @@ export default async function EventGuestView({ params, searchParams }) {
   let studio = null;
   let creatorName = "";
 
-  if (event) {
+  if (event && event.status !== "trashed") {
     try {
       const fetches = [];
       
@@ -78,7 +78,7 @@ export default async function EventGuestView({ params, searchParams }) {
   }
 
   // 1. Event Space Not Found
-  if (!event) {
+  if (!event || event.status === "trashed") {
     return (
       <div className="flex min-h-[85vh] flex-col items-center justify-center bg-white px-4 text-center dark:bg-black transition-colors duration-300">
         <div className="relative mb-6">

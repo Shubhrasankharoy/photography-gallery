@@ -193,6 +193,65 @@
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "expiresAt", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "faceIndexJobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "priority", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "faceIndexJobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "studioId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "faceIndexJobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "workerId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "faceEmbeddings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "eventId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "faceEmbeddings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "studioId", "order": "ASCENDING" },
+        { "fieldPath": "photoId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "faceEmbeddings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "photoId", "order": "ASCENDING" },
+        { "fieldPath": "faceIndex", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "faceEmbeddings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "provider", "order": "ASCENDING" },
+        { "fieldPath": "embeddingVersion", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

@@ -11,7 +11,8 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 // Vision Module
 import { faceSearchService } from '@/lib/vision/faceSearchService';
 import { visionFactory } from '@/lib/vision/visionFactory';
-import { DEFAULT_VISION_SETTINGS, CONFIDENCE_LEVELS } from '@/lib/vision/visionConstants';
+import { DEFAULT_VISION_SETTINGS } from '@/lib/vision/visionConstants';
+import { CONFIDENCE_LEVELS } from '@/lib/vision/faceConstants';
 
 // Components
 import FaceSearchUploader from '@/components/face/FaceSearchUploader';
@@ -64,11 +65,11 @@ export default function FaceSearchPage() {
         // Fetch event
         const eventRef = doc(db, 'events', eventId);
         const eventSnap = await getDoc(eventRef);
-        if (!eventSnap.exists()) {
+        const eventData = eventSnap.data();
+        if (!eventSnap.exists() || eventData.status === 'trashed') {
           setLoading(false);
           return;
         }
-        const eventData = eventSnap.data();
         setEvent(eventData);
 
         // Verify PIN passcode
@@ -149,12 +150,12 @@ export default function FaceSearchPage() {
         user,
         config
       );
-      setMatches(res);
+      setMatches(res.results);
       setSelectedIds([]);
 
       // Save to localStorage history
       if (sourceFileOrUrl) {
-        addSearchToHistory(eventId, embedding, sourceFileOrUrl);
+        addSearchToHistory(eventId, res.queryEmbedding || embedding, sourceFileOrUrl);
       }
     } catch (err) {
       alert('Search failed: ' + err.message);
@@ -167,21 +168,38 @@ export default function FaceSearchPage() {
     setIsSearching(true);
     try {
       const config = studioSettings?.visionSettings || DEFAULT_VISION_SETTINGS;
-      const provider = visionFactory.getProvider(config.provider);
-      
-      // Detect region
-      const regions = await provider.detectRegion(file);
-      if (regions.length === 0) {
-        throw new Error('No crop region detected in the image');
-      }
+      if (config.provider === 'insightface') {
+        const res = await faceSearchService.searchMatches(
+          file,
+          eventId,
+          event.studioId,
+          user,
+          config
+        );
+        setMatches(res.results);
+        setSelectedIds([]);
+        if (res.queryEmbedding) {
+          addSearchToHistory(eventId, res.queryEmbedding, URL.createObjectURL(file));
+        }
+      } else {
+        const provider = visionFactory.getProvider(config.provider);
+        
+        // Detect region
+        const regions = await provider.detectRegion(file);
+        if (regions.length === 0) {
+          throw new Error('No crop region detected in the image');
+        }
 
-      // Generate embedding vector
-      const embedding = await provider.generateEmbedding(file, 0, regions[0]);
-      
-      // Run comparison matches
-      await runVisualSimilaritySearch(embedding, file);
+        // Generate embedding vector
+        const embedding = await provider.generateEmbedding(file, 0, regions[0]);
+        
+        // Run comparison matches
+        await runVisualSimilaritySearch(embedding, file);
+      }
     } catch (err) {
       alert('Processing target image failed: ' + err.message);
+      setIsSearching(false);
+    } finally {
       setIsSearching(false);
     }
   };

@@ -7,6 +7,8 @@ import { useStudio } from "@/context/StudioContext";
 import { useSelectionManager } from "@/hooks/useSelectionManager";
 import WatermarkOverlay from "@/components/WatermarkOverlay";
 import Slideshow from "@/components/Slideshow";
+import { db } from "@/lib/firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 const DOWNLOAD_INTERVAL_MS = 200;
 
@@ -36,6 +38,144 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
   // Actor / Guest resolution
   const [actorId, setActorId] = useState("");
   const [actorType, setActorType] = useState("guest");
+
+  // Indexing status states
+  const [indexingStatus, setIndexingStatus] = useState(null);
+  const [failedJobs, setFailedJobs] = useState([]);
+  const [queuePosition, setQueuePosition] = useState(0);
+  const [facesIndexed, setFacesIndexed] = useState(0);
+
+  useEffect(() => {
+    if (!event?.eventId) return;
+
+    // Listen to photos to count indexing
+    const qPhotos = query(
+      collection(db, 'photos'),
+      where('eventId', '==', event.eventId)
+    );
+
+    const unsubPhotos = onSnapshot(qPhotos, (photoSnap) => {
+      const activePhotos = photoSnap.docs
+        .map(d => d.data())
+        .filter(p => p.status === 'active');
+      
+      const total = activePhotos.length;
+      if (total === 0) {
+        setIndexingStatus(null);
+        return;
+      }
+
+      const completed = activePhotos.filter(
+        p => p.faceIndexStatus === 'completed' || p.faceIndexStatus === 'failed'
+      ).length;
+
+      // Listen to faceEmbeddings count
+      const qEmbeddings = query(
+        collection(db, 'faceEmbeddings'),
+        where('eventId', '==', event.eventId),
+        where('status', '==', 'active')
+      );
+      const unsubEmbeddings = onSnapshot(qEmbeddings, (embSnap) => {
+        setFacesIndexed(embSnap.size);
+      });
+
+      // Listen to faceIndexJobs to determine statuses
+      const qJobs = query(
+        collection(db, 'faceIndexJobs'),
+        where('eventId', '==', event.eventId)
+      );
+
+      const unsubJobs = onSnapshot(qJobs, (jobSnap) => {
+        const jobs = jobSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const failed = jobs.filter(j => j.status === 'failed' || j.status === 'dead');
+        setFailedJobs(failed);
+
+        const pendingJobs = jobs.filter(j => j.status === 'pending');
+        const runningJobs = jobs.filter(j => j.status === 'running');
+
+        // Estimate queue position if there are pending jobs
+        if (pendingJobs.length > 0) {
+          const oldestJob = pendingJobs.sort((a, b) => {
+            const timeA = a.createdAt?.seconds || 0;
+            const timeB = b.createdAt?.seconds || 0;
+            return timeA - timeB;
+          })[0];
+          
+          if (oldestJob && oldestJob.createdAt) {
+            const qQueuePos = query(
+              collection(db, 'faceIndexJobs'),
+              where('status', '==', 'pending'),
+              where('createdAt', '<', oldestJob.createdAt)
+            );
+            getDocs(qQueuePos).then(posSnap => {
+              setQueuePosition(posSnap.size + 1);
+            }).catch(err => console.error(err));
+          }
+        } else {
+          setQueuePosition(0);
+        }
+
+        // Map statuses to Waiting, Queued, Processing, Indexed, Failed
+        if (failed.length > 0) {
+          setIndexingStatus({
+            type: 'failed',
+            completed,
+            total,
+            failedCount: failed.length
+          });
+        } else if (runningJobs.length > 0) {
+          setIndexingStatus({
+            type: 'processing',
+            completed,
+            total
+          });
+        } else if (pendingJobs.length > 0) {
+          setIndexingStatus({
+            type: 'queued',
+            completed,
+            total
+          });
+        } else if (completed < total && jobs.length === 0) {
+          setIndexingStatus({
+            type: 'waiting',
+            completed,
+            total
+          });
+        } else if (completed < total) {
+          setIndexingStatus({
+            type: 'processing',
+            completed,
+            total
+          });
+        } else {
+          setIndexingStatus({
+            type: 'ready',
+            completed,
+            total
+          });
+        }
+      });
+
+      return () => {
+        unsubEmbeddings();
+        unsubJobs();
+      };
+    });
+
+    return () => unsubPhotos();
+  }, [event?.eventId]);
+
+  const handleRetryAllFailed = async () => {
+    if (failedJobs.length === 0) return;
+    try {
+      const { queueService } = await import('@/lib/queue/queueService');
+      await Promise.all(
+        failedJobs.map(job => queueService.retryJob(job.id, user))
+      );
+    } catch (err) {
+      console.error('Failed to retry all jobs:', err);
+    }
+  };
 
   const fileInputRef = useRef(null);
 
@@ -701,6 +841,50 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
             <span className="text-xs font-semibold text-zinc-555 bg-zinc-100 dark:bg-zinc-900 px-3 py-1.5 rounded-full">
               {filteredPhotos.length} {filteredPhotos.length === 1 ? "Photo" : "Photos"}
             </span>
+
+            {/* Indexing Status Badge */}
+            {indexingStatus && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-50 border border-zinc-200 dark:bg-zinc-950 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400">
+                {indexingStatus.type === 'waiting' && (
+                  <>
+                    <span className="h-1.5 w-1.5 bg-yellow-500 rounded-full animate-ping"></span>
+                    <span>Waiting to Index</span>
+                  </>
+                )}
+                {indexingStatus.type === 'queued' && (
+                  <>
+                    <span className="h-1.5 w-1.5 bg-zinc-400 rounded-full animate-pulse"></span>
+                    <span>Queued {queuePosition > 0 ? `(Pos: #${queuePosition})` : ''}</span>
+                  </>
+                )}
+                {indexingStatus.type === 'processing' && (
+                  <>
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-indigo-500"></div>
+                    <span>Processing {indexingStatus.completed} / {indexingStatus.total}</span>
+                  </>
+                )}
+                {indexingStatus.type === 'ready' && (
+                  <>
+                    <span className="h-1.5 w-1.5 bg-emerald-500 rounded-full"></span>
+                    <span>Indexed {facesIndexed > 0 ? `(${facesIndexed} Face${facesIndexed > 1 ? 's' : ''})` : '(No Faces)'}</span>
+                  </>
+                )}
+                {indexingStatus.type === 'failed' && (
+                  <>
+                    <span className="h-1.5 w-1.5 bg-rose-500 rounded-full animate-bounce"></span>
+                    <span>Index Failed</span>
+                    {(currentRole === "owner" || currentRole === "admin" || currentRole === "photographer") && (
+                      <button 
+                        onClick={handleRetryAllFailed}
+                        className="ml-1.5 text-[10px] bg-rose-600 text-white hover:bg-rose-700 px-2 py-0.5 rounded transition-all cursor-pointer font-bold uppercase select-none"
+                      >
+                        Retry
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Face Search Button */}
             {(studioSettings?.allowFaceSearch !== false || currentRole === "owner" || currentRole === "admin" || currentRole === "photographer") && (

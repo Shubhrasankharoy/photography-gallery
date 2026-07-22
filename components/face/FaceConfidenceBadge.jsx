@@ -1,5 +1,5 @@
 import React from 'react';
-import { CONFIDENCE_LEVELS } from '../../lib/vision/visionConstants';
+import { CONFIDENCE_LEVELS } from '../../lib/vision/faceConstants';
 
 export function FaceConfidenceBadge({ level, similarity }) {
   let colorClasses = '';

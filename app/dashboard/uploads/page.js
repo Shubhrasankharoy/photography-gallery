@@ -7,6 +7,7 @@ import { useStudio } from "@/context/StudioContext";
 import { getEvents, getStudioSettings } from "@/lib/eventService";
 import { uploadPhoto, deletePhoto, canPerformPhotoAction } from "@/lib/photoService";
 import Link from "next/link";
+import JobMonitor from "@/components/queue/JobMonitor";
 
 /**
  * Generate a thumbnail blob from an image file via canvas compression
@@ -744,6 +745,13 @@ export default function UploadsPage() {
           <p className="text-zinc-600 dark:text-zinc-400 font-light">
             Select an event to start uploading photos
           </p>
+        </div>
+      )}
+
+      {currentStudio?.studioId && (
+        <div className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800">
+          <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-6">AI Processing Queue Monitor</h2>
+          <JobMonitor studioId={currentStudio.studioId} />
         </div>
       )}
     </div>
