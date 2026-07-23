@@ -10,10 +10,23 @@ def init_firebase():
   global db
   if not firebase_admin._apps:
     if config.FIREBASE_SERVICE_ACCOUNT_KEY:
-      cred = credentials.Certificate(config.FIREBASE_SERVICE_ACCOUNT_KEY)
-      firebase_admin.initialize_app(cred)
+      try:
+        import json
+        key_str = config.FIREBASE_SERVICE_ACCOUNT_KEY.strip()
+        if key_str.startswith("{"):
+          cert_dict = json.loads(key_str)
+          cred = credentials.Certificate(cert_dict)
+          print("[Firebase] Initializing Firebase Admin SDK with JSON dictionary from environment.")
+        else:
+          cred = credentials.Certificate(key_str)
+          print(f"[Firebase] Initializing Firebase Admin SDK with credentials file: {key_str}")
+        firebase_admin.initialize_app(cred)
+      except Exception as e:
+        print(f"[Firebase] Error parsing credentials, trying default credentials: {e}")
+        firebase_admin.initialize_app()
     else:
       # Automatically detect credentials from GCP environment or default
+      print("[Firebase] No service account key configured, trying default credentials...")
       firebase_admin.initialize_app()
   db = firestore.client()
   print("[Firebase] SDK initialized successfully.")
