@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { motion } from "motion/react";
 
 export default function Login() {
   const { user, login, loginWithGoogle, resetPassword } = useAuth();
@@ -130,79 +131,90 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-[92vh] w-full bg-white dark:bg-black transition-colors duration-300">
+    <div className="flex min-h-[92vh] w-full bg-white dark:bg-[#181818] transition-colors duration-300">
       
       {/* Split Layout: Left side (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-zinc-900">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2F2F2F]">
         <img
           src="https://images.unsplash.com/photo-1471341971476-ae15ff5dd4ad?q=80&w=1200&auto=format&fit=crop"
           alt="Vintage camera lens detail"
           className="absolute inset-0 h-full w-full object-cover object-center filter opacity-50 scale-105"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-black via-black/30 to-black/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10" />
         
         {/* Decorative Overlay Brand */}
         <div className="relative z-10 p-16 flex flex-col justify-between h-full w-full text-white">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="bg-linear-to-r from-violet-400 to-indigo-400 bg-clip-text text-xl font-bold tracking-wider text-transparent">
+          <Link href="/" className="flex items-center space-x-1.5">
+            <span className="font-headline text-xl font-bold tracking-wider text-[#D4AF37]">
               CAPTURE
             </span>
-            <span className="text-xl font-light tracking-widest text-zinc-200">
+            <span className="font-body text-xl font-light tracking-widest text-zinc-200">
               SPACE
             </span>
           </Link>
           
           <div className="space-y-4">
-            <h2 className="text-4xl font-extrabold tracking-tight leading-tight">
+            <h2 className="text-4xl font-bold tracking-tight leading-tight font-headline">
               Access Your Secured Client Spaces.
             </h2>
-            <p className="text-base text-zinc-350 font-light leading-relaxed max-w-md">
+            <p className="text-base text-zinc-400 font-light leading-relaxed max-w-md">
               Review event proofing folders, catalog favorites, and select digital items with custom permissions.
             </p>
           </div>
           
-          <p className="text-xs text-zinc-500 font-light">&copy; {new Date().getFullYear()} CaptureSpace. Delivered in Elegance.</p>
+          <p className="text-xs text-zinc-600 font-light">&copy; {new Date().getFullYear()} CaptureSpace. Delivered in Elegance.</p>
         </div>
       </div>
 
       {/* Split Layout: Right side (Form card) */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-20 bg-white dark:bg-black relative">
-        <div className="mx-auto w-full max-w-md flex flex-col">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-20 bg-white dark:bg-[#181818] relative">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="mx-auto w-full max-w-md flex flex-col"
+        >
           
           {!isForgotActive ? (
             <>
               {/* Header Info */}
               <div className="text-left mb-8">
-                <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">Welcome Back</h1>
-                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 font-light">
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 font-headline">Welcome Back</h1>
+                <p className="mt-2 text-sm text-[#8E8E8E] font-light">
                   Enter details below to access secure gallery catalogs.
                 </p>
               </div>
 
               {/* Authentication Error Banner */}
               {authError && (
-                <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 rounded-[20px] bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3"
+                >
                   <svg className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   <div>
-                    <p className="text-xs font-bold text-rose-800 dark:text-rose-455 uppercase tracking-wider">Login Failed</p>
-                    <p className="mt-1 text-xs text-rose-650 dark:text-rose-400 font-light leading-relaxed">
+                    <p className="text-xs font-bold text-rose-800 dark:text-rose-400 uppercase tracking-wider">Login Failed</p>
+                    <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 font-light leading-relaxed">
                       {authError}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Social Sign-in Card */}
-              <span
+              <motion.span
                 role="button"
                 tabIndex={0}
                 onClick={handleGoogleLogin}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") handleGoogleLogin();
                 }}
-                className="flex w-full items-center justify-center gap-3 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 hover:shadow-sm px-4 py-3.5 text-sm font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900 transition-all cursor-pointer select-none"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="flex w-full items-center justify-center gap-3 rounded-[12px] border border-zinc-200 bg-white hover:bg-zinc-50 hover:shadow-sm px-4 py-3.5 text-sm font-semibold text-zinc-700 dark:border-zinc-800 dark:bg-[#262626] dark:text-zinc-300 dark:hover:bg-[#2D2D2D] transition-all cursor-pointer select-none"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" width="24" height="24">
                   <path
@@ -211,12 +223,12 @@ export default function Login() {
                   />
                 </svg>
                 <span>Continue with Google</span>
-              </span>
+              </motion.span>
 
               {/* Divider line */}
               <div className="relative my-6 flex items-center">
                 <div className="grow border-t border-zinc-200 dark:border-zinc-800" />
-                <span className="mx-4 text-xs font-semibold text-zinc-400 dark:text-zinc-650 uppercase tracking-widest">or</span>
+                <span className="mx-4 text-xs font-semibold text-[#8E8E8E] uppercase tracking-widest">or</span>
                 <div className="grow border-t border-zinc-200 dark:border-zinc-800" />
               </div>
 
@@ -224,7 +236,7 @@ export default function Login() {
               <div className="space-y-4">
                 {/* Email Field */}
                 <div className="flex flex-col space-y-1.5">
-                  <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Email Address</label>
+                  <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Email Address</label>
                   <input
                     id="email"
                     name="email"
@@ -237,10 +249,10 @@ export default function Login() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleEmailLogin(e);
                     }}
-                    className={`rounded-xl border bg-transparent px-4 py-3.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all ${
+                    className={`rounded-[12px] border bg-transparent px-4 py-3.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 transition-all ${
                       errors.email 
                         ? "border-rose-500 focus:ring-rose-500" 
-                        : "border-zinc-200 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
+                        : "border-zinc-200 focus:ring-[#D4AF37] dark:border-zinc-800"
                     }`}
                     placeholder="you@example.com"
                   />
@@ -250,13 +262,13 @@ export default function Login() {
                 {/* Password Field */}
                 <div className="flex flex-col space-y-1.5">
                   <div className="flex justify-between items-center">
-                    <label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Password</label>
+                    <label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Password</label>
                     <span 
                       onClick={() => {
                         setIsForgotActive(true);
                         setAuthError("");
                       }}
-                      className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer select-none"
+                      className="text-xs font-bold text-[#D4AF37] hover:text-[#E0C55B] cursor-pointer select-none"
                     >
                       Forgot password?
                     </span>
@@ -273,10 +285,10 @@ export default function Login() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleEmailLogin(e);
                     }}
-                    className={`rounded-xl border bg-transparent px-4 py-3.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all ${
+                    className={`rounded-[12px] border bg-transparent px-4 py-3.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 transition-all ${
                       errors.password 
                         ? "border-rose-500 focus:ring-rose-500" 
-                        : "border-zinc-200 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
+                        : "border-zinc-200 focus:ring-[#D4AF37] dark:border-zinc-800"
                     }`}
                     placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
                   />
@@ -284,7 +296,7 @@ export default function Login() {
                 </div>
 
                 {/* Form Submit Button */}
-                <span
+                <motion.span
                   role="button"
                   tabIndex={0}
                   onClick={handleEmailLogin}
@@ -293,13 +305,15 @@ export default function Login() {
                       handleEmailLogin(e);
                     }
                   }}
-                  className={`w-full mt-4 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center ${
+                  whileHover={{ scale: loading ? 1 : 1.02 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
+                  className={`w-full mt-4 flex items-center justify-center rounded-[12px] bg-[#D4AF37] py-4 text-sm font-bold text-[#181818] hover:bg-[#E0C55B] transition-all select-none cursor-pointer text-center ${
                     loading ? "opacity-50 pointer-events-none" : ""
                   }`}
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
-                      <svg className="animate-spin h-5 w-5 text-white dark:text-black" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-5 w-5 text-[#181818]" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
@@ -308,14 +322,14 @@ export default function Login() {
                   ) : (
                     "Sign In"
                   )}
-                </span>
+                </motion.span>
               </div>
 
               {/* Bottom CTA to sign up */}
               <div className="mt-8 text-center">
-                <p className="text-sm text-zinc-500 font-light">
+                <p className="text-sm text-[#8E8E8E] font-light">
                   Don&apos;t have an account yet?{" "}
-                  <Link href="/register" className="font-bold text-zinc-950 dark:text-zinc-100 hover:underline">
+                  <Link href="/register" className="font-bold text-zinc-950 dark:text-zinc-100 hover:text-[#D4AF37] transition-colors">
                     Create free account
                   </Link>
                 </p>
@@ -325,35 +339,43 @@ export default function Login() {
             <>
               {/* Reset Password View */}
               <div className="text-left mb-8">
-                <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50">Reset Password</h1>
-                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 font-light">
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 font-headline">Reset Password</h1>
+                <p className="mt-2 text-sm text-[#8E8E8E] font-light">
                   Enter your email address and we will send reset instructions.
                 </p>
               </div>
 
               {/* Alerts */}
               {forgotError && (
-                <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 rounded-[20px] bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3"
+                >
                   <svg className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
-                  <p className="text-xs text-rose-650 dark:text-rose-455 font-light leading-relaxed">{forgotError}</p>
-                </div>
+                  <p className="text-xs text-rose-600 dark:text-rose-400 font-light leading-relaxed">{forgotError}</p>
+                </motion.div>
               )}
 
               {forgotSuccess && (
-                <div className="mb-6 rounded-2xl bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3 animate-fade-in">
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 rounded-[20px] bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3"
+                >
                   <svg className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                   </svg>
-                  <p className="text-xs text-emerald-650 dark:text-emerald-455 font-light leading-relaxed">{forgotSuccess}</p>
-                </div>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-light leading-relaxed">{forgotSuccess}</p>
+                </motion.div>
               )}
 
               {/* Forgot password email input */}
               <div className="space-y-4">
                 <div className="flex flex-col space-y-1.5">
-                  <label htmlFor="forgotEmail" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Email Address</label>
+                  <label htmlFor="forgotEmail" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Email Address</label>
                   <input
                     id="forgotEmail"
                     type="text"
@@ -365,24 +387,26 @@ export default function Login() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") handleForgotPassword(e);
                     }}
-                    className="rounded-xl border border-zinc-200 bg-transparent px-4 py-3.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400"
+                    className="rounded-[12px] border border-zinc-200 bg-transparent px-4 py-3.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-[#D4AF37]"
                     placeholder="you@example.com"
                   />
                 </div>
 
-                <span
+                <motion.span
                   role="button"
                   tabIndex={0}
                   onClick={handleForgotPassword}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") handleForgotPassword(e);
                   }}
-                  className={`w-full mt-4 flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black py-4 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center ${
+                  whileHover={{ scale: loading ? 1 : 1.02 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
+                  className={`w-full mt-4 flex items-center justify-center rounded-[12px] bg-[#D4AF37] py-4 text-sm font-bold text-[#181818] hover:bg-[#E0C55B] transition-all select-none cursor-pointer text-center ${
                     loading ? "opacity-50 pointer-events-none" : ""
                   }`}
                 >
                   {loading ? "Sending link..." : "Send Reset Link"}
-                </span>
+                </motion.span>
 
                 <span
                   role="button"
@@ -395,7 +419,7 @@ export default function Login() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") setIsForgotActive(false);
                   }}
-                  className="w-full text-center mt-3 text-sm font-semibold text-zinc-650 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 cursor-pointer block select-none"
+                  className="w-full text-center mt-3 text-sm font-semibold text-[#8E8E8E] hover:text-zinc-900 dark:hover:text-zinc-200 cursor-pointer block select-none"
                 >
                   Back to Sign In
                 </span>
@@ -403,7 +427,7 @@ export default function Login() {
             </>
           )}
 
-        </div>
+        </motion.div>
       </div>
 
     </div>

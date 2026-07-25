@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -8,14 +8,18 @@ import { SearchProvider } from "@/context/SearchContext";
 import GlobalSearch from "@/components/GlobalSearch";
 import AuthLoadingWrapper from "@/components/AuthLoadingWrapper";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
+  weight: ["600", "700"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata = {
@@ -27,7 +31,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${playfair.variable} ${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -48,7 +52,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white dark:text-zinc-50 transition-colors duration-300">
+      <body className="min-h-full flex flex-col transition-colors duration-300">
         <AuthProvider>
           <StudioProvider>
             <SearchProvider>
@@ -65,4 +69,3 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-
