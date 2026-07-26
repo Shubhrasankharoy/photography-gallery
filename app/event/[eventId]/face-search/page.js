@@ -373,7 +373,7 @@ export default function FaceSearchPage() {
     return (
       <div className="flex min-h-[85vh] flex-col items-center justify-center bg-zinc-50 dark:bg-black px-4 transition-colors duration-300">
         <div className="mx-auto w-full max-w-md rounded-3xl border border-zinc-200/60 bg-white p-8 shadow-2xl dark:border-zinc-800/50 dark:bg-zinc-950/80">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-650 dark:text-indigo-400">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 select-none">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
@@ -408,11 +408,11 @@ export default function FaceSearchPage() {
                 value={pinInput}
                 onChange={(e) => setPinInput(e.target.value)}
                 required
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400 transition-all text-center tracking-widest font-bold"
+                className="w-full rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-hidden focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 transition-all text-center tracking-widest font-bold"
                 placeholder="E.g., 5082"
               />
             </div>
-            <button type="submit" className="w-full flex items-center justify-center rounded-xl bg-indigo-650 hover:bg-indigo-600 py-3.5 text-xs font-bold text-white shadow-md">
+            <button type="submit" className="w-full flex items-center justify-center rounded-[12px] bg-[#D4AF37] hover:bg-[#E0C55B] py-3.5 text-xs font-bold text-[#181818] shadow-md hover:shadow-lg transition-all">
               Verify & Unlock
             </button>
           </form>
@@ -464,7 +464,7 @@ export default function FaceSearchPage() {
             </Link>
             <div>
               <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">Visual Search</h1>
-              <p className="text-[10px] font-medium text-indigo-650 dark:text-indigo-400 uppercase tracking-wider">
+              <p className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-wider">
                 {event.eventName}
               </p>
             </div>

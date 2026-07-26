@@ -80,7 +80,7 @@ export default async function EventGuestView({ params, searchParams }) {
   // 1. Event Space Not Found
   if (!event || event.status === "trashed") {
     return (
-      <div className="flex min-h-[85vh] flex-col items-center justify-center bg-white px-4 text-center dark:bg-black transition-colors duration-300">
+      <div className="flex min-h-[85vh] flex-col items-center justify-center bg-[#F7F7F7] px-4 text-center dark:bg-[#181818] transition-colors duration-300">
         <div className="relative mb-6">
           <div className="h-24 w-24 rounded-full bg-rose-50 dark:bg-rose-950/20 flex items-center justify-center text-rose-500">
             <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -88,14 +88,14 @@ export default async function EventGuestView({ params, searchParams }) {
             </svg>
           </div>
         </div>
-        <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-50">Gallery Space Not Found</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 font-headline">Gallery Space Not Found</h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 font-light max-w-sm leading-relaxed">
           The requested event gallery could not be located. It may have been archived or deleted by the photographer.
         </p>
         <div className="mt-8">
           <Link
             href="/"
-            className="rounded-full bg-zinc-950 px-6 py-3 text-xs font-bold text-white hover:bg-zinc-850 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200 transition-all"
+            className="rounded-[12px] bg-[#D4AF37] px-6 py-3 text-xs font-bold text-[#181818] hover:bg-[#E0C55B] transition-all"
           >
             Return to Homepage
           </Link>
@@ -111,18 +111,18 @@ export default async function EventGuestView({ params, searchParams }) {
   // 2. Render Passcode Authentication Screen
   if (!isPasswordCorrect) {
     return (
-      <div className="flex min-h-[85vh] flex-col items-center justify-center bg-zinc-50 dark:bg-black px-4 transition-colors duration-300">
+      <div className="flex min-h-[85vh] flex-col items-center justify-center bg-[#F7F7F7] dark:bg-[#181818] px-4 transition-colors duration-300">
         
-        <div className="mx-auto w-full max-w-md rounded-3xl border border-zinc-200/60 bg-white p-8 shadow-2xl dark:border-zinc-800/50 dark:bg-zinc-950/80">
+        <div className="mx-auto w-full max-w-md rounded-[24px] border border-zinc-200/50 bg-white/95 p-8 shadow-[var(--shadow-soft)] dark:border-zinc-800/40 dark:bg-[#202020]/95 backdrop-blur-md">
           
           {/* Padlock Icon */}
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-650 dark:text-indigo-400">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 select-none">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
           </div>
 
-          <h2 className="mt-5 text-center text-xl font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tight">
+          <h2 className="mt-5 text-center text-xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight font-headline">
             Passcode Protected Space
           </h2>
           <p className="mt-2 text-center text-xs text-zinc-500 dark:text-zinc-400 font-light leading-relaxed">
@@ -131,7 +131,7 @@ export default async function EventGuestView({ params, searchParams }) {
 
           {/* Wrong Password Screen banner */}
           {wrongPasswordEntered && (
-            <div className="mt-5 rounded-2xl bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in text-left">
+            <div className="mt-5 rounded-[12px] bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in text-left">
               <svg className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
@@ -153,14 +153,14 @@ export default async function EventGuestView({ params, searchParams }) {
                 type="text"
                 name="pin"
                 required
-                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 dark:focus:ring-indigo-400 transition-all text-center tracking-widest font-bold"
+                className="w-full rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 outline-hidden focus:ring-2 focus:ring-[#D4AF37]/30 focus:border-[#D4AF37] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder-zinc-500 transition-all text-center tracking-widest font-bold"
                 placeholder="E.g., 5082"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center rounded-xl bg-indigo-650 hover:bg-indigo-600 py-3.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all"
+              className="w-full flex items-center justify-center rounded-[12px] bg-[#D4AF37] hover:bg-[#E0C55B] py-3.5 text-xs font-bold text-[#181818] shadow-md hover:shadow-lg transition-all"
             >
               Verify & Unlock
             </button>
@@ -176,7 +176,7 @@ export default async function EventGuestView({ params, searchParams }) {
   const coverImage = event.coverImage || "https://images.unsplash.com/photo-1452587925148-ce544e77e60d?q=80&w=1200&auto=format&fit=crop";
 
   return (
-    <div className="w-full min-h-screen bg-white dark:bg-black transition-colors duration-300">
+    <div className="w-full min-h-screen bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300">
       
       {/* Panoramic Cover Header */}
       <div className="relative h-[45vh] w-full bg-zinc-900 overflow-hidden">
@@ -185,19 +185,19 @@ export default async function EventGuestView({ params, searchParams }) {
           alt={`${event.eventName} cover`}
           className="h-full w-full object-cover object-center filter brightness-75 scale-105"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-white via-transparent to-black/20 dark:from-black" />
+        <div className="absolute inset-0 bg-linear-to-t from-[#F7F7F7] via-transparent to-black/20 dark:from-[#181818]" />
       </div>
 
       {/* Main Profile Showcase */}
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 -mt-20 relative z-10 pb-20">
         
         {/* Profile Card Container */}
-        <div className="rounded-3xl border border-zinc-200/60 bg-white/90 p-6 sm:p-10 shadow-2xl backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-950/80 transition-all duration-300">
+        <div className="rounded-[24px] border border-zinc-200/50 bg-white/95 p-6 sm:p-10 shadow-[var(--shadow-soft)] backdrop-blur-md dark:border-zinc-800/40 dark:bg-[#202020]/95 transition-all duration-300">
           
           {/* Header information */}
-          <div className="flex flex-col gap-4 pb-6 border-b border-zinc-200/60 dark:border-zinc-800/50 text-left">
+          <div className="flex flex-col gap-4 pb-6 border-b border-zinc-200/50 dark:border-zinc-800/40 text-left">
             <div className="flex items-center justify-between gap-4">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight font-headline">
                 {event.eventName}
               </h1>
               <ShareEventButton
@@ -211,7 +211,7 @@ export default async function EventGuestView({ params, searchParams }) {
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-zinc-500 dark:text-zinc-400 font-light">
               {event.eventDate && (
                 <span className="flex items-center gap-1.5">
-                  <svg className="h-4 w-4 text-indigo-650 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-4 w-4 text-[#D4AF37] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <span>{event.eventDate}</span>
@@ -220,7 +220,7 @@ export default async function EventGuestView({ params, searchParams }) {
 
               {event.location && (
                 <span className="flex items-center gap-1.5">
-                  <svg className="h-4 w-4 text-indigo-650 dark:text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <svg className="h-4 w-4 text-[#D4AF37] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -239,7 +239,7 @@ export default async function EventGuestView({ params, searchParams }) {
           {/* Details / Couples Column */}
           <div className="mt-6 flex flex-col md:flex-row md:items-start justify-between gap-6 text-left">
             <div className="grow space-y-4 max-w-2xl">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50">Event Details</h3>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 font-headline">Event Details</h3>
               <p className="text-zinc-600 dark:text-zinc-300 font-light text-sm leading-relaxed whitespace-pre-line">
                 {event.description || "Welcome to the custom proofing workspace folder. High-resolution photographs will be visible here for review shortly."}
               </p>
@@ -248,7 +248,7 @@ export default async function EventGuestView({ params, searchParams }) {
             {/* Sidebar Cards */}
             <div className="w-full md:w-72 shrink-0 space-y-4">
               {(event.brideName || event.groomName) && (
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div className="rounded-[20px] border border-zinc-200/50 bg-zinc-50/50 p-5 dark:border-zinc-800/40 dark:bg-[#262626]/40">
                   <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Celebrated Couple</h4>
                   <div className="mt-2 text-sm font-bold text-zinc-800 dark:text-zinc-200 space-y-1">
                     {event.brideName && <div className="flex items-center gap-2">👰 {event.brideName}</div>}
@@ -258,7 +258,7 @@ export default async function EventGuestView({ params, searchParams }) {
               )}
 
               {(studio || creatorName) && (
-                <div className="rounded-2xl border border-zinc-200 bg-zinc-50/50 p-5 dark:border-zinc-800 dark:bg-zinc-950/40 space-y-4">
+                <div className="rounded-[20px] border border-zinc-200/50 bg-zinc-50/50 p-5 dark:border-zinc-800/40 dark:bg-[#262626]/40 space-y-4">
                   {studio && (
                     <div>
                       <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Published By</h4>
@@ -269,11 +269,11 @@ export default async function EventGuestView({ params, searchParams }) {
                         {studio.logo ? (
                           <img src={studio.logo} alt={studio.studioName} className="h-6 w-6 rounded-full object-cover shrink-0" />
                         ) : (
-                          <div className="h-6 w-6 rounded-full bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-[10px] font-bold text-indigo-650 dark:text-indigo-400 shrink-0">
+                          <div className="h-6 w-6 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center text-[10px] font-bold shrink-0">
                             {studio.studioName.charAt(0)}
                           </div>
                         )}
-                        <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                        <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 group-hover:text-[#D4AF37] transition-colors truncate">
                           {studio.studioName}
                         </span>
                       </Link>
@@ -282,7 +282,7 @@ export default async function EventGuestView({ params, searchParams }) {
                   {creatorName && (
                     <div>
                       <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Created By</h4>
-                      <div className="mt-1 text-xs font-bold text-zinc-800 dark:text-zinc-250">
+                      <div className="mt-1 text-xs font-bold text-zinc-800 dark:text-zinc-300">
                         {creatorName}
                       </div>
                     </div>
@@ -293,14 +293,14 @@ export default async function EventGuestView({ params, searchParams }) {
           </div>
 
           {/* Masonry / Photo grid */}
-          <div className="mt-12 pt-8 border-t border-zinc-200/60 dark:border-zinc-800/50 text-left">
+          <div className="mt-12 pt-8 border-t border-zinc-200/50 dark:border-zinc-800/40 text-left">
             {photos && photos.length > 0 ? (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">Event Gallery ({photos.length} photos)</h3>
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 font-headline">Event Gallery ({photos.length} photos)</h3>
                   <Link
                     href={`/event/${eventId}/gallery${clientPin ? `?pin=${clientPin}` : ""}`}
-                    className="rounded-full bg-indigo-600 hover:bg-indigo-700 px-5 py-2 text-xs font-bold text-white transition-all shadow-md hover:shadow-lg flex items-center gap-1.5"
+                    className="rounded-[12px] bg-[#D4AF37] hover:bg-[#E0C55B] px-5 py-2 text-xs font-bold text-[#181818] transition-all shadow-md hover:shadow-lg flex items-center gap-1.5"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -312,9 +312,9 @@ export default async function EventGuestView({ params, searchParams }) {
                   {photos.map((photo) => (
                     <div
                       key={photo.photoId}
-                      className="group relative overflow-hidden rounded-xl border border-zinc-200/60 dark:border-zinc-800/50 bg-zinc-100 dark:bg-zinc-900 shadow-sm hover:shadow-lg transition-all"
+                      className="group relative overflow-hidden rounded-[18px] border border-zinc-200/50 dark:border-zinc-800/40 bg-zinc-100 dark:bg-zinc-900 shadow-sm hover:shadow-lg transition-all"
                     >
-                      <div className="relative aspect-square w-full overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                      <div className="relative aspect-square w-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 rounded-[18px]">
                         <img
                           src={photo.thumbnailUrl || photo.url}
                           alt={photo.name}
@@ -332,13 +332,13 @@ export default async function EventGuestView({ params, searchParams }) {
                 </div>
               </>
             ) : (
-              <div className="rounded-2xl border border-dashed border-zinc-200 p-16 dark:border-zinc-800 bg-zinc-50/20 dark:bg-transparent text-center">
+              <div className="rounded-[20px] border border-dashed border-zinc-200/50 p-16 dark:border-zinc-800/40 bg-zinc-50/20 dark:bg-transparent text-center">
                 <svg className="mx-auto h-12 w-12 text-zinc-300 dark:text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                 </svg>
                 <h4 className="mt-4 text-sm font-bold text-zinc-800 dark:text-zinc-200">Event Gallery is Empty</h4>
-                <p className="mt-1.5 text-xs text-zinc-500 font-light max-w-xs mx-auto">
+                <p className="mt-1.5 text-xs text-zinc-550 font-light max-w-xs mx-auto">
                   No client proofing photos have been uploaded to this space yet. Please contact the studio for updates.
                 </p>
               </div>

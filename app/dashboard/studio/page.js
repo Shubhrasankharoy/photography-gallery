@@ -15,7 +15,8 @@ import {
   rejectInvitation,
   removeStudioMember,
   updateMemberRole,
-  transferStudioOwnership
+  transferStudioOwnership,
+  updateStudioMember
 } from "@/lib/studioService";
 import { getStudioSettings } from "@/lib/eventService";
 import { motion, AnimatePresence } from "motion/react";
@@ -59,6 +60,13 @@ export default function StudioHub() {
   // General error/success messages
   const [actionError, setActionError] = useState("");
   const [actionSuccess, setActionSuccess] = useState("");
+
+  // Edit member state
+  const [editingMember, setEditingMember] = useState(null);
+  const [editRole, setEditRole] = useState("photographer");
+  const [editPosition, setEditPosition] = useState("");
+  const [updatingMember, setUpdatingMember] = useState(false);
+  const [editError, setEditError] = useState("");
 
   // Redirect if unauthenticated
   useEffect(() => {
@@ -271,6 +279,26 @@ export default function StudioHub() {
     }
   };
 
+  const handleEditMemberSubmit = async (e) => {
+    e.preventDefault();
+    if (!currentStudio || !editingMember) return;
+    setUpdatingMember(true);
+    setEditError("");
+    try {
+      await updateStudioMember(currentStudio.studioId, editingMember.userId, {
+        role: editRole,
+        position: editPosition.trim()
+      });
+      setEditingMember(null);
+      await loadStudioDetails();
+    } catch (err) {
+      console.error(err);
+      setEditError("Failed to update member details.");
+    } finally {
+      setUpdatingMember(false);
+    }
+  };
+
   const handleLeaveStudio = async () => {
     if (!currentStudio) return;
 
@@ -444,7 +472,7 @@ export default function StudioHub() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
             </svg>
           </Link>
-          {currentStudio.userRole === "owner" && (
+          {isOwnerOrAdmin && (
             <Link
               href="/dashboard/studio/settings"
               className="inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#D4AF37] hover:bg-[#E0C55B] px-5 py-2.5 text-xs font-bold text-[#181818] shadow-md hover:shadow-lg transition-all"
@@ -643,6 +671,7 @@ export default function StudioHub() {
                             <th className="py-3.5 px-4">Name</th>
                             <th className="py-3.5 px-4">Email</th>
                             <th className="py-3.5 px-4">Role</th>
+                            <th className="py-3.5 px-4">Position</th>
                             <th className="py-3.5 px-4">Permissions</th>
                             <th className="py-3.5 px-4 text-right">Actions</th>
                           </tr>
@@ -662,6 +691,9 @@ export default function StudioHub() {
                                   {member.role}
                                 </span>
                               </td>
+                              <td className="py-3.5 px-4 text-[#8E8E8E] font-light">
+                                {member.position || (member.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1) : "Member")}
+                              </td>
                               <td className="py-3.5 px-4 text-[10px] text-[#8E8E8E] font-light leading-normal max-w-[200px]">
                                 {member.role === "owner" && "Upload, Delete, Replace, View (Full Access)"}
                                 {member.role === "admin" && "Upload, Delete, Replace, View"}
@@ -669,6 +701,22 @@ export default function StudioHub() {
                                 {member.role === "viewer" && "View (Read-only)"}
                               </td>
                               <td className="py-3.5 px-4 text-right space-x-3 font-semibold text-[11px]">
+                                {/* Edit Action */}
+                                {((currentStudio.userRole === "owner" && member.role !== "owner") || 
+                                  (currentStudio.userRole === "admin" && (member.role === "photographer" || member.role === "viewer"))) && (
+                                  <button 
+                                    onClick={() => {
+                                      setEditingMember(member);
+                                      setEditRole(member.role);
+                                      setEditPosition(member.position || (member.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1) : "Member"));
+                                      setEditError("");
+                                    }} 
+                                    className="text-indigo-655 dark:text-indigo-400 hover:underline transition-colors"
+                                  >
+                                    Edit
+                                  </button>
+                                )}
+
                                 {/* Promote/Demote Actions */}
                                 {currentStudio.userRole === "owner" && member.role !== "owner" && (
                                   <>
@@ -718,6 +766,9 @@ export default function StudioHub() {
                             <div>
                               <p className="text-sm font-bold text-zinc-900 dark:text-zinc-50 font-headline">{member.displayName}</p>
                               <p className="text-xs text-[#8E8E8E] font-light mt-0.5">{member.email}</p>
+                              <p className="text-[11px] text-[#D4AF37] font-semibold mt-1">
+                                {member.position || (member.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1) : "Member")}
+                              </p>
                             </div>
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
                               member.role === "owner" ? "bg-[#D4AF37]/10 text-[#D4AF37]" :
@@ -740,13 +791,29 @@ export default function StudioHub() {
                           {/* Member actions panel */}
                           {member.userId !== user.uid && (
                             <div className="flex flex-wrap gap-2 pt-2.5 border-t border-zinc-200/60 dark:border-zinc-800/60 text-xs">
+                              {/* Edit Action */}
+                              {((currentStudio.userRole === "owner" && member.role !== "owner") || 
+                                (currentStudio.userRole === "admin" && (member.role === "photographer" || member.role === "viewer"))) && (
+                                <button 
+                                  onClick={() => {
+                                    setEditingMember(member);
+                                    setEditRole(member.role);
+                                    setEditPosition(member.position || (member.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1) : "Member"));
+                                    setEditError("");
+                                  }} 
+                                  className="px-2.5 py-1 rounded-[8px] border border-indigo-250 bg-indigo-50 hover:bg-indigo-100 text-indigo-805 dark:border-indigo-900/50 dark:bg-indigo-950/20 dark:text-indigo-400 transition-colors"
+                                >
+                                  Edit
+                                </button>
+                              )}
+
                               {currentStudio.userRole === "owner" && member.role !== "owner" && (
                                 <>
                                   {member.role !== "admin" && (
-                                    <button onClick={() => handlePromote(member)} className="px-2.5 py-1 rounded-[8px] border border-zinc-200 hover:bg-zinc-100 text-zinc-600 dark:border-zinc-800 dark:text-zinc-350">Promote</button>
+                                    <button onClick={() => handlePromote(member)} className="px-2.5 py-1 rounded-[8px] border border-zinc-200 hover:bg-zinc-100 text-zinc-650 dark:border-zinc-800">Promote</button>
                                   )}
                                   {member.role !== "viewer" && (
-                                    <button onClick={() => handleDemote(member)} className="px-2.5 py-1 rounded-[8px] border border-zinc-200 hover:bg-zinc-100 text-zinc-600 dark:border-zinc-800 dark:text-zinc-350">Demote</button>
+                                    <button onClick={() => handleDemote(member)} className="px-2.5 py-1 rounded-[8px] border border-zinc-200 hover:bg-zinc-100 text-zinc-650 dark:border-zinc-800">Demote</button>
                                   )}
                                   <button onClick={() => handleTransferOwnership(member)} className="px-2.5 py-1 rounded-[8px] border border-amber-250 bg-amber-50 hover:bg-amber-100 text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-400">Make Owner</button>
                                 </>
@@ -758,13 +825,13 @@ export default function StudioHub() {
                                     <button onClick={() => handlePromote(member)} className="px-2.5 py-1 rounded-[8px] border border-zinc-200 hover:bg-zinc-100 text-zinc-650 dark:border-zinc-800">Promote</button>
                                   )}
                                   {member.role === "photographer" && (
-                                    <button onClick={() => handleDemote(member)} className="px-2.5 py-1 rounded-[8px] border border-zinc-200 hover:bg-zinc-100 text-zinc-655 dark:border-zinc-800">Demote</button>
+                                    <button onClick={() => handleDemote(member)} className="px-2.5 py-1 rounded-[8px] border border-zinc-200 hover:bg-zinc-100 text-zinc-650 dark:border-zinc-800">Demote</button>
                                   )}
                                 </>
                               )}
 
                               {((currentStudio.userRole === "owner") || (currentStudio.userRole === "admin" && (member.role === "photographer" || member.role === "viewer"))) && (
-                                <button onClick={() => handleRemoveMember(member)} className="px-2.5 py-1 rounded-[8px] bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-955/20 dark:text-rose-400">Remove</button>
+                                <button onClick={() => handleRemoveMember(member)} className="px-2.5 py-1 rounded-[8px] bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400">Remove</button>
                               )}
                             </div>
                           )}
@@ -778,6 +845,93 @@ export default function StudioHub() {
           )}
         </div>
       </div>
+
+      {/* Edit Member Modal */}
+      <AnimatePresence>
+        {editingMember && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-md rounded-3xl border border-zinc-200/60 bg-white/95 p-6 sm:p-8 shadow-2xl backdrop-blur-md dark:border-zinc-850/50 dark:bg-zinc-950/90 text-left"
+            >
+              <div className="flex items-center justify-between pb-4 border-b border-zinc-150 dark:border-zinc-800/60">
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 font-headline">
+                  Edit Team Member
+                </h3>
+                <button
+                  onClick={() => setEditingMember(null)}
+                  className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleEditMemberSubmit} className="mt-6 space-y-4">
+                {editError && (
+                  <p className="text-xs text-rose-500 font-semibold">{editError}</p>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E8E]">Name</label>
+                  <p className="text-xs font-semibold text-zinc-850 dark:text-zinc-200">{editingMember.displayName}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E8E]">Email</label>
+                  <p className="text-xs text-[#8E8E8E] font-light">{editingMember.email}</p>
+                </div>
+
+                <div className="flex flex-col space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E8E]">Position / Title</label>
+                  <input
+                    type="text"
+                    value={editPosition}
+                    onChange={(e) => setEditPosition(e.target.value)}
+                    placeholder="e.g. Lead Photographer, Editor, Assistant"
+                    className="rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[#8E8E8E]">Studio Role</label>
+                  <select
+                    value={editRole}
+                    onChange={(e) => setEditRole(e.target.value)}
+                    className="rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-xs text-zinc-900 outline-none dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100"
+                  >
+                    <option value="admin">Admin (Manage events/invites)</option>
+                    <option value="photographer">Photographer (Upload photos)</option>
+                    <option value="viewer">Viewer (Read-only)</option>
+                  </select>
+                </div>
+
+                <div className="pt-4 border-t border-zinc-150 dark:border-zinc-800/60 flex justify-end gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setEditingMember(null)}
+                    className="rounded-[12px] border border-zinc-200 hover:bg-zinc-100 dark:border-zinc-800 dark:hover:bg-[#2D2D2D] px-4 py-2 text-xs font-bold text-zinc-705 dark:text-zinc-350 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={updatingMember}
+                    className="rounded-[12px] bg-[#D4AF37] hover:bg-[#E0C55B] px-5 py-2 text-xs font-bold text-[#181818] transition-colors"
+                  >
+                    {updatingMember ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

@@ -565,7 +565,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
       ),
       onClick: () => setShowWatermarkPreview(p => !p),
       visible: true,
-      colorClass: showWatermarkPreview ? "text-indigo-400" : "text-white/80 hover:text-white"
+      colorClass: showWatermarkPreview ? "text-[#D4AF37]" : "text-white/80 hover:text-white"
     },
     {
       id: "slideshow",
@@ -589,7 +589,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
       ),
       onClick: () => setIsDetailsOpen(prev => !prev),
       visible: true,
-      colorClass: isDetailsOpen ? "text-indigo-400" : "text-white/80 hover:text-white"
+      colorClass: isDetailsOpen ? "text-[#D4AF37]" : "text-white/80 hover:text-white"
     },
     {
       id: "share",
@@ -870,7 +870,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                 )}
                 {indexingStatus.type === 'processing' && (
                   <>
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-indigo-500"></div>
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#D4AF37]"></div>
                     <span>Processing {indexingStatus.completed} / {indexingStatus.total}</span>
                   </>
                 )}
@@ -903,7 +903,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                 href={`/event/${event.eventId}/face-search${clientPin ? `?pin=${clientPin}` : ""}`}
                 className="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 text-xs font-bold px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 select-none cursor-pointer"
               >
-                <svg className="h-3.5 w-3.5 animate-pulse text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <svg className="h-3.5 w-3.5 animate-pulse text-[#D4AF37]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 Face Search
@@ -918,7 +918,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                 }}
                 className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 select-none cursor-pointer ${
                   isSelectMode
-                    ? "bg-indigo-650 text-white shadow-md shadow-indigo-600/10"
+                    ? "bg-[#D4AF37] text-[#181818] shadow-md shadow-[#D4AF37]/10"
                     : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 }`}
               >
@@ -954,7 +954,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                       : "cursor-zoom-in hover:shadow-lg"
                   } ${
                     selection.isSelected(photo.photoId)
-                      ? "border-indigo-500 ring-2 ring-indigo-500/20"
+                      ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/20"
                       : "border-zinc-200/60 dark:border-zinc-800/50 bg-zinc-100 dark:bg-zinc-950"
                   }`}
                   tabIndex={0}
@@ -974,7 +974,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                     <div className="absolute top-3 left-3 z-10 select-none">
                       <div className={`h-5 w-5 rounded-md border flex items-center justify-center transition-all ${
                         selection.isSelected(photo.photoId)
-                          ? "bg-indigo-600 border-indigo-600 text-white"
+                          ? "bg-[#D4AF37] border-[#D4AF37] text-[#181818]"
                           : "bg-white/95 border-zinc-305 dark:bg-zinc-950/90 dark:border-zinc-700"
                       }`}>
                         {selection.isSelected(photo.photoId) && (
@@ -1033,7 +1033,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
             {/* Infinite Scroll Sentinel */}
             {visiblePhotos.length < filteredPhotos.length && (
               <div ref={sentinelRef} className="py-12 flex justify-center items-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent dark:border-indigo-400"></div>
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent dark:border-[#D4AF37]"></div >
               </div>
             )}
           </>
@@ -1139,7 +1139,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                       }
                     }}
                     disabled={action.disabled}
-                    className={`p-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+                    className={`p-2 rounded-full transition-all focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37]/35 ${
                       action.colorClass || "text-white/80 hover:text-white hover:bg-white/10"
                     }`}
                     title={action.label}
@@ -1171,7 +1171,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                   e.stopPropagation();
                   navigateLightbox(-1);
                 }}
-                className="absolute left-4 z-20 p-3 rounded-full bg-black/40 hover:bg-black/60 border border-white/5 text-white/85 hover:text-white transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="absolute left-4 z-20 p-3 rounded-full bg-black/40 hover:bg-black/60 border border-white/5 text-white/85 hover:text-white transition-all hover:scale-105 focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37]/35"
                 title="Previous Photo"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -1206,7 +1206,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                   e.stopPropagation();
                   navigateLightbox(1);
                 }}
-                className="absolute right-4 z-20 p-3 rounded-full bg-black/40 hover:bg-black/60 border border-white/5 text-white/85 hover:text-white transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="absolute right-4 z-20 p-3 rounded-full bg-black/40 hover:bg-black/60 border border-white/5 text-white/85 hover:text-white transition-all hover:scale-105 focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37]/35"
                 title="Next Photo"
               >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -1271,7 +1271,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
                   <div className="mt-8 border-t border-zinc-800 pt-5">
                     <button
                       onClick={() => handleDownload(currentPhoto)}
-                      className="w-full py-2.5 bg-indigo-650 hover:bg-indigo-600 active:bg-indigo-700 text-xs font-bold text-white rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      className="w-full py-2.5 bg-[#D4AF37] hover:bg-[#E0C55B] active:bg-[#C29E30] text-xs font-bold text-[#181818] rounded-[12px] shadow-md transition-all flex items-center justify-center gap-1.5 focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37]/30"
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -1312,7 +1312,7 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
               <button
                 onClick={handleDownloadMultiple}
                 disabled={selection.count === 0 || bulkDownloading}
-                className="text-xs font-bold px-4 py-1.5 rounded-xl bg-indigo-650 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 shadow-md shadow-indigo-600/10 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="text-xs font-bold px-4 py-1.5 rounded-[12px] bg-[#D4AF37] text-[#181818] hover:bg-[#E0C55B] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 shadow-md shadow-[#D4AF37]/10 focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37]/30"
               >
                 {bulkDownloading ? (
                   <>

@@ -24,6 +24,14 @@ export default function StudioSettings() {
     website: "",
     instagram: "",
     facebook: "",
+    visibilitySettings: {
+      showEmail: true,
+      showPhone: true,
+      showLocation: true,
+      showSocials: true,
+      showMembers: true,
+      showEvents: true
+    }
   });
 
   const [logoFile, setLogoFile] = useState(null);
@@ -36,6 +44,16 @@ export default function StudioSettings() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
+
+  // Redirect if unauthorized (only owners and admins allowed)
+  useEffect(() => {
+    if (!authLoading && currentStudio) {
+      const role = currentStudio.userRole;
+      if (role !== "owner" && role !== "admin") {
+        router.replace("/dashboard/studio");
+      }
+    }
+  }, [currentStudio, authLoading, router]);
 
   // Redirect if unauthenticated
   useEffect(() => {
@@ -63,6 +81,14 @@ export default function StudioSettings() {
           website: s.website || "",
           instagram: s.instagram || "",
           facebook: s.facebook || "",
+          visibilitySettings: s.visibilitySettings || {
+            showEmail: true,
+            showPhone: true,
+            showLocation: true,
+            showSocials: true,
+            showMembers: true,
+            showEvents: true
+          }
         });
         setLogoPreview(s.logo || "");
         setCoverPreview(s.coverImage || "");
@@ -75,6 +101,24 @@ export default function StudioSettings() {
     }
     loadStudioData();
   }, [currentStudio]);
+
+  const handleToggleChange = (settingKey) => {
+    setFormData((prev) => ({
+      ...prev,
+      visibilitySettings: {
+        ...(prev.visibilitySettings || {
+          showEmail: true,
+          showPhone: true,
+          showLocation: true,
+          showSocials: true,
+          showMembers: true,
+          showEvents: true
+        }),
+        [settingKey]: !((prev.visibilitySettings || {})[settingKey] !== false)
+      }
+    }));
+    if (saveSuccess) setSaveSuccess(false);
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -393,6 +437,146 @@ export default function StudioSettings() {
               onChange={handleInputChange}
               className="rounded-[12px] border border-[#202020] bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100"
             />
+          </div>
+        </div>
+
+        {/* Public Profile Visibility Settings */}
+        <div className="bg-white dark:bg-[#262626] p-6 rounded-[20px] border border-zinc-200/50 dark:border-zinc-800/40 space-y-6">
+          <div>
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-widest pb-2 border-b border-zinc-100 dark:border-zinc-800/60 font-headline">
+              Public Profile Visibility Settings
+            </h3>
+            <p className="text-xs text-[#8E8E8E] font-light mt-1.5">
+              Select which details will be displayed to the public on the studio page.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Show Email */}
+            <div className="flex items-center justify-between p-3.5 rounded-[12px] border border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-[#181818]/25">
+              <div className="text-xs pr-2">
+                <p className="font-bold text-zinc-805 dark:text-zinc-200">Show Contact Email</p>
+                <p className="text-[10px] text-[#8E8E8E] font-light mt-0.5">Show email in Contact Studio section.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggleChange("showEmail")}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  formData.visibilitySettings?.showEmail !== false ? "bg-[#D4AF37]" : "bg-zinc-250 dark:bg-zinc-800"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    formData.visibilitySettings?.showEmail !== false ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Show Phone */}
+            <div className="flex items-center justify-between p-3.5 rounded-[12px] border border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-[#181818]/25">
+              <div className="text-xs pr-2">
+                <p className="font-bold text-zinc-805 dark:text-zinc-200">Show Phone Number</p>
+                <p className="text-[10px] text-[#8E8E8E] font-light mt-0.5">Show phone number in Contact section.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggleChange("showPhone")}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  formData.visibilitySettings?.showPhone !== false ? "bg-[#D4AF37]" : "bg-zinc-250 dark:bg-zinc-800"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    formData.visibilitySettings?.showPhone !== false ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Show Location */}
+            <div className="flex items-center justify-between p-3.5 rounded-[12px] border border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-[#181818]/25">
+              <div className="text-xs pr-2">
+                <p className="font-bold text-zinc-805 dark:text-zinc-200">Show Location</p>
+                <p className="text-[10px] text-[#8E8E8E] font-light mt-0.5">Show address and location metadata.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggleChange("showLocation")}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  formData.visibilitySettings?.showLocation !== false ? "bg-[#D4AF37]" : "bg-zinc-250 dark:bg-zinc-800"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    formData.visibilitySettings?.showLocation !== false ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Show Socials */}
+            <div className="flex items-center justify-between p-3.5 rounded-[12px] border border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-[#181818]/25">
+              <div className="text-xs pr-2">
+                <p className="font-bold text-zinc-805 dark:text-zinc-200">Show Social Media Links</p>
+                <p className="text-[10px] text-[#8E8E8E] font-light mt-0.5">Display links to website, Instagram, Facebook.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggleChange("showSocials")}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  formData.visibilitySettings?.showSocials !== false ? "bg-[#D4AF37]" : "bg-zinc-250 dark:bg-zinc-800"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    formData.visibilitySettings?.showSocials !== false ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Show Members */}
+            <div className="flex items-center justify-between p-3.5 rounded-[12px] border border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-[#181818]/25">
+              <div className="text-xs pr-2">
+                <p className="font-bold text-zinc-805 dark:text-zinc-200">Show Team Members</p>
+                <p className="text-[10px] text-[#8E8E8E] font-light mt-0.5">Display the members list on the public profile.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggleChange("showMembers")}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  formData.visibilitySettings?.showMembers !== false ? "bg-[#D4AF37]" : "bg-zinc-250 dark:bg-zinc-800"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    formData.visibilitySettings?.showMembers !== false ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Show Events */}
+            <div className="flex items-center justify-between p-3.5 rounded-[12px] border border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-[#181818]/25">
+              <div className="text-xs pr-2">
+                <p className="font-bold text-zinc-805 dark:text-zinc-200">Show Galleries & Events</p>
+                <p className="text-[10px] text-[#8E8E8E] font-light mt-0.5">Display the studio&apos;s event portfolio links.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleToggleChange("showEvents")}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  formData.visibilitySettings?.showEvents !== false ? "bg-[#D4AF37]" : "bg-zinc-250 dark:bg-zinc-800"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                    formData.visibilitySettings?.showEvents !== false ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
 

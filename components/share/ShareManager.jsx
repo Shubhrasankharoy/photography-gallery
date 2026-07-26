@@ -112,7 +112,7 @@ export default function ShareManager({
     setSaving(true);
     try {
       const expiresAt = calculateExpiresAt();
-      const newShare = await shareService.createShare({
+      await shareService.createShare({
         resourceType,
         resourceId,
         studioId,
@@ -211,34 +211,34 @@ export default function ShareManager({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 text-white shadow-2xl relative my-8">
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+        <div className="bg-[#202020] border border-zinc-800/40 rounded-[24px] max-w-2xl w-full p-6 text-white shadow-2xl relative my-8">
           <button
             onClick={onClose}
-            className="absolute top-5 right-5 text-slate-400 hover:text-white text-xl p-1"
+            className="absolute top-5 right-5 text-zinc-400 hover:text-[#D4AF37] text-xl p-1 transition-colors"
             aria-label="Close Share Manager"
           >
             ✕
           </button>
 
           <div className="mb-6">
-            <h2 className="text-2xl font-bold tracking-tight">Sharing System</h2>
-            <p className="text-sm text-slate-400">
-              Manage public access, permissions, QR codes, and link expiration for <span className="text-slate-200 font-semibold">{resourceTitle || resourceType}</span>.
+            <h2 className="text-2xl font-bold tracking-tight font-headline">Sharing System</h2>
+            <p className="text-sm text-[#8E8E8E] font-light mt-0.5">
+              Manage public access, permissions, QR codes, and link expiration for <span className="text-[#D4AF37] font-bold">{resourceTitle || resourceType}</span>.
             </p>
           </div>
 
           {loading ? (
-            <div className="py-12 text-center text-slate-400">Loading share settings...</div>
+            <div className="py-12 text-center text-zinc-400 font-light">Loading share settings...</div>
           ) : activeShare ? (
             <div className="space-y-6">
               {/* Preview & Live Link Card */}
-              <div className="p-4 bg-slate-950/80 border border-slate-800 rounded-xl space-y-3">
+              <div className="p-4 bg-[#262626] border border-zinc-800/40 rounded-[20px] space-y-3 shadow-[var(--shadow-soft)]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full uppercase tracking-wider">
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full uppercase tracking-wider">
                     {activeShare.status}
                   </span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-zinc-400">
                     Visits: <strong className="text-white font-bold">{activeShare.accessCount || 0}</strong>
                     {activeShare.maxAccessCount ? ` / ${activeShare.maxAccessCount}` : ''}
                   </span>
@@ -246,17 +246,17 @@ export default function ShareManager({
 
                 <div className="flex gap-4 items-center">
                   <div className="flex-1 min-w-0">
-                    <label className="text-xs text-slate-400 block mb-1">Public Share URL</label>
+                    <label className="text-xs text-zinc-400 block mb-1">Public Share URL</label>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         readOnly
                         value={shareUrl}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs font-mono text-slate-200 truncate focus:outline-none"
+                        className="w-full bg-[#181818] border border-zinc-800/60 rounded-[12px] px-3 py-2 text-xs font-mono text-zinc-200 truncate focus:outline-hidden"
                       />
                       <button
                         onClick={handleCopyLink}
-                        className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs font-medium rounded-lg shrink-0 transition"
+                        className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] text-xs font-bold rounded-[12px] shrink-0 transition-all duration-155"
                       >
                         {copied ? 'Copied!' : 'Copy Link'}
                       </button>
@@ -266,36 +266,36 @@ export default function ShareManager({
                   {qrThumbnail && (
                     <button
                       onClick={() => setQrModalOpen(true)}
-                      className="shrink-0 p-1.5 bg-white rounded-lg border border-slate-700 hover:opacity-90 transition group relative"
+                      className="shrink-0 p-1.5 bg-white rounded-[12px] border border-zinc-200 hover:opacity-90 transition group relative"
                       title="View & Download QR Code"
                     >
                       <img src={qrThumbnail} alt="QR Thumbnail" className="w-12 h-12 object-contain" />
-                      <span className="absolute -bottom-2 right-1/2 translate-x-1/2 bg-slate-900 text-[10px] text-indigo-400 px-1.5 py-0.5 rounded border border-slate-700 font-medium">
+                      <span className="absolute -bottom-2 right-1/2 translate-x-1/2 bg-[#181818] text-[9px] text-[#D4AF37] px-1.5 py-0.5 rounded border border-zinc-800/60 font-bold tracking-wider">
                         QR
                       </span>
                     </button>
                   )}
                 </div>
 
-                <div className="text-xs text-slate-400 flex flex-wrap gap-x-4 gap-y-1">
+                <div className="text-xs text-zinc-400 flex flex-wrap gap-x-4 gap-y-1">
                   <span>
                     Expiry: {activeShare.expiresAt ? new Date(activeShare.expiresAt).toLocaleString() : 'Never'}
                   </span>
-                  <span>Visibility: <strong className="text-slate-300 capitalize">{activeShare.visibility}</strong></span>
+                  <span>Visibility: <strong className="text-[#D4AF37] capitalize font-bold">{activeShare.visibility}</strong></span>
                 </div>
               </div>
 
               {/* Settings Configuration */}
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-slate-300">Access Settings</h3>
+                <h3 className="text-sm font-bold text-zinc-300 font-headline">Access Settings</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">Visibility Mode</label>
+                    <label className="text-xs font-semibold text-zinc-400 block mb-1">Visibility Mode</label>
                     <select
                       value={visibility}
                       onChange={(e) => setVisibility(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#181818] border border-zinc-800/60 rounded-[12px] px-3 py-2 text-sm text-zinc-200 focus:outline-hidden focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                     >
                       <option value={VISIBILITY_TYPES.PUBLIC}>Public (Anyone with link)</option>
                       <option value={VISIBILITY_TYPES.PASSWORD}>Password Protected</option>
@@ -304,23 +304,23 @@ export default function ShareManager({
 
                   {visibility === VISIBILITY_TYPES.PASSWORD && (
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">Access Password</label>
+                      <label className="text-xs font-semibold text-zinc-400 block mb-1">Access Password</label>
                       <input
                         type="password"
                         placeholder="Enter access password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                        className="w-full bg-[#181818] border border-zinc-800/60 rounded-[12px] px-3 py-2 text-sm text-zinc-200 focus:outline-hidden focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                       />
                     </div>
                   )}
 
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">Link Expiration</label>
+                    <label className="text-xs font-semibold text-zinc-400 block mb-1">Link Expiration</label>
                     <select
                       value={expiryOption}
                       onChange={(e) => setExpiryOption(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#181818] border border-zinc-800/60 rounded-[12px] px-3 py-2 text-sm text-zinc-200 focus:outline-hidden focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                     >
                       <option value="never">Never Expires</option>
                       <option value="1h">1 Hour</option>
@@ -333,45 +333,45 @@ export default function ShareManager({
 
                   {expiryOption === 'custom' && (
                     <div>
-                      <label className="text-xs font-medium text-slate-300 block mb-1">Expiration Date</label>
+                      <label className="text-xs font-semibold text-zinc-400 block mb-1">Expiration Date</label>
                       <input
                         type="datetime-local"
                         value={customExpiry}
                         onChange={(e) => setCustomExpiry(e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                        className="w-full bg-[#181818] border border-zinc-800/60 rounded-[12px] px-3 py-2 text-sm text-zinc-200 focus:outline-hidden focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                       />
                     </div>
                   )}
 
                   <div>
-                    <label className="text-xs font-medium text-slate-300 block mb-1">Max Access Limit (Optional)</label>
+                    <label className="text-xs font-semibold text-zinc-400 block mb-1">Max Access Limit (Optional)</label>
                     <input
                       type="number"
                       placeholder="Unlimited"
                       min="1"
                       value={maxAccessCount}
                       onChange={(e) => setMaxAccessCount(e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-[#181818] border border-zinc-800/60 rounded-[12px] px-3 py-2 text-sm text-zinc-200 focus:outline-hidden focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Action Bar */}
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-slate-800 justify-between items-center">
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-zinc-800/60 justify-between items-center">
                 <div className="flex gap-2">
                   <button
                     onClick={handleRotateToken}
                     disabled={saving}
-                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition"
+                    className="px-3 py-2 bg-[#262626] hover:bg-[#2D2D2D] text-zinc-200 text-xs font-semibold rounded-[12px] border border-zinc-800/60 transition-all duration-150"
                   >
-                    Rotate Token (Revoke Old)
+                    Rotate Token
                   </button>
 
                   <button
                     onClick={handleRevokeShare}
                     disabled={saving}
-                    className="px-3 py-2 bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 text-xs font-semibold rounded-lg border border-rose-800/60 transition"
+                    className="px-3 py-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-350 text-xs font-semibold rounded-[12px] border border-rose-900/20 transition-all duration-150"
                   >
                     Revoke Share
                   </button>
@@ -380,7 +380,7 @@ export default function ShareManager({
                 <button
                   onClick={handleUpdateSettings}
                   disabled={saving}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition"
+                  className="px-5 py-2 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] text-xs font-bold rounded-[12px] transition-all duration-150"
                 >
                   {saving ? 'Saving...' : 'Save Settings'}
                 </button>
@@ -388,17 +388,19 @@ export default function ShareManager({
             </div>
           ) : (
             <div className="py-12 text-center space-y-4">
-              <div className="w-16 h-16 bg-slate-800 text-slate-400 rounded-full flex items-center justify-center mx-auto text-2xl">
-                🔗
+              <div className="w-16 h-16 bg-[#262626] border border-zinc-800/60 text-[#D4AF37] rounded-full flex items-center justify-center mx-auto text-xl shadow-[var(--shadow-soft)]">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                </svg>
               </div>
-              <h3 className="text-lg font-medium text-slate-200">No Active Share Link</h3>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              <h3 className="text-lg font-bold text-zinc-100 font-headline">No Active Share Link</h3>
+              <p className="text-xs text-[#8E8E8E] font-light max-w-sm mx-auto leading-relaxed">
                 Create a secure, trackable public link with QR codes and expiration options for this resource.
               </p>
               <button
                 onClick={handleCreateShare}
                 disabled={saving}
-                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-sm rounded-xl shadow-lg transition"
+                className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] font-bold text-sm rounded-[12px] shadow-lg transition-all duration-150"
               >
                 {saving ? 'Creating Share Link...' : 'Create Share Link'}
               </button>

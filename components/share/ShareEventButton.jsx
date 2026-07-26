@@ -50,9 +50,12 @@ export default function ShareEventButton({ eventId, studioId, createdBy, eventNa
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
+        className="shrink-0 px-4 py-2 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] text-xs font-bold rounded-[12px] shadow-[var(--shadow-soft)] transition-all duration-150 flex items-center gap-2 cursor-pointer select-none"
       >
-        🔗 Share Event
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+        </svg>
+        <span>Share Event</span>
       </button>
 
       <ShareManager

@@ -28,7 +28,7 @@ export default async function PublicProfile({ params }) {
   // Profile not found view
   if (!profile) {
     return (
-      <div className="flex min-h-[85vh] flex-col items-center justify-center bg-white px-4 text-center dark:bg-black transition-colors duration-300">
+      <div className="flex min-h-[85vh] flex-col items-center justify-center bg-[#F7F7F7] px-4 text-center dark:bg-[#181818] transition-colors duration-300">
         <div className="relative mb-6">
           <div className="h-24 w-24 rounded-full bg-rose-50 dark:bg-rose-950/20 flex items-center justify-center text-rose-500">
             <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
@@ -36,14 +36,14 @@ export default async function PublicProfile({ params }) {
             </svg>
           </div>
         </div>
-        <h1 className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-50">Profile Not Found</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 font-headline">Profile Not Found</h1>
         <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400 font-light max-w-sm leading-relaxed">
           The photographer username <span className="font-semibold text-zinc-800 dark:text-zinc-200">&quot;{username}&quot;</span> does not exist or has not published their space yet.
         </p>
         <div className="mt-8">
           <Link
             href="/"
-            className="rounded-full bg-zinc-950 px-6 py-3 text-xs font-bold text-white hover:bg-zinc-850 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-200 transition-all"
+            className="rounded-[12px] bg-[#D4AF37] px-6 py-3 text-xs font-bold text-[#181818] hover:bg-[#E0C55B] transition-all"
           >
             Return to Homepage
           </Link>
@@ -60,7 +60,7 @@ export default async function PublicProfile({ params }) {
   const logoUrl = profile.logo || "";
 
   return (
-    <div className="w-full min-h-screen bg-white dark:bg-black transition-colors duration-300">
+    <div className="w-full min-h-screen bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300">
       
       {/* Panoramic Cover Header */}
       <div className="relative h-[45vh] w-full bg-zinc-900 overflow-hidden">
@@ -69,20 +69,20 @@ export default async function PublicProfile({ params }) {
           alt={`${profile.studioName} cover`}
           className="h-full w-full object-cover object-center filter brightness-75 scale-105"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-white via-transparent to-black/20 dark:from-black" />
+        <div className="absolute inset-0 bg-linear-to-t from-[#F7F7F7] via-transparent to-black/20 dark:from-[#181818]" />
       </div>
 
       {/* Main Profile Showcase */}
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 -mt-20 relative z-10 pb-20">
         
         {/* Profile Card Container */}
-        <div className="rounded-3xl border border-zinc-200/60 bg-white/90 p-6 sm:p-10 shadow-2xl backdrop-blur-md dark:border-zinc-850/50 dark:bg-zinc-950/80 transition-all duration-300">
+        <div className="rounded-[24px] border border-zinc-200/50 bg-white/95 p-6 sm:p-10 shadow-[var(--shadow-soft)] backdrop-blur-md dark:border-zinc-800/40 dark:bg-[#202020]/95 transition-all duration-300">
           
           {/* Logo & Headline Row */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-zinc-200/60 dark:border-zinc-850/50">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-zinc-200/50 dark:border-zinc-800/40">
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 text-center sm:text-left">
               {/* Logo / Initial Box */}
-              <div className="h-28 w-28 rounded-full bg-indigo-600 border-4 border-white shadow-xl dark:border-zinc-950 overflow-hidden shrink-0 flex items-center justify-center text-white text-3xl font-extrabold select-none">
+              <div className="h-28 w-28 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] border-4 border-white shadow-xl dark:border-[#202020] overflow-hidden shrink-0 flex items-center justify-center text-3xl font-extrabold select-none">
                 {logoUrl ? (
                    <img src={logoUrl} alt={`${profile.studioName} logo`} className="h-full w-full object-cover" />
                 ) : (
@@ -91,11 +91,11 @@ export default async function PublicProfile({ params }) {
               </div>
 
               <div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
+                <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight font-headline">
                   {profile.studioName}
                 </h1>
                 <p className="mt-1.5 text-base text-zinc-550 dark:text-zinc-400 font-light flex items-center justify-center sm:justify-start gap-2">
-                  <span className="font-semibold text-indigo-600 dark:text-indigo-400">{profile.photographerName}</span>
+                  <span className="font-bold text-[#D4AF37]">{profile.photographerName}</span>
                   {profile.location && (
                     <>
                       <span className="text-zinc-300 dark:text-zinc-700">|</span>
@@ -113,7 +113,7 @@ export default async function PublicProfile({ params }) {
                   href={profile.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-zinc-250 p-2.5 text-zinc-650 hover:bg-zinc-55 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 transition-all"
+                  className="rounded-full border border-zinc-200/60 p-2.5 text-zinc-400 hover:text-[#D4AF37] dark:border-zinc-800/40 dark:text-zinc-500 dark:hover:text-[#D4AF37] hover:bg-zinc-100 dark:hover:bg-[#2D2D2D] transition-all"
                   title="Website"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -127,7 +127,7 @@ export default async function PublicProfile({ params }) {
                   href={`https://instagram.com/${profile.instagram.replace("@", "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-zinc-250 p-2.5 text-zinc-650 hover:bg-zinc-55 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 transition-all"
+                  className="rounded-full border border-zinc-200/60 p-2.5 text-zinc-400 hover:text-[#D4AF37] dark:border-zinc-800/40 dark:text-zinc-500 dark:hover:text-[#D4AF37] hover:bg-zinc-100 dark:hover:bg-[#2D2D2D] transition-all"
                   title="Instagram"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -142,7 +142,7 @@ export default async function PublicProfile({ params }) {
                   href={profile.facebook.startsWith("http") ? profile.facebook : `https://facebook.com/${profile.facebook}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="rounded-full border border-zinc-250 p-2.5 text-zinc-650 hover:bg-zinc-55 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 transition-all"
+                  className="rounded-full border border-zinc-200/60 p-2.5 text-zinc-400 hover:text-[#D4AF37] dark:border-zinc-800/40 dark:text-zinc-500 dark:hover:text-[#D4AF37] hover:bg-zinc-100 dark:hover:bg-[#2D2D2D] transition-all"
                   title="Facebook"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -158,7 +158,7 @@ export default async function PublicProfile({ params }) {
             
             {/* Bio Column (span 7) */}
             <div className="lg:col-span-7 flex flex-col space-y-4 text-left">
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">About the Studio</h2>
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 font-headline">About the Studio</h2>
               <p className="text-zinc-650 dark:text-zinc-300 font-light text-base leading-relaxed whitespace-pre-line">
                 {profile.bio || "No biography provided. Capturing elegance and storytelling through professional photography lenses."}
               </p>
@@ -166,17 +166,17 @@ export default async function PublicProfile({ params }) {
 
             {/* Contact details Card Column (span 5) */}
             <div className="lg:col-span-5">
-              <div className="rounded-2xl border border-zinc-200/80 bg-zinc-50/50 p-6 dark:border-zinc-850/50 dark:bg-zinc-950/40 text-left">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wider mb-4">Contact Workspace</h3>
+              <div className="rounded-[20px] border border-zinc-200/50 bg-zinc-50/50 p-6 dark:border-zinc-800/40 dark:bg-[#262626]/40 text-left">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wider mb-4 font-headline">Contact Workspace</h3>
                 
                 <div className="space-y-4 text-sm font-medium">
                   {/* Email */}
                   {profile.email && (
                     <div className="flex items-start gap-3">
-                      <svg className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <svg className="h-5 w-5 text-[#D4AF37] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      <a href={`mailto:${profile.email}`} className="text-zinc-700 hover:text-indigo-600 dark:text-zinc-300 dark:hover:text-indigo-400 break-all">
+                      <a href={`mailto:${profile.email}`} className="text-zinc-700 hover:text-[#D4AF37] dark:text-zinc-300 dark:hover:text-[#D4AF37] break-all">
                         {profile.email}
                       </a>
                     </div>
@@ -185,7 +185,7 @@ export default async function PublicProfile({ params }) {
                   {/* Phone */}
                   {profile.phone && (
                     <div className="flex items-start gap-3">
-                      <svg className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <svg className="h-5 w-5 text-[#D4AF37] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
                       <span className="text-zinc-700 dark:text-zinc-300">{profile.phone}</span>
@@ -195,7 +195,7 @@ export default async function PublicProfile({ params }) {
                   {/* Location */}
                   {profile.location && (
                     <div className="flex items-start gap-3">
-                      <svg className="h-5 w-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <svg className="h-5 w-5 text-[#D4AF37] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
@@ -209,12 +209,12 @@ export default async function PublicProfile({ params }) {
           </div>
 
           {/* Client Proofing Spaces Grid */}
-          <div className="mt-12 pt-8 border-t border-zinc-200/60 dark:border-zinc-850/50 text-left">
-            <h3 className="text-xl font-extrabold text-zinc-900 dark:text-zinc-50 mb-6">Client Proofing Spaces</h3>
+          <div className="mt-12 pt-8 border-t border-zinc-200/50 dark:border-zinc-800/40 text-left">
+            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 mb-6 font-headline">Client Proofing Spaces</h3>
             
             {events.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-zinc-200 p-10 text-center dark:border-zinc-800 bg-zinc-50/20 dark:bg-transparent">
-                <svg className="mx-auto h-12 w-12 text-zinc-300 dark:text-zinc-750" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
+              <div className="rounded-[20px] border border-dashed border-zinc-200/50 p-10 text-center dark:border-zinc-800/40 bg-zinc-50/20 dark:bg-transparent">
+                <svg className="mx-auto h-12 w-12 text-zinc-300 dark:text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375 .375 0 11-.75 0 .375 .375 0 017 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375 .375 0 11-.75 0 .375 .375 0 017 0zM3.75 17.25h.007v.008H3.75v-.008zm.375 0a.375 .375 0 11-.75 0 .375 .375 0 017 0z" />
                 </svg>
                 <h4 className="mt-4 text-sm font-bold text-zinc-800 dark:text-zinc-200">No Client Spaces Listed</h4>
@@ -229,10 +229,11 @@ export default async function PublicProfile({ params }) {
                   const isPrivate = evt.visibility === "private";
 
                   return (
-                    <div
+                    <Link
+                      href={`/event/${evt.eventId}`}
                       key={evt.eventId}
                       id={`event-${evt.eventId}`}
-                      className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white hover:shadow-lg dark:border-zinc-850 dark:bg-zinc-950/20 transition-all duration-300"
+                      className="group relative flex flex-col overflow-hidden rounded-[20px] border border-zinc-200/50 bg-white shadow-[var(--shadow-soft)] hover:shadow-md dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300"
                     >
                       {/* Image Frame */}
                       <div className="relative aspect-video w-full overflow-hidden bg-zinc-150 dark:bg-zinc-900">
@@ -256,7 +257,7 @@ export default async function PublicProfile({ params }) {
                       {/* Info Panel */}
                       <div className="p-4 flex-grow flex flex-col justify-between">
                         <div>
-                          <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 truncate">
+                          <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 truncate group-hover:text-[#D4AF37] transition-colors">
                             {evt.eventName}
                           </h4>
                           <p className="mt-1 text-[11px] text-zinc-400 font-light truncate">
@@ -265,13 +266,13 @@ export default async function PublicProfile({ params }) {
                         </div>
 
                         {/* Direct action info */}
-                        <div className="mt-4 pt-3 border-t border-zinc-150 dark:border-zinc-850 flex items-center justify-between">
+                        <div className="mt-4 pt-3 border-t border-zinc-150 dark:border-zinc-800/40 flex items-center justify-between">
                           <span className="text-[10px] text-zinc-450 uppercase font-semibold">
                             {isPrivate ? "PIN REQUIRED" : "PUBLIC"}
                           </span>
                           
                           <span
-                            className="text-xs font-bold text-indigo-650 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1 cursor-pointer select-none"
+                            className="text-xs font-bold text-[#D4AF37] group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1 select-none"
                           >
                             <span>Open Space</span>
                             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
@@ -281,7 +282,7 @@ export default async function PublicProfile({ params }) {
                         </div>
                       </div>
 
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
