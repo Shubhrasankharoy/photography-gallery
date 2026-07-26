@@ -10,6 +10,7 @@ import {
   uploadProfileImage, 
   saveProfile 
 } from "@/lib/profileService";
+import { motion } from "motion/react";
 
 export default function ProfileEditor() {
   const { user, loading: authLoading } = useAuth();
@@ -205,7 +206,6 @@ export default function ProfileEditor() {
           uploadedLogoUrl = await uploadProfileImage(selectedFiles.logo, "logo", user.uid);
         } catch (uploadErr) {
           console.error("Logo upload failed:", uploadErr);
-          // If storage permissions fail, warn the user but keep saving, fallback to local URL
           throw new Error("Failed to upload Logo to storage. Please check your storage rules.");
         }
       }
@@ -246,57 +246,64 @@ export default function ProfileEditor() {
 
   if (authLoading || !user || isFetching) {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center">
+      <div className="flex min-h-[70vh] items-center justify-center bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300">
         <div className="flex flex-col items-center gap-2">
-          <svg className="animate-spin h-8 w-8 text-indigo-650" fill="none" viewBox="0 0 24 24">
+          <svg className="animate-spin h-8 w-8 text-[#D4AF37]" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          <span className="text-sm text-zinc-550">Fetching profile workspace...</span>
+          <span className="text-sm text-[#8E8E8E] font-medium">Fetching profile workspace...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen bg-zinc-50 dark:bg-black py-10 transition-colors duration-300">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="w-full min-h-screen bg-[#F7F7F7] dark:bg-[#181818] py-10 transition-colors duration-300 text-left"
+    >
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         
         {/* Header Breadcrumbs */}
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-zinc-400">
-          <Link href="/dashboard" className="hover:text-zinc-900 dark:hover:text-zinc-200">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">
+          <Link href="/dashboard" className="hover:text-[#D4AF37]">
             Dashboard
           </Link>
           <span>/</span>
           <span className="text-zinc-800 dark:text-zinc-200">Profile settings</span>
         </div>
 
-        <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-200 pb-6 dark:border-zinc-800">
+        <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-200/50 pb-6 dark:border-zinc-800/40">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-headline">
               Photographer Profile
             </h1>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400 font-light">
+            <p className="mt-1 text-sm text-[#8E8E8E] font-light">
               Customize your public branding, credentials, and social links.
             </p>
           </div>
           
           {formData.username && (
-            <Link
-              href={`/photographer/${formData.username}`}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-zinc-350 dark:border-zinc-800 bg-white hover:bg-zinc-50 px-5 py-2 text-xs font-bold text-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900 transition-all select-none"
-            >
-              <span>View Public Profile</span>
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-            </Link>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href={`/photographer/${formData.username}`}
+                className="inline-flex items-center justify-center gap-2 rounded-[12px] border border-zinc-200/60 bg-white hover:bg-zinc-100 px-5 py-2.5 text-xs font-bold text-zinc-800 dark:bg-[#262626] dark:border-zinc-800/40 dark:text-zinc-300 dark:hover:bg-[#2D2D2D] transition-all select-none shadow-xs"
+              >
+                <span>View Public Profile</span>
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                </svg>
+              </Link>
+            </motion.div>
           )}
         </div>
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="mt-6 rounded-2xl bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
+          <div className="mt-6 rounded-[12px] bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
             <svg className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
@@ -311,7 +318,7 @@ export default function ProfileEditor() {
 
         {/* Success Alert */}
         {saveSuccess && (
-          <div className="mt-6 rounded-2xl bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3 animate-fade-in">
+          <div className="mt-6 rounded-[12px] bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3 animate-fade-in">
             <svg className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.746 3.746 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
             </svg>
@@ -319,7 +326,7 @@ export default function ProfileEditor() {
               <p className="text-xs font-bold text-emerald-800 dark:text-emerald-455 uppercase tracking-wider">Changes Saved</p>
               <p className="mt-1 text-xs text-emerald-650 dark:text-emerald-400 font-light leading-relaxed">
                 Your portfolio details have been updated. View the live changes at{" "}
-                <Link href={`/photographer/${formData.username}`} className="font-bold underline">
+                <Link href={`/photographer/${formData.username}`} className="font-bold underline text-[#D4AF37] hover:text-[#E0C55B]">
                   /photographer/{formData.username}
                 </Link>.
               </p>
@@ -333,10 +340,10 @@ export default function ProfileEditor() {
           <div className="space-y-6 lg:col-span-1">
             
             {/* Cover Image Upload Card */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-850 dark:bg-zinc-950/20">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wider mb-4">Cover Image</h3>
+            <div className="rounded-[20px] border border-zinc-200/60 bg-white p-6 shadow-[var(--shadow-soft)] dark:border-zinc-800/40 dark:bg-[#262626]">
+              <h3 className="text-xs font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-wider mb-4">Cover Image</h3>
               
-              <div className="relative aspect-video rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden flex items-center justify-center">
+              <div className="relative aspect-video rounded-[12px] bg-zinc-100 dark:bg-[#181818] border border-zinc-200/60 dark:border-zinc-800/40 overflow-hidden flex items-center justify-center">
                 {previews.coverImage || currentImages.coverImage ? (
                   <img
                     src={previews.coverImage || currentImages.coverImage}
@@ -368,7 +375,7 @@ export default function ProfileEditor() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") coverInputRef.current.click();
                 }}
-                className="mt-4 flex w-full justify-center rounded-xl border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900 py-2.5 text-xs font-bold text-zinc-700 dark:text-zinc-350 cursor-pointer select-none text-center"
+                className="mt-4 flex w-full justify-center rounded-[12px] border border-zinc-200/60 bg-white hover:bg-zinc-100 dark:border-zinc-800/40 dark:bg-[#262626] dark:hover:bg-[#2D2D2D] py-2.5 text-xs font-bold text-[#D4AF37] cursor-pointer select-none text-center shadow-xs"
               >
                 Choose Cover File
               </span>
@@ -376,11 +383,11 @@ export default function ProfileEditor() {
             </div>
 
             {/* Logo Image Upload Card */}
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-850 dark:bg-zinc-950/20">
-              <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 uppercase tracking-wider mb-4">Studio Logo / Avatar</h3>
+            <div className="rounded-[20px] border border-zinc-200/60 bg-white p-6 shadow-[var(--shadow-soft)] dark:border-zinc-800/40 dark:bg-[#262626]">
+              <h3 className="text-xs font-bold text-zinc-400 dark:text-zinc-550 uppercase tracking-wider mb-4">Studio Logo / Avatar</h3>
               
               <div className="flex justify-center">
-                <div className="relative h-24 w-24 rounded-full bg-zinc-150 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden flex items-center justify-center">
+                <div className="relative h-24 w-24 rounded-full bg-zinc-150 dark:bg-[#181818] border border-zinc-200/60 dark:border-zinc-800/40 overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-[#D4AF37] transition-all">
                   {previews.logo || currentImages.logo ? (
                     <img
                       src={previews.logo || currentImages.logo}
@@ -412,7 +419,7 @@ export default function ProfileEditor() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") logoInputRef.current.click();
                 }}
-                className="mt-4 flex w-full justify-center rounded-xl border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900 py-2.5 text-xs font-bold text-zinc-700 dark:text-zinc-350 cursor-pointer select-none text-center"
+                className="mt-4 flex w-full justify-center rounded-[12px] border border-zinc-200/60 bg-white hover:bg-zinc-100 dark:border-zinc-800/40 dark:bg-[#262626] dark:hover:bg-[#2D2D2D] py-2.5 text-xs font-bold text-[#D4AF37] cursor-pointer select-none text-center shadow-xs"
               >
                 Choose Logo File
               </span>
@@ -423,26 +430,26 @@ export default function ProfileEditor() {
 
           {/* Right Column: Form Inputs */}
           <div className="lg:col-span-2">
-            <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-850 dark:bg-zinc-950/20">
+            <div className="rounded-[20px] border border-zinc-200/60 bg-white p-6 shadow-[var(--shadow-soft)] dark:border-zinc-800/40 dark:bg-[#262626]">
               
               <div className="space-y-6">
                 
                 {/* Branding Section */}
                 <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-150 dark:border-zinc-850">Branding</h3>
+                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-150 dark:border-zinc-800/60 font-headline">Branding</h3>
                   
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Photographer Name */}
-                    <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="photographerName" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Photographer Name</label>
+                    <div className="flex flex-col space-y-1.5 text-left">
+                      <label htmlFor="photographerName" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Photographer Name</label>
                       <input
                         id="photographerName"
                         name="photographerName"
                         type="text"
                         value={formData.photographerName}
                         onChange={handleInputChange}
-                        className={`rounded-xl border bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all ${
-                          errors.photographerName ? "border-rose-500 focus:ring-rose-500" : "border-zinc-200 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
+                        className={`rounded-[12px] border bg-transparent px-4 py-2.5 text-xs text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 transition-all ${
+                          errors.photographerName ? "border-rose-500 focus:ring-rose-500" : "border-zinc-200/60 focus:ring-[#D4AF37] dark:border-zinc-800/60 dark:focus:ring-[#D4AF37]"
                         }`}
                         placeholder="Alex Carter"
                       />
@@ -451,10 +458,10 @@ export default function ProfileEditor() {
                   </div>
 
                   {/* Username Slug */}
-                  <div className="mt-4 flex flex-col space-y-1.5">
-                    <label htmlFor="username" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Public URL Handle (Username)</label>
-                    <div className="relative flex rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500 dark:focus-within:ring-indigo-400">
-                      <span className="flex items-center bg-zinc-100 dark:bg-zinc-900 px-4 text-sm text-zinc-500 border-r border-zinc-200 dark:border-zinc-800 select-none">
+                  <div className="mt-4 flex flex-col space-y-1.5 text-left">
+                    <label htmlFor="username" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Public URL Handle (Username)</label>
+                    <div className="relative flex rounded-[12px] border border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden focus-within:ring-2 focus-within:ring-[#D4AF37]">
+                      <span className="flex items-center bg-zinc-100 dark:bg-[#181818] px-4 text-xs text-[#8E8E8E] border-r border-zinc-200/60 dark:border-zinc-800/60 select-none">
                         capturespace.com/photographer/
                       </span>
                       <input
@@ -468,26 +475,26 @@ export default function ProfileEditor() {
                           setFormData((prev) => ({ ...prev, username: sanitized }));
                           if (errors.username) setErrors((prev) => ({ ...prev, username: "" }));
                         }}
-                        className={`grow bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none ${
+                        className={`grow bg-transparent px-4 py-2.5 text-xs text-zinc-900 dark:text-zinc-100 outline-none ${
                           errors.username ? "border-rose-500 focus:ring-rose-500" : ""
                         }`}
                         placeholder="alex-carter"
                       />
                     </div>
                     {errors.username && <span className="text-xs text-rose-500 mt-1 font-medium">{errors.username}</span>}
-                    <span className="text-[10px] text-zinc-450 font-light">This defines your SEO friendly profile address (letters, numbers, hyphens only).</span>
+                    <span className="text-[10px] text-[#8E8E8E] font-light">This defines your SEO friendly profile address (letters, numbers, hyphens only).</span>
                   </div>
 
                   {/* Bio */}
-                  <div className="mt-4 flex flex-col space-y-1.5">
-                    <label htmlFor="bio" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Biography / Studio Description</label>
+                  <div className="mt-4 flex flex-col space-y-1.5 text-left">
+                    <label htmlFor="bio" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Biography / Studio Description</label>
                     <textarea
                       id="bio"
                       name="bio"
                       rows={4}
                       value={formData.bio}
                       onChange={handleInputChange}
-                      className="rounded-xl border border-zinc-200 bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400 resize-none"
+                      className="rounded-[12px] border border-zinc-200/60 bg-transparent px-4 py-2.5 text-xs text-zinc-900 dark:border-zinc-800/60 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-[#D4AF37] resize-none"
                       placeholder="Share your creative vision, studio achievements, and style focus..."
                     />
                   </div>
@@ -495,20 +502,20 @@ export default function ProfileEditor() {
 
                 {/* Contact Information */}
                 <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-150 dark:border-zinc-850">Contact info</h3>
+                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-150 dark:border-zinc-800/60 font-headline">Contact info</h3>
                   
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Email */}
-                    <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Public Contact Email</label>
+                    <div className="flex flex-col space-y-1.5 text-left">
+                      <label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Public Contact Email</label>
                       <input
                         id="email"
                         name="email"
                         type="text"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className={`rounded-xl border bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none focus:ring-1 transition-all ${
-                          errors.email ? "border-rose-500 focus:ring-rose-500" : "border-zinc-200 focus:ring-indigo-500 dark:border-zinc-800 dark:focus:border-indigo-400"
+                        className={`rounded-[12px] border bg-transparent px-4 py-2.5 text-xs text-zinc-900 dark:text-zinc-100 outline-none focus:ring-2 transition-all ${
+                          errors.email ? "border-rose-500 focus:ring-rose-500" : "border-zinc-200/60 focus:ring-[#D4AF37] dark:border-zinc-800/60 dark:focus:ring-[#D4AF37]"
                         }`}
                         placeholder="studio@example.com"
                       />
@@ -516,29 +523,29 @@ export default function ProfileEditor() {
                     </div>
 
                     {/* Phone */}
-                    <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="phone" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Phone number</label>
+                    <div className="flex flex-col space-y-1.5 text-left">
+                      <label htmlFor="phone" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Phone number</label>
                       <input
                         id="phone"
                         name="phone"
                         type="text"
                         value={formData.phone}
                         onChange={handleInputChange}
-                        className="rounded-xl border border-zinc-200 bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400"
+                        className="rounded-[12px] border border-zinc-200/60 bg-transparent px-4 py-2.5 text-xs text-zinc-900 dark:border-zinc-800/60 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-[#D4AF37]"
                         placeholder="+1 (555) 000-0000"
                       />
                     </div>
 
                     {/* Website */}
-                    <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="website" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Website URL</label>
+                    <div className="flex flex-col space-y-1.5 text-left">
+                      <label htmlFor="website" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Website URL</label>
                       <input
                         id="website"
                         name="website"
                         type="text"
                         value={formData.website}
                         onChange={handleInputChange}
-                        className="rounded-xl border border-zinc-200 bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400"
+                        className="rounded-[12px] border border-zinc-200/60 bg-transparent px-4 py-2.5 text-xs text-zinc-900 dark:border-zinc-800/60 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-[#D4AF37]"
                         placeholder="https://aurastudios.com"
                       />
                     </div>
@@ -547,36 +554,36 @@ export default function ProfileEditor() {
 
                 {/* Social Media Links */}
                 <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-150 dark:border-zinc-850">Social Media</h3>
+                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-150 dark:border-zinc-800/60 font-headline">Social Media</h3>
                   
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Instagram */}
-                    <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="instagram" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Instagram Handle</label>
-                      <div className="relative flex rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500 dark:focus-within:ring-indigo-400">
-                        <span className="flex items-center bg-zinc-100 dark:bg-zinc-900 px-3 text-sm text-zinc-500 border-r border-zinc-200 dark:border-zinc-800 select-none">@</span>
+                    <div className="flex flex-col space-y-1.5 text-left">
+                      <label htmlFor="instagram" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Instagram Handle</label>
+                      <div className="relative flex rounded-[12px] border border-zinc-200/60 dark:border-zinc-800/60 overflow-hidden focus-within:ring-2 focus-within:ring-[#D4AF37]">
+                        <span className="flex items-center bg-zinc-100 dark:bg-[#181818] px-3.5 text-xs text-zinc-500 border-r border-zinc-200/60 dark:border-zinc-800/60 select-none">@</span>
                         <input
                           id="instagram"
                           name="instagram"
                           type="text"
                           value={formData.instagram}
                           onChange={handleInputChange}
-                          className="grow bg-transparent px-3 py-2.5 text-sm text-zinc-900 dark:text-zinc-100 outline-none"
+                          className="grow bg-transparent px-3.5 py-2.5 text-xs text-zinc-900 dark:text-zinc-100 outline-none"
                           placeholder="aurastudios"
                         />
                       </div>
                     </div>
 
                     {/* Facebook */}
-                    <div className="flex flex-col space-y-1.5">
-                      <label htmlFor="facebook" className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Facebook Page URL</label>
+                    <div className="flex flex-col space-y-1.5 text-left">
+                      <label htmlFor="facebook" className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Facebook Page URL</label>
                       <input
                         id="facebook"
                         name="facebook"
                         type="text"
                         value={formData.facebook}
                         onChange={handleInputChange}
-                        className="rounded-xl border border-zinc-200 bg-transparent px-4 py-2.5 text-sm text-zinc-900 dark:border-zinc-800 dark:text-zinc-100 outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-400"
+                        className="rounded-[12px] border border-zinc-200/60 bg-transparent px-4 py-2.5 text-xs text-zinc-900 dark:border-zinc-800/60 dark:text-zinc-100 outline-none focus:ring-2 focus:ring-[#D4AF37]"
                         placeholder="https://facebook.com/aurastudios"
                       />
                     </div>
@@ -584,10 +591,10 @@ export default function ProfileEditor() {
                 </div>
 
                 {/* Form Submit buttons */}
-                <div className="pt-6 border-t border-zinc-150 dark:border-zinc-850 flex items-center justify-end gap-3">
+                <div className="pt-6 border-t border-zinc-150 dark:border-zinc-800/60 flex items-center justify-end gap-3">
                   <Link
                     href="/dashboard"
-                    className="rounded-xl border border-zinc-250 hover:bg-zinc-50 px-5 py-3 text-sm font-semibold text-zinc-700 dark:border-zinc-800 dark:hover:bg-zinc-900 dark:text-zinc-300 transition-all cursor-pointer"
+                    className="rounded-[12px] border border-zinc-250 hover:bg-zinc-50 px-5 py-2.5 text-xs font-bold text-zinc-700 dark:border-zinc-800 dark:hover:bg-zinc-900 dark:text-zinc-300 transition-all cursor-pointer"
                   >
                     Cancel
                   </Link>
@@ -599,13 +606,13 @@ export default function ProfileEditor() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") handleSave();
                     }}
-                    className={`flex items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-50 dark:text-black px-6 py-3 text-sm font-bold text-white hover:bg-zinc-850 dark:hover:bg-zinc-200 transition-all select-none cursor-pointer text-center ${
+                    className={`flex items-center justify-center rounded-[12px] bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] px-6 py-2.5 text-xs font-bold transition-all select-none cursor-pointer text-center shadow-md ${
                       isSaving ? "opacity-50 pointer-events-none" : ""
                     }`}
                   >
                     {isSaving ? (
                       <span className="flex items-center gap-2">
-                        <svg className="animate-spin h-4 w-4 text-white dark:text-black" fill="none" viewBox="0 0 24 24">
+                        <svg className="animate-spin h-4 w-4 text-zinc-950" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
@@ -625,6 +632,6 @@ export default function ProfileEditor() {
         </div>
 
       </div>
-    </div>
+    </motion.div>
   );
 }

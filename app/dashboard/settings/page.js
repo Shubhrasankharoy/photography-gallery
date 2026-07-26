@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useStudio } from "@/context/StudioContext";
 import { db, auth } from "@/lib/firebase";
-import { doc, getDoc, setDoc, deleteDoc, writeBatch, query, collection, where, getDocs, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, writeBatch, query, collection, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { 
   updatePassword, 
   deleteUser, 
@@ -18,6 +18,17 @@ import {
   uploadProfileImage, 
   saveProfile 
 } from "@/lib/profileService";
+import { motion, AnimatePresence } from "motion/react";
+
+/* ── Motion Variants ──────────────────────────────────────────── */
+const containerVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+};
 
 export default function SettingsPage() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -423,7 +434,7 @@ export default function SettingsPage() {
     } catch (err) {
       console.error(err);
       if (err.code === "auth/requires-recent-login" || err.code === "auth/wrong-password") {
-        setError("Re-authentication failed. Please enter your correct current password, or sign out and sign back in to modify security settings.");
+        setError("Re-authentication failed. Please enter your correct current password, or sign out and sign back in to complete password updates.");
       } else {
         setError(err.message || "Failed to update account password.");
       }
@@ -431,7 +442,6 @@ export default function SettingsPage() {
       setSaving(false);
     }
   };
-
 
   // Delete Account Action
   const handleDeleteAccount = async (e) => {
@@ -700,22 +710,27 @@ export default function SettingsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex h-[80vh] items-center justify-center bg-zinc-50 dark:bg-black">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-650 border-t-transparent"></div>
+      <div className="flex h-[80vh] items-center justify-center bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-black transition-colors duration-300 min-h-[85vh] text-left">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300 min-h-[85vh] text-left"
+    >
       
       {/* Title Header */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
-            Settings
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight font-headline">
+            System Settings
           </h1>
-          <p className="mt-2 text-sm text-zinc-650 dark:text-zinc-400 font-light font-sans">
+          <p className="mt-2 text-sm text-[#8E8E8E] font-light">
             Manage your photographer profile, credentials, storage integrations, and app settings.
           </p>
         </div>
@@ -723,7 +738,7 @@ export default function SettingsPage() {
 
       {/* Status Notifications */}
       {displayError && (
-        <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3">
+        <div className="mb-6 rounded-[12px] bg-rose-50 border border-rose-200 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
           <svg className="h-5 w-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -735,7 +750,7 @@ export default function SettingsPage() {
       )}
 
       {displaySuccess && (
-        <div className="mb-6 rounded-2xl bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3">
+        <div className="mb-6 rounded-[12px] bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3 animate-fade-in">
           <svg className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -750,13 +765,13 @@ export default function SettingsPage() {
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         
         {/* Tab List */}
-        <div className="flex lg:flex-col overflow-x-auto w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-850 pb-2 lg:pb-0 lg:pr-6 gap-2 shrink-0 scrollbar-none">
+        <div className="flex lg:flex-col overflow-x-auto w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-zinc-200/50 dark:border-zinc-800/40 pb-2 lg:pb-0 lg:pr-6 gap-2 shrink-0 scrollbar-none">
           <button
             onClick={() => { setActiveTab("profile"); setError(""); setSuccess(""); }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-[12px] text-xs font-bold transition-all shrink-0 ${
               activeTab === "profile"
-                ? "bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400"
-                : "text-zinc-550 hover:bg-zinc-100/50 dark:text-zinc-400 dark:hover:bg-zinc-900/40"
+                ? "bg-[#D4AF37]/10 text-[#D4AF37]"
+                : "text-zinc-550 hover:bg-zinc-200/50 dark:text-zinc-400 dark:hover:bg-[#2D2D2D]/40"
             }`}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -767,10 +782,10 @@ export default function SettingsPage() {
           
           <button
             onClick={() => { setActiveTab("security"); setError(""); setSuccess(""); }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-[12px] text-xs font-bold transition-all shrink-0 ${
               activeTab === "security"
-                ? "bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400"
-                : "text-zinc-550 hover:bg-zinc-100/50 dark:text-zinc-400 dark:hover:bg-zinc-900/40"
+                ? "bg-[#D4AF37]/10 text-[#D4AF37]"
+                : "text-zinc-550 hover:bg-zinc-200/50 dark:text-zinc-400 dark:hover:bg-[#2D2D2D]/40"
             }`}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -781,10 +796,10 @@ export default function SettingsPage() {
 
           <button
             onClick={() => { setActiveTab("storage"); setError(""); setSuccess(""); }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-[12px] text-xs font-bold transition-all shrink-0 ${
               activeTab === "storage"
-                ? "bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400"
-                : "text-zinc-550 hover:bg-zinc-100/50 dark:text-zinc-400 dark:hover:bg-zinc-900/40"
+                ? "bg-[#D4AF37]/10 text-[#D4AF37]"
+                : "text-zinc-550 hover:bg-zinc-200/50 dark:text-zinc-400 dark:hover:bg-[#2D2D2D]/40"
             }`}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -795,10 +810,10 @@ export default function SettingsPage() {
 
           <button
             onClick={() => { setActiveTab("preferences"); setError(""); setSuccess(""); }}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
+            className={`flex items-center gap-3 px-4 py-3 rounded-[12px] text-xs font-bold transition-all shrink-0 ${
               activeTab === "preferences"
-                ? "bg-indigo-50/50 text-indigo-650 dark:bg-indigo-950/20 dark:text-indigo-400"
-                : "text-zinc-550 hover:bg-zinc-100/50 dark:text-zinc-400 dark:hover:bg-zinc-900/40"
+                ? "bg-[#D4AF37]/10 text-[#D4AF37]"
+                : "text-zinc-550 hover:bg-zinc-200/50 dark:text-zinc-400 dark:hover:bg-[#2D2D2D]/40"
             }`}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -809,12 +824,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Content Panel */}
-        <div className="flex-1 w-full bg-white dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-850 rounded-3xl p-6 sm:p-8 shadow-xs">
+        <div className="flex-1 w-full bg-white dark:bg-[#262626] border border-zinc-200/50 dark:border-zinc-800/40 rounded-[20px] p-6 sm:p-8 shadow-[var(--shadow-soft)]">
           
           {/* TAB 1: EDIT PROFILE */}
           {activeTab === "profile" && (
             <form onSubmit={handleSaveProfile} className="space-y-6">
-              <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-55 pb-3 border-b border-zinc-200/50 dark:border-zinc-850">
+              <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-3 border-b border-zinc-200/50 dark:border-zinc-800/60 font-headline">
                 Edit Studio & Profile Settings
               </h2>
 
@@ -822,11 +837,11 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Logo Uploader */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">
                     Studio Logo
                   </label>
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="h-16 w-16 rounded-full bg-zinc-100 dark:bg-[#181818] border border-zinc-200/60 dark:border-zinc-850 flex items-center justify-center overflow-hidden shrink-0">
                       {previews.logo || currentImages.logo ? (
                         <img src={previews.logo || currentImages.logo} alt="Logo" className="h-full w-full object-cover" />
                       ) : (
@@ -846,7 +861,7 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => logoInputRef.current?.click()}
-                        className="px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                        className="px-3.5 py-2 border border-zinc-200/60 dark:border-zinc-800 rounded-[12px] text-xs font-bold text-[#D4AF37] hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
                       >
                         Upload logo
                       </button>
@@ -857,11 +872,11 @@ export default function SettingsPage() {
 
                 {/* Cover Image Uploader */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">
                     Profile Cover Banner
                   </label>
                   <div className="flex items-center gap-4">
-                    <div className="h-16 w-32 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+                    <div className="h-16 w-32 rounded-[12px] bg-zinc-100 dark:bg-[#181818] border border-zinc-200/60 dark:border-zinc-850 flex items-center justify-center overflow-hidden shrink-0">
                       {previews.coverImage || currentImages.coverImage ? (
                         <img src={previews.coverImage || currentImages.coverImage} alt="Cover" className="h-full w-full object-cover" />
                       ) : (
@@ -881,7 +896,7 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => coverInputRef.current?.click()}
-                        className="px-3.5 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                        className="px-3.5 py-2 border border-zinc-200/60 dark:border-zinc-800 rounded-[12px] text-xs font-bold text-[#D4AF37] hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
                       >
                         Upload cover
                       </button>
@@ -894,7 +909,7 @@ export default function SettingsPage() {
               {/* Standard text inputs */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                     Photographer Name
                   </label>
                   <input
@@ -902,17 +917,17 @@ export default function SettingsPage() {
                     name="photographerName"
                     value={profileForm.photographerName}
                     onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   />
                   {errors.photographerName && <p className="text-[10px] text-rose-500 font-semibold mt-1">{errors.photographerName}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                     Username URL Handle
                   </label>
-                  <div className="relative flex items-stretch">
-                    <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-450 text-xs">
+                  <div className="relative flex items-stretch rounded-[12px] overflow-hidden border border-zinc-200/60 dark:border-zinc-800 focus-within:ring-2 focus-within:ring-[#D4AF37]">
+                    <span className="inline-flex items-center px-3 border-r border-zinc-200/60 dark:border-zinc-800 bg-zinc-55 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-450 text-xs select-none">
                       /photographer/
                     </span>
                     <input
@@ -920,14 +935,14 @@ export default function SettingsPage() {
                       name="username"
                       value={profileForm.username}
                       onChange={handleProfileInputChange}
-                      className="flex-1 px-4 py-2.5 rounded-r-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      className="flex-1 px-4 py-2.5 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none"
                     />
                   </div>
                   {errors.username && <p className="text-[10px] text-rose-500 font-semibold mt-1">{errors.username}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                     Email Address
                   </label>
                   <input
@@ -935,13 +950,13 @@ export default function SettingsPage() {
                     name="email"
                     value={profileForm.email}
                     onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   />
                   {errors.email && <p className="text-[10px] text-rose-500 font-semibold mt-1">{errors.email}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                     Phone Number
                   </label>
                   <input
@@ -949,12 +964,12 @@ export default function SettingsPage() {
                     name="phone"
                     value={profileForm.phone}
                     onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                     Website Address
                   </label>
                   <input
@@ -962,12 +977,12 @@ export default function SettingsPage() {
                     name="website"
                     value={profileForm.website}
                     onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                     Instagram Handle
                   </label>
                   <input
@@ -975,12 +990,12 @@ export default function SettingsPage() {
                     name="instagram"
                     value={profileForm.instagram}
                     onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                     Facebook Handle
                   </label>
                   <input
@@ -988,13 +1003,13 @@ export default function SettingsPage() {
                     name="facebook"
                     value={profileForm.facebook}
                     onChange={handleProfileInputChange}
-                    className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                   Studio Biography
                 </label>
                 <textarea
@@ -1002,15 +1017,15 @@ export default function SettingsPage() {
                   rows="4"
                   value={profileForm.bio}
                   onChange={handleProfileInputChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37] resize-none"
                 />
               </div>
 
-              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-850 flex justify-end">
+              <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800 flex justify-end">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 bg-indigo-650 hover:bg-indigo-600 active:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md disabled:opacity-50"
+                  className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] rounded-[12px] text-xs font-bold transition-all shadow-md disabled:opacity-50"
                 >
                   {saving ? "Saving changes..." : "Save Settings"}
                 </button>
@@ -1023,13 +1038,13 @@ export default function SettingsPage() {
             <div className="space-y-8">
               {/* Password update form */}
               <form onSubmit={handlePasswordChange} className="space-y-6">
-                <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-55 pb-3 border-b border-zinc-200/50 dark:border-zinc-850">
+                <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 pb-3 border-b border-zinc-200/50 dark:border-zinc-800/60 font-headline">
                   Update Account Password
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                       Current Password
                     </label>
                     <input
@@ -1037,12 +1052,12 @@ export default function SettingsPage() {
                       required
                       value={securityForm.currentPassword}
                       onChange={(e) => setSecurityForm({ ...securityForm, currentPassword: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                       New Password
                     </label>
                     <input
@@ -1050,12 +1065,12 @@ export default function SettingsPage() {
                       required
                       value={securityForm.newPassword}
                       onChange={(e) => setSecurityForm({ ...securityForm, newPassword: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-2">
                       Confirm New Password
                     </label>
                     <input
@@ -1063,7 +1078,7 @@ export default function SettingsPage() {
                       required
                       value={securityForm.confirmPassword}
                       onChange={(e) => setSecurityForm({ ...securityForm, confirmPassword: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      className="w-full px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                     />
                   </div>
                 </div>
@@ -1072,7 +1087,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-6 py-2.5 bg-indigo-650 hover:bg-indigo-600 active:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md disabled:opacity-50"
+                    className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] rounded-[12px] text-xs font-bold transition-all shadow-md disabled:opacity-50"
                   >
                     {saving ? "Processing..." : "Update Password"}
                   </button>
@@ -1082,14 +1097,14 @@ export default function SettingsPage() {
               {/* Danger Zone: Account deletion */}
               <div className="pt-8 border-t border-rose-200/50 dark:border-rose-950/20 space-y-4">
                 <div className="flex items-start gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-rose-50 dark:bg-rose-950/20 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-900/30">
+                  <div className="h-10 w-10 rounded-[12px] bg-rose-50 dark:bg-rose-950/20 text-rose-500 flex items-center justify-center shrink-0 border border-rose-100 dark:border-rose-900/30">
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50">Danger Zone: Delete Account</h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-light mt-1 max-w-xl leading-relaxed">
+                    <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 font-headline">Danger Zone: Delete Account</h3>
+                    <p className="text-xs text-[#8E8E8E] font-light mt-1 max-w-xl leading-relaxed">
                       Permanently delete your photographer profile and close your CaptureSpace account. This action is irreversible. All galleries, event structures, and database records will be erased.
                     </p>
                   </div>
@@ -1099,12 +1114,12 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowDeleteModal(true)}
-                    className="px-5 py-2.5 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-900/50 rounded-xl text-xs font-bold transition-all"
+                    className="px-5 py-2.5 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-900/50 rounded-[12px] text-xs font-bold transition-all"
                   >
                     Delete Account Permanent
                   </button>
                 ) : (
-                  <div className="p-5 border border-rose-250 dark:border-rose-950 bg-rose-50/20 dark:bg-rose-950/5 rounded-2xl max-w-xl space-y-4 animate-fade-in">
+                  <div className="p-5 border border-rose-250 dark:border-rose-950 bg-rose-50/20 dark:bg-rose-950/5 rounded-[20px] max-w-xl space-y-4 animate-fade-in">
                     <p className="text-xs font-semibold text-rose-700 dark:text-rose-400 leading-normal">
                       Confirm by typing your email address <span className="font-bold underline select-all">{user.email}</span> below:
                     </p>
@@ -1113,21 +1128,21 @@ export default function SettingsPage() {
                       placeholder={user.email}
                       value={deleteConfirmText}
                       onChange={(e) => setDeleteConfirmText(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-rose-300 dark:border-rose-900 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20"
+                      className="w-full px-4 py-2.5 rounded-[12px] border border-rose-300 dark:border-rose-900 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500/20"
                     />
                     <div className="flex gap-2">
                       <button
                         type="button"
                         onClick={handleDeleteAccount}
                         disabled={saving || deleteConfirmText.toLowerCase() !== user.email.toLowerCase()}
-                        className="px-4 py-2 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                        className="px-4 py-2 bg-rose-650 hover:bg-rose-700 disabled:opacity-50 text-white rounded-[12px] text-xs font-bold transition-all shadow-md"
                       >
                         Confirm Delete Irreversibly
                       </button>
                       <button
                         type="button"
                         onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(""); }}
-                        className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                        className="px-4 py-2 border border-zinc-200 dark:border-zinc-800 rounded-[12px] text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900"
                       >
                         Cancel
                       </button>
@@ -1143,16 +1158,16 @@ export default function SettingsPage() {
             <div className="space-y-6">
               
               {/* Connection Status Section */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-zinc-200 dark:border-zinc-850">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-zinc-200/50 dark:border-zinc-800/40">
                 <div className="flex gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                  <div className="h-12 w-12 rounded-[12px] bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z" />
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50">Google Drive Cloud Storage</h2>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-light mt-0.5 max-w-md">
+                    <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50 font-headline">Google Drive Cloud Storage</h2>
+                    <p className="text-xs text-[#8E8E8E] font-light mt-0.5 max-w-md">
                       Sync and back up client proofing images to Google Drive. Keep low-res versions in Firebase Storage.
                     </p>
                   </div>
@@ -1163,14 +1178,14 @@ export default function SettingsPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={handleConnect}
-                        className="w-full md:w-auto px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all border border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/50"
+                        className="w-full md:w-auto px-4 py-2.5 bg-zinc-50 text-[#D4AF37] hover:bg-zinc-100 rounded-[12px] text-xs font-bold transition-all border border-zinc-200/60 dark:bg-[#181818] dark:border-zinc-800/60"
                       >
                         Reconnect
                       </button>
                       <button
                         onClick={handleDisconnect}
                         disabled={saving}
-                        className="w-full md:w-auto px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all border border-rose-200 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-900/50"
+                        className="w-full md:w-auto px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-[12px] text-xs font-bold transition-all border border-rose-200/50 dark:bg-rose-950/20 dark:text-rose-450 dark:border-rose-900/50"
                       >
                         {saving ? "Processing..." : "Disconnect Drive"}
                       </button>
@@ -1178,7 +1193,7 @@ export default function SettingsPage() {
                   ) : (
                     <button
                       onClick={handleConnect}
-                      className="w-full md:w-auto px-5 py-2.5 bg-indigo-650 hover:bg-indigo-600 active:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
+                      className="w-full md:w-auto px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] rounded-[12px] text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5"
                     >
                       <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-6H5v-2h6V5h2v6h6v2h-6v6z" />
@@ -1191,14 +1206,14 @@ export default function SettingsPage() {
 
               {/* Connection Information Panel */}
               {connected && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-50 dark:bg-zinc-900/30 p-5 rounded-2xl border border-zinc-100 dark:border-zinc-850 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-55 dark:bg-[#181818]/60 p-5 rounded-[20px] border border-zinc-200/50 dark:border-zinc-800/40 text-xs">
                   <div>
                     <span className="font-semibold text-zinc-400">Connected Email:</span>{" "}
                     <span className="text-zinc-800 dark:text-zinc-200">{connectedEmail || "N/A"}</span>
                   </div>
                   <div>
                     <span className="font-semibold text-zinc-400">Connection Status:</span>{" "}
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-450 capitalize">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-450 capitalize">
                       {connectionStatus}
                     </span>
                   </div>
@@ -1228,7 +1243,7 @@ export default function SettingsPage() {
                       <select
                         value={selectedFolderId}
                         onChange={(e) => setSelectedFolderId(e.target.value)}
-                        className="flex-1 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="flex-1 px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] text-zinc-900 dark:text-zinc-50 text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                       >
                         <option value="root">Root (My Drive)</option>
                         {folders
@@ -1243,7 +1258,7 @@ export default function SettingsPage() {
                       <button
                         onClick={handleSaveFolder}
                         disabled={saving}
-                        className="px-5 py-2.5 bg-indigo-650 hover:bg-indigo-600 active:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 shrink-0"
+                        className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] rounded-[12px] text-xs font-bold transition-all disabled:opacity-50 shrink-0"
                       >
                         {saving ? "Saving..." : "Apply Directory"}
                       </button>
@@ -1254,7 +1269,7 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Create new folder form */}
-                  <div className="border-t border-zinc-200 dark:border-zinc-850 pt-6">
+                  <div className="border-t border-zinc-200/50 dark:border-zinc-800/40 pt-6">
                     <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3">
                       Create New Folder
                     </label>
@@ -1265,12 +1280,12 @@ export default function SettingsPage() {
                         placeholder="E.g., CaptureSpace_Weddings"
                         value={newFolderName}
                         onChange={(e) => setNewFolderName(e.target.value)}
-                        className="flex-1 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 dark:text-zinc-50 text-sm placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="flex-1 px-4 py-2.5 rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 bg-white dark:bg-[#181818] dark:text-zinc-50 text-xs placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
                       />
                       <button
                         type="submit"
                         disabled={creatingFolder}
-                        className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-black text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 shrink-0"
+                        className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-black text-white rounded-[12px] text-xs font-bold transition-all disabled:opacity-50 shrink-0"
                       >
                         {creatingFolder ? "Creating..." : "Create & Map"}
                       </button>
@@ -1287,17 +1302,17 @@ export default function SettingsPage() {
               
               {/* Theme Settings Toggle */}
               <div className="space-y-4">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-55 pb-2 border-b border-zinc-200/50 dark:border-zinc-850">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-200/50 dark:border-zinc-800/60 font-headline">
                   Visual Interface Theme
                 </h3>
                 <div className="flex gap-4">
                   <button
                     type="button"
                     onClick={() => handleThemeChange("light")}
-                    className={`flex-1 flex flex-col items-center p-4 border rounded-2xl transition-all ${
+                    className={`flex-1 flex flex-col items-center p-5 border rounded-[20px] transition-all ${
                       theme === "light"
-                        ? "border-indigo-600 bg-indigo-50/10 text-indigo-650 dark:border-indigo-500 dark:text-indigo-400"
-                        : "border-zinc-200 dark:border-zinc-850 bg-transparent text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
+                        ? "border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]"
+                        : "border-zinc-200/60 dark:border-zinc-800 bg-transparent text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
                     }`}
                   >
                     <svg className="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1309,10 +1324,10 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => handleThemeChange("dark")}
-                    className={`flex-1 flex flex-col items-center p-4 border rounded-2xl transition-all ${
+                    className={`flex-1 flex flex-col items-center p-5 border rounded-[20px] transition-all ${
                       theme === "dark"
-                        ? "border-indigo-600 bg-indigo-50/10 text-indigo-650 dark:border-indigo-500 dark:text-indigo-400"
-                        : "border-zinc-200 dark:border-zinc-850 bg-transparent text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
+                        ? "border-[#D4AF37] bg-[#D4AF37]/10 text-[#D4AF37]"
+                        : "border-zinc-200/60 dark:border-zinc-800 bg-transparent text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
                     }`}
                   >
                     <svg className="h-6 w-6 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -1325,7 +1340,7 @@ export default function SettingsPage() {
 
               {/* Notification Preferences */}
               <form onSubmit={handleSavePreferences} className="space-y-4">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-55 pb-2 border-b border-zinc-200/50 dark:border-zinc-850">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 pb-2 border-b border-zinc-200/50 dark:border-zinc-800/60 font-headline">
                   Notification Dispatch Preferences
                 </h3>
                 <div className="space-y-3">
@@ -1334,7 +1349,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={notifications.notifyNewUploads}
                       onChange={(e) => setNotifications({ ...notifications, notifyNewUploads: e.target.checked })}
-                      className="h-4 w-4 text-indigo-600 rounded-sm border-zinc-300 focus:ring-indigo-500"
+                      className="h-4 w-4 text-[#D4AF37] focus:ring-[#D4AF37] rounded-sm border-zinc-300"
                     />
                     <span>Email alert when guests or clients upload photos to your event spaces</span>
                   </label>
@@ -1344,7 +1359,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={notifications.notifyDownloads}
                       onChange={(e) => setNotifications({ ...notifications, notifyDownloads: e.target.checked })}
-                      className="h-4 w-4 text-indigo-600 rounded-sm border-zinc-300 focus:ring-indigo-500"
+                      className="h-4 w-4 text-[#D4AF37] focus:ring-[#D4AF37] rounded-sm border-zinc-300"
                     />
                     <span>Email alert when photos are downloaded from your public galleries</span>
                   </label>
@@ -1354,17 +1369,17 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={notifications.weeklyDigest}
                       onChange={(e) => setNotifications({ ...notifications, weeklyDigest: e.target.checked })}
-                      className="h-4 w-4 text-indigo-600 rounded-sm border-zinc-300 focus:ring-indigo-500"
+                      className="h-4 w-4 text-[#D4AF37] focus:ring-[#D4AF37] rounded-sm border-zinc-300"
                     />
                     <span>Subscribe to weekly summary statistics (views, downloads, and disk space usage)</span>
                   </label>
                 </div>
 
-                <div className="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-850">
+                <div className="flex justify-end pt-4 border-t border-zinc-100 dark:border-zinc-800">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="px-6 py-2.5 bg-indigo-650 hover:bg-indigo-600 active:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md disabled:opacity-50"
+                    className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] rounded-[12px] text-xs font-bold transition-all shadow-md disabled:opacity-50"
                   >
                     {saving ? "Saving..." : "Save Preferences"}
                   </button>
@@ -1378,6 +1393,6 @@ export default function SettingsPage() {
 
       </div>
 
-    </div>
+    </motion.div>
   );
 }

@@ -10,7 +10,7 @@ export default function DashboardLayout({ children }) {
 
   return (
     <NotificationProvider>
-      <div className="min-h-screen bg-zinc-50 dark:bg-black transition-colors duration-300">
+      <div className="min-h-screen bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300">
         
         {/* Dashboard Left Navigation Drawer */}
         <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

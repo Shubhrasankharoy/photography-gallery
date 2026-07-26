@@ -25,14 +25,14 @@ export default function DashboardHeader({ onMenuClick }) {
   }, [user]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-zinc-200 bg-white/80 px-4 backdrop-blur-md dark:border-zinc-850 dark:bg-black/80 sm:px-6 lg:px-8 transition-colors duration-300">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-zinc-200/50 bg-white/70 px-4 backdrop-blur-md dark:border-zinc-800/40 dark:bg-[#181818]/70 sm:px-6 lg:px-8 transition-colors duration-300">
       
       {/* Left side: Hamburger (mobile only) & Breadcrumbs */}
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
           type="button"
-          className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 lg:hidden focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+          className="rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100 lg:hidden focus:outline-hidden focus:ring-2 focus:ring-[#D4AF37]"
         >
           <span className="sr-only">Open sidebar</span>
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
@@ -40,7 +40,7 @@ export default function DashboardHeader({ onMenuClick }) {
           </svg>
         </button>
 
-        <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-zinc-400">
+        <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-[#8E8E8E]">
           <span className="text-zinc-800 dark:text-zinc-200">Console</span>
           <span className="text-zinc-300 dark:text-zinc-700">/</span>
           <StudioSwitcher />
@@ -71,7 +71,7 @@ export default function DashboardHeader({ onMenuClick }) {
             <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate">
               {user.displayName || user.email}
             </span>
-            <span className="text-[10px] text-zinc-400 font-light uppercase tracking-wider">
+            <span className="text-[10px] text-[#8E8E8E] font-light uppercase tracking-wider">
               Photographer Partner
             </span>
           </div>
@@ -81,9 +81,9 @@ export default function DashboardHeader({ onMenuClick }) {
 
         <Link
           href="/dashboard/profile"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-650 text-white hover:bg-indigo-600 shadow-sm transition-all text-sm font-bold uppercase select-none border border-indigo-500/20"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-[#D4AF37] text-[#181818] hover:bg-[#E0C55B] shadow-sm transition-all text-sm font-bold uppercase select-none border border-[#D4AF37]/20"
         >
-          {user?.displayName ? user.displayName.charAt(0) : (user?.email ? user.email.charAt(0) : "P")}
+          {user?.displayName ? user.displayName.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : "P")}
         </Link>
       </div>
 

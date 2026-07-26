@@ -8,6 +8,7 @@ import { getEvents, getStudioSettings } from "@/lib/eventService";
 import { uploadPhoto, deletePhoto, canPerformPhotoAction } from "@/lib/photoService";
 import Link from "next/link";
 import JobMonitor from "@/components/queue/JobMonitor";
+import { motion, AnimatePresence } from "motion/react";
 
 /**
  * Generate a thumbnail blob from an image file via canvas compression
@@ -136,6 +137,16 @@ function formatDate(dateValue) {
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const MAX_UPLOAD_COUNT = 50; // Max files allowed in a single selection batch
+
+/* ── Motion Variants ──────────────────────────────────────────── */
+const containerVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+};
 
 export default function UploadsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -451,13 +462,13 @@ export default function UploadsPage() {
 
   if (authLoading || studioLoading || !user) {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center bg-zinc-50 dark:bg-black transition-colors duration-300">
+      <div className="flex min-h-[70vh] items-center justify-center bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300">
         <div className="flex flex-col items-center gap-2">
-          <svg className="animate-spin h-8 w-8 text-indigo-650" fill="none" viewBox="0 0 24 24">
+          <svg className="animate-spin h-8 w-8 text-[#D4AF37]" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          <span className="text-sm text-zinc-550">Loading uploads interface...</span>
+          <span className="text-sm text-[#8E8E8E] font-medium">Loading uploads interface...</span>
         </div>
       </div>
     );
@@ -466,45 +477,55 @@ export default function UploadsPage() {
   const selectedEvent = events.find((e) => e.eventId === selectedEventId);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-black transition-colors duration-300 min-h-[85vh]">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300 min-h-[85vh] text-left"
+    >
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight font-headline">
           Photo Upload Manager
         </h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 font-light max-w-2xl">
-          Drag and drop your images or select files from your computer. Uploads belong to the selected studio, event, and uploader.
+        <p className="mt-2 text-sm text-[#8E8E8E] font-light max-w-2xl">
+          Drag and drop your images or select files from your computer. Uploaded assets sync directly with proofing configurations and Google Drive targets.
         </p>
       </div>
 
       {/* Studio Banner info */}
       {currentStudio && (
-        <div className="mb-6 rounded-xl bg-indigo-50/50 border border-indigo-100 dark:bg-indigo-950/10 dark:border-indigo-900/50 p-4 flex justify-between items-center">
+        <div className="mb-6 rounded-[20px] bg-[#D4AF37]/10 border border-zinc-200/50 dark:border-[#D4AF37]/10 p-4 flex justify-between items-center">
           <div>
-            <span className="text-xs uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400">Selected Studio</span>
-            <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{currentStudio.studioName}</h4>
+            <span className="text-[10px] uppercase tracking-widest font-bold text-[#D4AF37]">Selected Studio</span>
+            <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 font-headline mt-0.5">{currentStudio.studioName}</h4>
           </div>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-750 dark:bg-indigo-900/50 dark:text-indigo-300 capitalize">
+          <span className="px-3.5 py-1.5 rounded-[12px] text-xs font-bold bg-[#D4AF37] text-[#181818] capitalize">
             Role: {currentRole}
           </span>
         </div>
       )}
 
       {/* Event Selector */}
-      <div className="mb-8 rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
-        <label className="block text-sm font-bold text-zinc-900 dark:text-zinc-50 mb-3">
+      <div className="mb-8 rounded-[20px] border border-zinc-200/60 bg-white p-6 shadow-[var(--shadow-soft)] dark:border-zinc-800/40 dark:bg-[#262626]">
+        <label className="block text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-3">
           Select Event
         </label>
         {isFetching ? (
-          <div className="text-sm text-zinc-500">Loading events...</div>
+          <div className="text-xs text-[#8E8E8E] font-medium flex items-center gap-2">
+            <svg className="animate-spin h-4 w-4 text-[#D4AF37]" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            </svg>
+            <span>Loading active events...</span>
+          </div>
         ) : events.length === 0 ? (
-          <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 p-4">
-            <p className="text-sm text-amber-900 dark:text-amber-400 font-light">
+          <div className="rounded-[12px] bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 p-4">
+            <p className="text-xs text-amber-900 dark:text-amber-400 font-light">
               No events found for this studio. Create an event first to start uploading photos.
             </p>
             <Link
               href="/dashboard/events/new"
-              className="mt-3 inline-block text-sm font-bold text-amber-700 dark:text-amber-400 hover:underline"
+              className="mt-3 inline-block text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
             >
               Create Event →
             </Link>
@@ -513,7 +534,7 @@ export default function UploadsPage() {
           <select
             value={selectedEventId}
             onChange={(e) => setSelectedEventId(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 font-light text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400"
+            className="w-full px-4 py-3 rounded-[12px] border border-zinc-200/60 bg-white dark:border-zinc-800 dark:bg-[#181818] text-zinc-900 dark:text-zinc-50 font-light text-xs focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
           >
             <option value="">-- Select an event --</option>
             {events.map((evt) => (
@@ -529,8 +550,8 @@ export default function UploadsPage() {
       {selectedEvent && (
         <>
           {["viewer"].includes(currentRole) || !currentRole ? (
-            <div className="mb-8 rounded-3xl border-2 border-dashed border-rose-300 dark:border-rose-900/50 bg-rose-50/20 p-12 text-center">
-              <p className="text-rose-700 dark:text-rose-400 font-semibold">
+            <div className="mb-8 rounded-[20px] border-2 border-dashed border-rose-300 dark:border-rose-900/50 bg-rose-50/20 p-12 text-center">
+              <p className="text-rose-700 dark:text-rose-455 font-semibold text-sm">
                 {!currentRole ? "You do not have member access to this studio." : "You have Viewer access only. Uploading is disabled."}
               </p>
             </div>
@@ -539,14 +560,14 @@ export default function UploadsPage() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`mb-8 rounded-3xl border-2 border-dashed p-12 text-center transition-all ${
+              className={`mb-8 rounded-[20px] border-2 border-dashed p-12 text-center transition-all ${
                 isDragging
-                  ? "border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/20"
-                  : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950/20"
+                  ? "border-[#D4AF37] bg-[#D4AF37]/5 dark:border-[#D4AF37] dark:bg-[#D4AF37]/5"
+                  : "border-zinc-300 hover:border-[#D4AF37]/60 dark:border-zinc-800 bg-white dark:bg-[#262626]"
               }`}
             >
               <div className="flex flex-col items-center justify-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#D4AF37]/10 text-[#D4AF37]">
                   <svg
                     className="h-8 w-8"
                     fill="none"
@@ -561,14 +582,14 @@ export default function UploadsPage() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 font-headline">
                   {isDragging ? "Drop your images here" : "Drag & drop images here"}
                 </h3>
-                <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 font-light">
+                <p className="mt-2 text-xs text-[#8E8E8E] font-light">
                   or
                 </p>
                 <label className="mt-2">
-                  <span className="cursor-pointer text-sm font-bold text-indigo-650 dark:text-indigo-400 hover:underline">
+                  <span className="cursor-pointer text-xs font-bold text-[#D4AF37] hover:text-[#E0C55B] hover:underline">
                     Click to select files
                   </span>
                   <input
@@ -579,7 +600,7 @@ export default function UploadsPage() {
                     className="hidden"
                   />
                 </label>
-                <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-500">
+                <p className="mt-3 text-[10px] text-[#8E8E8E] font-light">
                   Supported formats: JPG, PNG, WebP, GIF (max 50 MB each, up to 50 files at once)
                 </p>
               </div>
@@ -588,19 +609,19 @@ export default function UploadsPage() {
 
           {/* Upload Manager */}
           {uploads.length > 0 && (
-            <div className="rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
+            <div className="rounded-[20px] border border-zinc-200/60 bg-white p-6 shadow-[var(--shadow-soft)] dark:border-zinc-800/40 dark:bg-[#262626] animate-fade-in">
               <div className="flex justify-between items-center mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50 font-headline">
                     Upload Queue
                   </h3>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-light mt-0.5">
+                  <p className="text-xs text-[#8E8E8E] font-light mt-0.5">
                     {uploads.filter((u) => u.status === "completed").length} of{" "}
                     {uploads.length} uploaded
                   </p>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-extrabold text-zinc-900 dark:text-zinc-50">
+                  <div className="text-2xl font-bold text-[#D4AF37]">
                     {Math.round(
                       (uploads.filter((u) => u.status === "completed").length /
                         uploads.length) *
@@ -608,29 +629,29 @@ export default function UploadsPage() {
                     )}
                     %
                   </div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-light">
+                  <p className="text-[10px] text-[#8E8E8E] font-bold uppercase tracking-wider">
                     Complete
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
                 {uploads.map((upload) => (
                   <div
                     key={upload.id}
-                    className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 flex flex-col gap-3"
+                    className="rounded-[12px] border border-zinc-200/60 dark:border-zinc-800 p-4 flex flex-col gap-3"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
+                        <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-50 truncate">
                           {upload.file.name}
                         </p>
                         <div className="flex gap-2 mt-1 flex-wrap">
-                          <span className="text-xs text-zinc-500 dark:text-zinc-400 font-light">
+                          <span className="text-[10px] text-zinc-500 dark:text-zinc-450 font-light">
                             {formatFileSize(upload.file.size)}
                           </span>
                           {upload.photoData && (
-                            <span className="text-xs text-zinc-500 dark:text-zinc-400 font-light">
+                            <span className="text-[10px] text-zinc-500 dark:text-zinc-450 font-light">
                               {formatDate(upload.photoData.createdAt)}
                             </span>
                           )}
@@ -640,27 +661,27 @@ export default function UploadsPage() {
                       {/* Status Badge */}
                       <div className="flex items-center gap-2">
                         {upload.status === "queued" && (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-400">
                             Queued
                           </span>
                         )}
                         {upload.status === "uploading" && (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-155 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-400">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#D4AF37]/10 text-[#D4AF37] dark:bg-black/60 dark:text-[#D4AF37]">
                             Uploading
                           </span>
                         )}
                         {upload.status === "processing" && (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 animate-pulse">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 animate-pulse">
                             Processing
                           </span>
                         )}
                         {upload.status === "completed" && (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-emerald-105 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400">
                             Success
                           </span>
                         )}
                         {upload.status === "failed" && (
-                          <span className="px-2 py-1 rounded-full text-xs font-bold bg-rose-105 text-rose-700 dark:bg-rose-950/30 dark:text-rose-400">
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-rose-50 text-rose-800 dark:bg-rose-950/20 dark:text-rose-400">
                             Failed
                           </span>
                         )}
@@ -671,16 +692,16 @@ export default function UploadsPage() {
                     {(upload.status === "uploading" || upload.status === "queued" || upload.status === "processing") && (
                       <div className="w-full">
                         <div className="flex justify-between items-center mb-1">
-                          <span className="text-xs text-zinc-500 dark:text-zinc-400 font-light">
+                          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-light">
                             Progress
                           </span>
-                          <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                          <span className="text-[10px] font-bold text-zinc-700 dark:text-zinc-300">
                             {upload.progress}%
                           </span>
                         </div>
-                        <div className="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+                        <div className="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
                           <div
-                            className="h-full bg-linear-to-r from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-indigo-500 transition-all duration-300"
+                             className="h-full bg-[#D4AF37] transition-all duration-300"
                             style={{ width: `${upload.progress}%` }}
                           />
                         </div>
@@ -689,7 +710,7 @@ export default function UploadsPage() {
 
                     {/* Error Message */}
                     {upload.error && (
-                      <div className="rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 p-3 flex items-start gap-2">
+                      <div className="rounded-[12px] bg-rose-50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/40 p-3 flex items-start gap-2">
                         <svg
                           className="h-5 w-5 text-rose-500 mt-0.5 shrink-0"
                           fill="none"
@@ -707,7 +728,7 @@ export default function UploadsPage() {
                           <p className="text-xs font-semibold text-rose-800 dark:text-rose-300">
                             Upload Failed
                           </p>
-                          <p className="text-[10px] text-rose-700 dark:text-rose-400 font-light mt-0.5">
+                          <p className="text-[10px] text-rose-700 dark:text-rose-455 font-light mt-0.5">
                             {upload.error}
                           </p>
                         </div>
@@ -719,14 +740,14 @@ export default function UploadsPage() {
                       {upload.status === "failed" && (
                         <button
                           onClick={() => handleRetry(upload.id)}
-                          className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-indigo-700 dark:text-indigo-400 bg-indigo-55 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-950/40 transition-colors"
+                          className="flex-1 px-3 py-2 rounded-[12px] text-xs font-bold text-[#D4AF37] bg-white border border-zinc-200 hover:bg-zinc-50 dark:bg-[#181818] dark:border-zinc-800 dark:hover:bg-zinc-900 transition-colors"
                         >
                           Retry
                         </button>
                       )}
                       <button
                         onClick={() => handleDeletePhoto(upload)}
-                        className="flex-1 px-3 py-2 rounded-lg text-xs font-bold text-rose-700 dark:text-rose-400 bg-rose-55 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 transition-colors"
+                        className="flex-1 px-3 py-2 rounded-[12px] text-xs font-bold text-rose-500 bg-white border border-rose-200/50 hover:bg-rose-50 dark:bg-transparent dark:border-rose-900/30 dark:hover:bg-rose-950/20 transition-colors"
                       >
                         Delete
                       </button>
@@ -741,8 +762,8 @@ export default function UploadsPage() {
 
       {/* No event selected */}
       {!selectedEvent && events.length > 0 && (
-        <div className="rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950/30 p-12 text-center">
-          <p className="text-zinc-600 dark:text-zinc-400 font-light">
+        <div className="rounded-[20px] border border-dashed border-zinc-300 dark:border-zinc-800 bg-white dark:bg-transparent p-12 text-center">
+          <p className="text-xs text-[#8E8E8E] font-light">
             Select an event to start uploading photos
           </p>
         </div>
@@ -750,10 +771,10 @@ export default function UploadsPage() {
 
       {currentStudio?.studioId && (
         <div className="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800">
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-6">AI Processing Queue Monitor</h2>
+          <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-6 font-headline">AI Processing Queue Monitor</h2>
           <JobMonitor studioId={currentStudio.studioId} />
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

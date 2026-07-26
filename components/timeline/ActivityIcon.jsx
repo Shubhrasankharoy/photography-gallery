@@ -4,15 +4,15 @@ import React from 'react';
 import { SEVERITIES } from '@/lib/timeline/timelineConstants';
 
 export default function ActivityIcon({ action, resourceType, severity, className = "w-5 h-5" }) {
-  let badgeBg = "bg-slate-800 text-slate-400 border-slate-700";
+  let badgeBg = "bg-zinc-100 text-zinc-500 border-zinc-200/50 dark:bg-[#181818] dark:text-zinc-400 dark:border-zinc-800/40";
   if (severity === SEVERITIES.SUCCESS) {
-    badgeBg = "bg-emerald-950/60 text-emerald-400 border-emerald-800/50";
+    badgeBg = "bg-emerald-50 text-emerald-650 border-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30";
   } else if (severity === SEVERITIES.WARNING) {
-    badgeBg = "bg-amber-950/60 text-amber-400 border-amber-800/50";
+    badgeBg = "bg-amber-50 text-amber-650 border-amber-100 dark:bg-amber-955/20 dark:text-amber-400 dark:border-amber-900/30";
   } else if (severity === SEVERITIES.ERROR) {
-    badgeBg = "bg-rose-950/60 text-rose-400 border-rose-800/50";
+    badgeBg = "bg-rose-50 text-rose-650 border-rose-100 dark:bg-rose-955/20 dark:text-rose-400 dark:border-rose-900/30";
   } else if (severity === SEVERITIES.INFO) {
-    badgeBg = "bg-indigo-950/60 text-indigo-400 border-indigo-800/50";
+    badgeBg = "bg-blue-50 text-blue-650 border-blue-100 dark:bg-blue-955/20 dark:text-blue-400 dark:border-blue-900/30";
   }
 
   const renderIcon = () => {
@@ -82,7 +82,7 @@ export default function ActivityIcon({ action, resourceType, severity, className
   };
 
   return (
-    <div className={`p-2.5 rounded-xl border ${badgeBg} flex items-center justify-center shrink-0`}>
+    <div className={`p-2.5 rounded-[12px] border ${badgeBg} flex items-center justify-center shrink-0`}>
       {renderIcon()}
     </div>
   );

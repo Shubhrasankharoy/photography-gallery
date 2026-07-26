@@ -246,7 +246,7 @@ export default function PhotographersDirectory() {
                         </div>
 
                         {/* Profile Info */}
-                        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-55 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors truncate">
+                        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50 group-hover:text-indigo-650 dark:group-hover:text-indigo-400 transition-colors truncate">
                           {p.studioName}
                         </h2>
                         

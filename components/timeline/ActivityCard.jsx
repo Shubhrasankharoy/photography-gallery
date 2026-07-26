@@ -49,36 +49,36 @@ export default React.memo(function ActivityCard({ activity }) {
   );
 
   return (
-    <div className="group relative bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 sm:p-5 transition-all duration-200">
+    <div className="group relative bg-white hover:bg-zinc-50/50 border border-zinc-200/50 hover:border-zinc-300 rounded-[20px] p-4 sm:p-5 transition-all duration-200 dark:bg-[#262626] dark:border-zinc-800/40 dark:hover:bg-[#2D2D2D]/30 shadow-[var(--shadow-soft)]">
       <div className="flex items-start gap-4">
         {/* Activity Icon with Severity indication */}
         <ActivityIcon action={action} resourceType={resourceType} severity={severity} />
 
         {/* Card Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
             {/* Actor Avatar & Name */}
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="w-6 h-6 rounded-full bg-zinc-100 border border-zinc-200/60 dark:bg-[#181818] dark:border-zinc-800/40 flex items-center justify-center overflow-hidden shrink-0">
                 {actorAvatar ? (
                   <img src={actorAvatar} alt={actorName} className="w-full h-full object-cover" />
                 ) : (
-                  <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg className="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 )}
               </div>
-              <span className="text-sm font-semibold text-slate-200 truncate">{actorName || 'System'}</span>
+              <span className="text-sm font-bold text-zinc-800 dark:text-zinc-100 font-headline truncate">{actorName || 'System'}</span>
               
               {/* Action Chip */}
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800/80 text-indigo-400 font-mono border border-indigo-900/40">
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[#D4AF37]/10 text-[#D4AF37] font-mono border border-[#D4AF37]/20 font-bold">
                 {action}
               </span>
             </div>
 
             {/* Relative Time */}
-            <div className="flex items-center gap-1 text-xs text-slate-500 font-mono">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-1 text-[11px] text-[#8E8E8E] font-light">
+              <svg className="w-3.5 h-3.5 text-[#8E8E8E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>{formatRelativeTime(createdAt)}</span>
@@ -86,9 +86,9 @@ export default React.memo(function ActivityCard({ activity }) {
           </div>
 
           {/* Title & Description */}
-          <h4 className="text-base font-medium text-slate-100 mt-1">{title}</h4>
+          <h4 className="text-base font-bold text-zinc-900 dark:text-zinc-50 font-headline mt-1">{title}</h4>
           {description && (
-            <p className="text-sm text-slate-400 mt-0.5 leading-relaxed">{description}</p>
+            <p className="text-xs text-[#8E8E8E] dark:text-zinc-400 mt-1 font-light leading-relaxed">{description}</p>
           )}
 
           {/* Target Resource Link (if event or studio) */}
@@ -96,7 +96,7 @@ export default React.memo(function ActivityCard({ activity }) {
             {eventId && (
               <Link 
                 href={`/event/${eventId}`} 
-                className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 bg-indigo-950/40 hover:bg-indigo-900/40 px-2.5 py-1 rounded-lg border border-indigo-800/50 transition-colors"
+                className="inline-flex items-center gap-1.5 text-[#D4AF37] hover:text-[#E0C55B] bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 px-3 py-1.5 rounded-[12px] border border-[#D4AF37]/20 font-bold transition-colors select-none"
               >
                 <span>View Event</span>
               </Link>
@@ -104,8 +104,8 @@ export default React.memo(function ActivityCard({ activity }) {
 
             {/* Source Chip */}
             {source && (
-              <span className="inline-flex items-center gap-1 text-slate-400 bg-slate-800/40 px-2.5 py-1 rounded-lg border border-slate-700/50 font-mono">
-                <svg className="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="inline-flex items-center gap-1.5 text-zinc-650 bg-zinc-50/60 dark:bg-[#181818]/60 dark:text-zinc-400 px-3 py-1.5 rounded-[12px] border border-zinc-200/50 dark:border-zinc-800/40 font-mono text-[10px] font-bold">
+                <svg className="w-3 h-3 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
                 <span>{source}</span>
@@ -114,45 +114,45 @@ export default React.memo(function ActivityCard({ activity }) {
 
             {/* Metadata Badges / Chips */}
             {metadata?.fileCount && (
-              <span className="bg-slate-800/80 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700">
+              <span className="bg-zinc-50/60 border border-zinc-200/50 text-zinc-650 dark:bg-[#181818]/60 dark:border-zinc-800/40 dark:text-zinc-400 px-3 py-1 rounded-[12px] font-light">
                 {metadata.fileCount} Files
               </span>
             )}
             {metadata?.role && (
-              <span className="bg-slate-800/80 text-emerald-400 px-2.5 py-1 rounded-lg border border-emerald-900/40">
-                Role: {metadata.role}
+              <span className="bg-zinc-50/60 border border-zinc-200/50 text-zinc-650 dark:bg-[#181818]/60 dark:border-zinc-800/40 dark:text-zinc-400 px-3 py-1 rounded-[12px] font-light">
+                Role: <span className="font-bold text-[#D4AF37]">{metadata.role}</span>
               </span>
             )}
             {metadata?.shareType && (
-              <span className="bg-slate-800/80 text-purple-400 px-2.5 py-1 rounded-lg border border-purple-900/40">
-                Share: {metadata.shareType}
+              <span className="bg-zinc-50/60 border border-zinc-200/50 text-zinc-650 dark:bg-[#181818]/60 dark:border-zinc-800/40 dark:text-zinc-400 px-3 py-1 rounded-[12px] font-light">
+                Share: <span className="font-bold text-[#D4AF37]">{metadata.shareType}</span>
               </span>
             )}
           </div>
 
           {/* Expandable Details Section */}
           {hasMetadata && (
-            <div className="mt-3 pt-3 border-t border-slate-800/60">
+            <div className="mt-3.5 pt-3.5 border-t border-zinc-100 dark:border-zinc-800/60">
               <button 
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                className="flex items-center gap-1 text-[11px] font-bold text-[#8E8E8E] hover:text-[#D4AF37] transition-colors"
               >
                 <span>{expanded ? 'Hide Details' : 'Expand Details'}</span>
                 {expanded ? (
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 15l7-7 7 7" /></svg>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 15l7-7 7 7" /></svg>
                 ) : (
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
                 )}
               </button>
 
               {expanded && (
-                <div className="mt-2.5 p-3 rounded-xl bg-slate-950/80 border border-slate-800 font-mono text-xs text-slate-300 space-y-1.5 overflow-x-auto">
-                  <div className="text-slate-500 text-[11px] mb-1">Key: {activityKey}</div>
-                  {metadata.previousValue && <div><span className="text-rose-400">- Previous:</span> {metadata.previousValue}</div>}
-                  {metadata.newValue && <div><span className="text-emerald-400">+ New:</span> {metadata.newValue}</div>}
-                  {metadata.eventName && <div><span className="text-slate-400">Event:</span> {metadata.eventName}</div>}
+                <div className="mt-2.5 p-3 rounded-[12px] bg-zinc-50/80 border border-zinc-200/50 dark:bg-[#181818]/60 dark:border-zinc-800/40 font-mono text-[11px] text-zinc-700 dark:text-zinc-350 space-y-1.5 overflow-x-auto">
+                  <div className="text-zinc-400 dark:text-zinc-500 text-[10px] mb-1">Key: {activityKey}</div>
+                  {metadata.previousValue && <div><span className="text-rose-500 font-semibold">- Previous:</span> {metadata.previousValue}</div>}
+                  {metadata.newValue && <div><span className="text-emerald-600 font-semibold">+ New:</span> {metadata.newValue}</div>}
+                  {metadata.eventName && <div><span className="text-[#8E8E8E]">Event:</span> {metadata.eventName}</div>}
                   {metadata.custom && Object.keys(metadata.custom).length > 0 && (
-                    <pre className="text-slate-400 text-[11px] mt-1 whitespace-pre-wrap">
+                    <pre className="text-zinc-500 dark:text-zinc-400 text-[10px] mt-1 whitespace-pre-wrap">
                       {JSON.stringify(metadata.custom, null, 2)}
                     </pre>
                   )}

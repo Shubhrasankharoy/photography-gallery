@@ -5,6 +5,27 @@ import { db } from '../../lib/firebase';
 import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { queueService } from '../../lib/queue/queueService';
 import { useAuth } from '../../context/AuthContext';
+import { motion, AnimatePresence } from 'motion/react';
+
+/* ── Motion Variants ──────────────────────────────────────────── */
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: 'easeOut' },
+  },
+};
 
 export default function JobMonitor({ studioId }) {
   const { user } = useAuth();
@@ -130,17 +151,17 @@ export default function JobMonitor({ studioId }) {
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'pending':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
+        return 'bg-amber-50/90 text-amber-800 border-amber-200/50 dark:bg-amber-950/20 dark:text-amber-400';
       case 'running':
-        return 'bg-blue-100 text-blue-800 border-blue-200 animate-pulse';
+        return 'bg-[#D4AF37]/10 text-[#D4AF37] border-[#D4AF37]/20 animate-pulse';
       case 'completed':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+        return 'bg-emerald-50/90 text-emerald-800 border-emerald-200/50 dark:bg-emerald-955/20 dark:text-emerald-400';
       case 'failed':
-        return 'bg-orange-100 text-orange-800 border-orange-200';
+        return 'bg-rose-50/90 text-rose-800 border-rose-250/30 dark:bg-rose-955/20 dark:text-rose-400';
       case 'dead':
-        return 'bg-rose-100 text-rose-800 border-rose-200';
+        return 'bg-rose-50/90 text-rose-800 border-rose-250/30 dark:bg-rose-955/20 dark:text-rose-450';
       default:
-        return 'bg-slate-100 text-slate-800 border-slate-200';
+        return 'bg-zinc-50/80 text-zinc-550 border-zinc-200/60 dark:bg-[#181818] dark:text-zinc-400 dark:border-zinc-800/40';
     }
   };
 
@@ -153,123 +174,169 @@ export default function JobMonitor({ studioId }) {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-48">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      <div className="flex justify-center items-center h-48 bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300">
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#D4AF37] border-t-transparent"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="space-y-6"
+    >
       {/* Metrics Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Queue Length</div>
-          <div className="mt-2 text-2xl font-bold text-slate-900">{stats.pending + stats.running}</div>
-          <div className="text-xs text-slate-400 mt-1">{stats.pending} pending, {stats.running} running</div>
-        </div>
+        {/* Metric 1 */}
+        <motion.div
+          variants={itemVariants}
+          className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300"
+        >
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Queue Length</span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 mt-2 block">
+            {stats.pending + stats.running}
+          </span>
+          <span className="text-[10px] text-[#8E8E8E] font-light mt-1.5 block">
+            {stats.pending} pending, {stats.running} running
+          </span>
+        </motion.div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Workers</div>
-          <div className="mt-2 text-2xl font-bold text-indigo-600">{stats.activeWorkers}</div>
-          <div className="text-xs text-slate-400 mt-1">Active leases</div>
-        </div>
+        {/* Metric 2 */}
+        <motion.div
+          variants={itemVariants}
+          className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300"
+        >
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Active Workers</span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-[#D4AF37] mt-2 block">
+            {stats.activeWorkers}
+          </span>
+          <span className="text-[10px] text-[#8E8E8E] font-light mt-1.5 block">
+            Active leases
+          </span>
+        </motion.div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg Processing Time</div>
-          <div className="mt-2 text-2xl font-bold text-slate-900">
+        {/* Metric 3 */}
+        <motion.div
+          variants={itemVariants}
+          className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300"
+        >
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Avg Processing Time</span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 mt-2 block">
             {stats.avgDurationMs > 0 ? `${(stats.avgDurationMs / 1000).toFixed(1)}s` : 'N/A'}
-          </div>
-          <div className="text-xs text-slate-400 mt-1">Per completed job</div>
-        </div>
+          </span>
+          <span className="text-[10px] text-[#8E8E8E] font-light mt-1.5 block">
+            Per completed job
+          </span>
+        </motion.div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Throughput</div>
-          <div className="mt-2 text-2xl font-bold text-emerald-600">{stats.throughput} <span className="text-xs text-slate-400 font-normal">/min</span></div>
-          <div className="text-xs text-slate-400 mt-1">Last 10 minutes</div>
-        </div>
+        {/* Metric 4 */}
+        <motion.div
+          variants={itemVariants}
+          className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300"
+        >
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Throughput</span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-2 block">
+            {stats.throughput} <span className="text-xs text-[#8E8E8E] font-normal">/min</span>
+          </span>
+          <span className="text-[10px] text-[#8E8E8E] font-light mt-1.5 block">
+            Last 10 minutes
+          </span>
+        </motion.div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm col-span-2 lg:col-span-1">
-          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Failed / Dead</div>
-          <div className="mt-2 text-2xl font-bold text-rose-600">{stats.failed + stats.dead}</div>
-          <div className="text-xs text-slate-400 mt-1">Retry rate: {stats.retryRate}%</div>
-        </div>
+        {/* Metric 5 */}
+        <motion.div
+          variants={itemVariants}
+          className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300 col-span-2 lg:col-span-1"
+        >
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Failed / Dead</span>
+          <span className="text-2xl sm:text-3xl font-extrabold text-rose-600 mt-2 block">
+            {stats.failed + stats.dead}
+          </span>
+          <span className="text-[10px] text-[#8E8E8E] font-light mt-1.5 block">
+            Retry rate: {stats.retryRate}%
+          </span>
+        </motion.div>
       </div>
 
       {/* Jobs Log Table */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h3 className="font-bold text-slate-900">AI Background Processing Queue</h3>
-          <span className="text-xs text-slate-500">Showing last 100 jobs</span>
+      <motion.div
+        variants={itemVariants}
+        className="bg-white rounded-[20px] border border-zinc-200/50 shadow-[var(--shadow-soft)] overflow-hidden dark:bg-[#262626] dark:border-zinc-800/40"
+      >
+        <div className="px-5 py-4 border-b border-zinc-200/50 dark:border-zinc-800/40 flex justify-between items-center bg-transparent">
+          <h3 className="font-bold text-zinc-900 dark:text-zinc-50 font-headline">AI Background Processing Queue</h3>
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-wider">Showing last 100 jobs</span>
         </div>
 
         <div className="overflow-x-auto">
           {jobs.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">
+            <div className="p-8 text-center text-[#8E8E8E] font-light text-xs">
               No background AI jobs found for this studio.
             </div>
           ) : (
-            <table className="w-full text-left border-collapse text-sm">
+            <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
-                  <th className="px-6 py-3 font-semibold text-slate-600">Job ID / File</th>
-                  <th className="px-6 py-3 font-semibold text-slate-600">Type</th>
-                  <th className="px-6 py-3 font-semibold text-slate-600">Priority</th>
-                  <th className="px-6 py-3 font-semibold text-slate-600">Progress</th>
-                  <th className="px-6 py-3 font-semibold text-slate-600">Status</th>
-                  <th className="px-6 py-3 font-semibold text-slate-600">Attempts</th>
-                  <th className="px-6 py-3 font-semibold text-slate-600">Actions</th>
+                <tr className="border-b border-zinc-200/50 dark:border-zinc-800/40 text-[#8E8E8E] font-bold uppercase tracking-wider">
+                  <th className="px-6 py-4">Job ID / File</th>
+                  <th className="px-6 py-4">Type</th>
+                  <th className="px-6 py-4">Priority</th>
+                  <th className="px-6 py-4">Progress</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4">Attempts</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
                 {jobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={job.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/30 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-mono text-xs text-slate-500">{job.jobId}</div>
-                      <div className="text-xs text-slate-400 mt-0.5 truncate max-w-xs">
+                      <div className="font-mono text-[10px] text-[#8E8E8E]">{job.jobId}</div>
+                      <div className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1 truncate max-w-xs font-light">
                         Photo ID: {job.photoId}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-mono text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
+                      <span className="font-mono text-[10px] bg-zinc-55 text-zinc-650 px-2 py-0.5 rounded-[12px] border border-zinc-200/60 dark:bg-[#181818] dark:text-zinc-400 dark:border-zinc-800/40">
                         {job.jobType}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-xs ${formatPriority(job.priority) === 'High' ? 'text-amber-600 font-bold' : 'text-slate-600'}`}>
+                      <span className={`text-[10px] font-bold ${formatPriority(job.priority) === 'High' ? 'text-[#D4AF37]' : 'text-zinc-600 dark:text-zinc-400'}`}>
                         {formatPriority(job.priority)}
                       </span>
                     </td>
                     <td className="px-6 py-4 w-48">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-24 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="w-24 bg-zinc-150 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
                           <div 
-                            className="bg-indigo-600 h-1.5 rounded-full transition-all duration-300" 
+                            className="bg-[#D4AF37] h-1.5 rounded-full transition-all duration-300" 
                             style={{ width: `${job.progress || 0}%` }}
                           ></div>
                         </div>
-                        <span className="text-xs font-mono text-slate-600">{job.progress || 0}%</span>
+                        <span className="text-[10px] font-mono text-zinc-600 dark:text-zinc-400">{job.progress || 0}%</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getStatusBadgeClass(job.status)}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusBadgeClass(job.status)}`}>
                         {job.status}
                       </span>
                       {job.lastError && (
-                        <div className="text-xs text-rose-500 mt-1 max-w-xs truncate" title={job.lastError}>
+                        <div className="text-[10px] text-rose-500 mt-1.5 max-w-xs truncate font-light" title={job.lastError}>
                           {job.lastError}
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-slate-600 font-mono text-xs">
+                    <td className="px-6 py-4 text-zinc-600 dark:text-zinc-400 font-mono text-[10px]">
                       {job.attempts} / {job.maxAttempts}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end space-x-2">
                         {(job.status === 'failed' || job.status === 'dead') && (
                           <button
                             onClick={() => handleRetry(job.id)}
-                            className="text-xs bg-indigo-600 text-white hover:bg-indigo-700 px-2.5 py-1 rounded transition-colors font-medium"
+                            className="text-[10px] bg-[#D4AF37] hover:bg-[#E0C55B] text-[#181818] px-3 py-1.5 rounded-[12px] transition-colors font-bold shadow-xs select-none"
                           >
                             Retry
                           </button>
@@ -277,10 +344,13 @@ export default function JobMonitor({ studioId }) {
                         {(job.status === 'pending' || job.status === 'running') && (
                           <button
                             onClick={() => handleCancel(job.id)}
-                            className="text-xs bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 px-2.5 py-1 rounded transition-colors font-medium"
+                            className="text-[10px] bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 px-3 py-1.5 rounded-[12px] transition-colors font-bold dark:bg-[#2D1818] dark:border-rose-900/50 dark:text-rose-400"
                           >
                             Cancel
                           </button>
+                        )}
+                        {!(job.status === 'failed' || job.status === 'dead' || job.status === 'pending' || job.status === 'running') && (
+                          <span className="text-zinc-400 dark:text-zinc-650 font-light pr-2">—</span>
                         )}
                       </div>
                     </td>
@@ -290,7 +360,7 @@ export default function JobMonitor({ studioId }) {
             </table>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { motion } from "motion/react";
 
 // Helper function to format bytes to human readable format
 function formatBytes(bytes, decimals = 2) {
@@ -43,6 +44,26 @@ function isSameDay(date1Str, date2Obj) {
     d1.getDate() === date2Obj.getDate()
   );
 }
+
+/* ── Motion Variants ──────────────────────────────────────────── */
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+};
 
 export default function AnalyticsDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -182,7 +203,7 @@ export default function AnalyticsDashboard() {
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={fillColor} stopOpacity="0.45" />
+              <stop offset="0%" stopColor={fillColor} stopOpacity="0.3" />
               <stop offset="100%" stopColor={fillColor} stopOpacity="0.0" />
             </linearGradient>
           </defs>
@@ -197,7 +218,7 @@ export default function AnalyticsDashboard() {
                 y1={y}
                 x2={width - padding}
                 y2={y}
-                className="stroke-zinc-150 dark:stroke-zinc-900/60"
+                className="stroke-zinc-200 dark:stroke-zinc-800/60"
                 strokeWidth="1"
                 strokeDasharray="4 4"
               />
@@ -230,10 +251,9 @@ export default function AnalyticsDashboard() {
               cx={p.x}
               cy={p.y}
               r="4.5"
-              className="fill-white stroke-indigo-650 dark:fill-zinc-950 dark:stroke-indigo-400 transition-all cursor-pointer hover:r-6"
+              className="fill-white stroke-[#D4AF37] dark:fill-[#262626] dark:stroke-[#D4AF37] transition-all cursor-pointer hover:r-6"
               strokeWidth="2.5"
               onMouseEnter={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
                 setActiveTooltip({
                   type,
                   index: idx,
@@ -251,14 +271,14 @@ export default function AnalyticsDashboard() {
         {/* Hover Tooltip Overlay */}
         {activeTooltip && activeTooltip.type === type && (
           <div
-            className="absolute z-10 -translate-x-1/2 -translate-y-full bg-zinc-950 text-white dark:bg-white dark:text-black rounded-lg px-2.5 py-1 text-[10px] font-bold shadow-xl flex flex-col items-center pointer-events-none animate-fade-in border border-white/10 dark:border-zinc-200"
+            className="absolute z-10 -translate-x-1/2 -translate-y-full bg-[#181818] text-white dark:bg-white dark:text-[#181818] rounded-[12px] border border-zinc-200/50 dark:border-zinc-800/40 px-3 py-1.5 text-[10px] font-bold shadow-xl flex flex-col items-center pointer-events-none transition-all duration-150"
             style={{
               left: `${(activeTooltip.x / width) * 100}%`,
               top: `${(activeTooltip.y / height) * 100}%`,
             }}
           >
             <span>{activeTooltip.value} {type}</span>
-            <span className="text-[8px] opacity-75 font-normal">{activeTooltip.label}</span>
+            <span className="text-[8px] opacity-75 font-normal mt-0.5">{activeTooltip.label}</span>
           </div>
         )}
       </div>
@@ -296,7 +316,7 @@ export default function AnalyticsDashboard() {
                 y1={y}
                 x2={width - padding}
                 y2={y}
-                className="stroke-zinc-150 dark:stroke-zinc-900/60"
+                className="stroke-zinc-200 dark:stroke-zinc-800/60"
                 strokeWidth="1"
                 strokeDasharray="4 4"
               />
@@ -312,7 +332,7 @@ export default function AnalyticsDashboard() {
               width={p.w}
               height={p.h}
               rx="3"
-              className={`fill-indigo-600/80 dark:fill-indigo-500/80 hover:fill-indigo-600 dark:hover:fill-indigo-400 transition-all cursor-pointer`}
+              className="fill-[#D4AF37]/80 hover:fill-[#D4AF37] transition-all cursor-pointer"
               onMouseEnter={(e) => {
                 setActiveTooltip({
                   type,
@@ -344,14 +364,14 @@ export default function AnalyticsDashboard() {
         {/* Hover Tooltip Overlay */}
         {activeTooltip && activeTooltip.type === type && (
           <div
-            className="absolute z-10 -translate-x-1/2 -translate-y-full bg-zinc-950 text-white dark:bg-white dark:text-black rounded-lg px-2.5 py-1 text-[10px] font-bold shadow-xl flex flex-col items-center pointer-events-none animate-fade-in border border-white/10 dark:border-zinc-200"
+            className="absolute z-10 -translate-x-1/2 -translate-y-full bg-[#181818] text-white dark:bg-white dark:text-[#181818] rounded-[12px] border border-zinc-200/50 dark:border-zinc-800/40 px-3 py-1.5 text-[10px] font-bold shadow-xl flex flex-col items-center pointer-events-none transition-all duration-150"
             style={{
               left: `${(activeTooltip.x / width) * 100}%`,
               top: `${(activeTooltip.y / height) * 100}%`,
             }}
           >
             <span>{activeTooltip.value} {type}</span>
-            <span className="text-[8px] opacity-75 font-normal">{activeTooltip.label}</span>
+            <span className="text-[8px] opacity-75 font-normal mt-0.5">{activeTooltip.label}</span>
           </div>
         )}
       </div>
@@ -359,135 +379,144 @@ export default function AnalyticsDashboard() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-black transition-colors duration-300 min-h-screen text-left">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300 min-h-screen text-left"
+    >
       
       {/* Title Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <motion.div
+        variants={itemVariants}
+        className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      >
         <div>
-          <h1 className="text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 tracking-tight font-headline">
             Analytics Console
           </h1>
-          <p className="mt-2 text-sm text-zinc-650 dark:text-zinc-400 font-light">
+          <p className="mt-2 text-sm text-[#8E8E8E] font-light">
             Realtime client interaction metrics, visitor trends, and storage usage summary.
           </p>
         </div>
 
         {/* Live indicator badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-200/50 bg-emerald-500/10 text-emerald-500 dark:border-emerald-950/20 text-xs font-bold shrink-0 self-start sm:self-center select-none">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          Live Realtime Firestore Connection
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-zinc-200/50 bg-[#D4AF37]/10 text-[#D4AF37] dark:border-zinc-800/40 text-xs font-bold shrink-0 self-start sm:self-center select-none">
+          <span className="h-2 w-2 rounded-full bg-[#D4AF37] animate-pulse" />
+          Live Realtime Connection
         </div>
-      </div>
+      </motion.div>
 
       {/* Realtime Stats Summary Blocks */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        
+      <motion.div
+        variants={itemVariants}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+      >
         {/* Stat Block 1: Visitors */}
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
-          <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Total Visits</span>
+        <div className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300">
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Total Visits</span>
           <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 mt-2 block">
             {isFetching ? "..." : totalViews}
           </span>
-          <span className="text-[9px] text-zinc-400 font-light mt-1.5 block">Across all active event domains</span>
+          <span className="text-[9px] text-[#8E8E8E] font-light mt-1.5 block">Across all active event domains</span>
         </div>
 
         {/* Stat Block 2: Downloads */}
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
-          <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Downloads</span>
+        <div className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300">
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Downloads</span>
           <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 mt-2 block">
             {isFetching ? "..." : totalDownloads}
           </span>
-          <span className="text-[9px] text-zinc-400 font-light mt-1.5 block">Original high-res assets delivered</span>
+          <span className="text-[9px] text-[#8E8E8E] font-light mt-1.5 block">Original high-res assets delivered</span>
         </div>
 
         {/* Stat Block 3: Uploaded Photos */}
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
-          <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Total Images</span>
+        <div className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300">
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Total Images</span>
           <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 mt-2 block">
             {isFetching ? "..." : totalPhotos}
           </span>
-          <span className="text-[9px] text-zinc-400 font-light mt-1.5 block">Photos hosted in proofing galleries</span>
+          <span className="text-[9px] text-[#8E8E8E] font-light mt-1.5 block">Photos hosted in proofing galleries</span>
         </div>
 
         {/* Stat Block 4: Storage quota usage */}
-        <div className="rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-xs dark:border-zinc-850 dark:bg-zinc-950/20">
-          <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Storage Space</span>
+        <div className="rounded-[20px] border border-zinc-200/60 bg-white p-5 shadow-[var(--shadow-soft)] hover:shadow-[var(--shadow-lg)] dark:border-zinc-800/40 dark:bg-[#262626] transition-all duration-300">
+          <span className="text-[10px] font-bold text-[#8E8E8E] uppercase tracking-widest block">Storage Space</span>
           <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 mt-2 block">
             {isFetching ? "..." : formatBytes(totalStorageBytes, 2)}
           </span>
-          <span className="text-[9px] text-zinc-400 font-light mt-1.5 block">of 5.0 GB maximum quota limit</span>
+          <span className="text-[9px] text-[#8E8E8E] font-light mt-1.5 block">of 5.0 GB maximum quota limit</span>
         </div>
-
-      </div>
+      </motion.div>
 
       {/* Main Charts Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left column: Trends uploads/downloads/visitors */}
-        <div className="lg:col-span-2 space-y-8">
+        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
           
           {/* Chart 1: Visitors trends */}
-          <div className="bg-white dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-850 rounded-3xl p-6 shadow-xs">
+          <div className="bg-white dark:bg-[#262626] border border-zinc-200/50 dark:border-zinc-800/40 rounded-[20px] p-6 shadow-[var(--shadow-soft)]">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Gallery Traffic</h3>
-                <p className="text-[10px] text-zinc-450 dark:text-zinc-500 font-light">Client and guest visits over the past 7 days</p>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 font-headline">Gallery Traffic</h3>
+                <p className="text-[10px] text-[#8E8E8E] font-light">Client and guest visits over the past 7 days</p>
               </div>
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-900 px-3 py-1 rounded-full border border-zinc-100 dark:border-zinc-850">
+              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 bg-zinc-50 dark:bg-[#181818] px-3.5 py-1.5 rounded-[12px] border border-zinc-200/50 dark:border-zinc-800/40">
                 Last 7 Days
               </span>
             </div>
             {isFetching ? (
               <div className="h-44 flex items-center justify-center">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-650 border-t-transparent"></div>
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent"></div>
               </div>
             ) : (
-              renderBarChart(visitorsData, daysList, "#6366f1", "#4f46e5", "Visits")
+              renderBarChart(visitorsData, daysList, "#D4AF37", "#E0C55B", "Visits")
             )}
           </div>
 
           {/* Chart 2 & 3: Uploads & Downloads details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Uploads Area Chart */}
-            <div className="bg-white dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-850 rounded-3xl p-6 shadow-xs">
+            <div className="bg-white dark:bg-[#262626] border border-zinc-200/50 dark:border-zinc-800/40 rounded-[20px] p-6 shadow-[var(--shadow-soft)]">
               <div className="mb-4">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Photo Uploads</h3>
-                <p className="text-[10px] text-zinc-450 dark:text-zinc-500 font-light">Upload activity over the last 7 days</p>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 font-headline">Photo Uploads</h3>
+                <p className="text-[10px] text-[#8E8E8E] font-light">Upload activity over the last 7 days</p>
               </div>
               {isFetching ? (
                 <div className="h-44 flex items-center justify-center">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-650 border-t-transparent"></div>
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent"></div>
                 </div>
               ) : (
-                renderAreaChart(uploadsData, daysList, "#8b5cf6", "#8b5cf6", "uploadsGrad", "Uploads")
+                renderAreaChart(uploadsData, daysList, "#8E8E8E", "#8E8E8E", "uploadsGrad", "Uploads")
               )}
             </div>
 
             {/* Downloads Line Chart */}
-            <div className="bg-white dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-850 rounded-3xl p-6 shadow-xs">
+            <div className="bg-white dark:bg-[#262626] border border-zinc-200/50 dark:border-zinc-800/40 rounded-[20px] p-6 shadow-[var(--shadow-soft)]">
               <div className="mb-4">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Deliveries (Downloads)</h3>
-                <p className="text-[10px] text-zinc-450 dark:text-zinc-500 font-light">Photo download requests completed</p>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 font-headline">Deliveries (Downloads)</h3>
+                <p className="text-[10px] text-[#8E8E8E] font-light">Photo download requests completed</p>
               </div>
               {isFetching ? (
                 <div className="h-44 flex items-center justify-center">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-650 border-t-transparent"></div>
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent"></div>
                 </div>
               ) : (
-                renderAreaChart(downloadsData, daysList, "#10b981", "#10b981", "downloadsGrad", "Downloads")
+                renderAreaChart(downloadsData, daysList, "#D4AF37", "#D4AF37", "downloadsGrad", "Downloads")
               )}
             </div>
           </div>
 
-        </div>
+        </motion.div>
 
         {/* Right column: Popular events and Storage Donut */}
-        <div className="space-y-8">
+        <motion.div variants={itemVariants} className="space-y-8">
           
           {/* Chart 4: Storage usage donut progress */}
-          <div className="bg-white dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-850 rounded-3xl p-6 shadow-xs text-center flex flex-col items-center">
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full text-left">Disk Space Usage</h3>
-            <p className="text-[10px] text-zinc-450 dark:text-zinc-500 font-light w-full text-left mb-6">Photographer cloud storage allocation</p>
+          <div className="bg-white dark:bg-[#262626] border border-zinc-200/50 dark:border-zinc-800/40 rounded-[20px] p-6 shadow-[var(--shadow-soft)] text-center flex flex-col items-center">
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 w-full text-left font-headline">Disk Space Usage</h3>
+            <p className="text-[10px] text-[#8E8E8E] font-light w-full text-left mb-6">Photographer cloud storage allocation</p>
 
             <div className="relative h-40 w-40 flex items-center justify-center">
               {/* Radial Donut circle path */}
@@ -497,7 +526,7 @@ export default function AnalyticsDashboard() {
                   cx="50"
                   cy="50"
                   r="40"
-                  className="stroke-indigo-600 dark:stroke-indigo-500 transition-all duration-500"
+                  className="stroke-[#D4AF37] dark:stroke-[#D4AF37] transition-all duration-500"
                   strokeWidth="8"
                   fill="none"
                   strokeLinecap="round"
@@ -509,16 +538,16 @@ export default function AnalyticsDashboard() {
               {/* Text overlay inner donut */}
               <div className="absolute flex flex-col items-center justify-center">
                 <span className="text-xl font-extrabold text-zinc-900 dark:text-zinc-50">{storagePercentage.toFixed(1)}%</span>
-                <span className="text-[9px] uppercase tracking-wider font-semibold text-zinc-400 dark:text-zinc-500">Quota Used</span>
+                <span className="text-[9px] uppercase tracking-wider font-bold text-zinc-400 dark:text-zinc-500 mt-0.5">Quota Used</span>
               </div>
             </div>
 
             <div className="mt-6 space-y-1.5 w-full">
-              <div className="flex justify-between text-xs font-medium text-zinc-550 dark:text-zinc-400">
+              <div className="flex justify-between text-xs font-medium text-[#8E8E8E]">
                 <span>Consumed:</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">{formatBytes(totalStorageBytes)}</span>
               </div>
-              <div className="flex justify-between text-xs font-medium text-zinc-550 dark:text-zinc-400">
+              <div className="flex justify-between text-xs font-medium text-[#8E8E8E]">
                 <span>Total Quota:</span>
                 <span className="font-bold text-zinc-800 dark:text-zinc-200">5.00 GB</span>
               </div>
@@ -531,16 +560,16 @@ export default function AnalyticsDashboard() {
           </div>
 
           {/* Chart 5: Popular Events list */}
-          <div className="bg-white dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-850 rounded-3xl p-6 shadow-xs">
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1">Popular Events</h3>
-            <p className="text-[10px] text-zinc-455 dark:text-zinc-500 font-light mb-5">Ranked by combined guest views and downloads</p>
+          <div className="bg-white dark:bg-[#262626] border border-zinc-200/50 dark:border-zinc-800/40 rounded-[20px] p-6 shadow-[var(--shadow-soft)]">
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-1 font-headline">Popular Events</h3>
+            <p className="text-[10px] text-[#8E8E8E] font-light mb-5">Ranked by combined guest views and downloads</p>
 
             {isFetching ? (
               <div className="py-8 flex items-center justify-center">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-indigo-650 border-t-transparent"></div>
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#D4AF37] border-t-transparent"></div>
               </div>
             ) : popularEvents.length === 0 ? (
-              <div className="py-8 text-center text-xs text-zinc-450 dark:text-zinc-550 italic font-light">
+              <div className="py-8 text-center text-xs text-zinc-400 dark:text-zinc-550 italic font-light">
                 No active event interactions recorded yet.
               </div>
             ) : (
@@ -557,7 +586,7 @@ export default function AnalyticsDashboard() {
                           </span>
                           <span className="truncate">{evt.eventName}</span>
                         </div>
-                        <span className="shrink-0 font-extrabold text-indigo-650 dark:text-indigo-400">
+                        <span className="shrink-0 font-extrabold text-[#D4AF37]">
                           {evt.totalActions} pts
                         </span>
                       </div>
@@ -565,7 +594,7 @@ export default function AnalyticsDashboard() {
                       {/* Visual bar tracking views metric */}
                       <div className="w-full h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 overflow-hidden">
                         <div
-                          className="h-full bg-linear-to-r from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-indigo-500"
+                          className="h-full bg-[#D4AF37]"
                           style={{ width: `${viewsPercent}%` }}
                         />
                       </div>
@@ -581,10 +610,10 @@ export default function AnalyticsDashboard() {
             )}
           </div>
 
-        </div>
+        </motion.div>
 
       </div>
 
-    </div>
+    </motion.div>
   );
 }

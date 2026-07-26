@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { getUserStudios, updateStudio, isStudioSlugUnique, uploadStudioImage } from "@/lib/studioService";
+import { updateStudio, isStudioSlugUnique, uploadStudioImage } from "@/lib/studioService";
 import { useStudio } from "@/context/StudioContext";
+import { motion } from "motion/react";
 
 export default function StudioSettings() {
   const { user, loading: authLoading } = useAuth();
@@ -182,58 +183,63 @@ export default function StudioSettings() {
 
   if (authLoading || !user || isFetching) {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center bg-zinc-50 dark:bg-black transition-colors duration-300">
+      <div className="flex min-h-[70vh] items-center justify-center bg-[#F7F7F7] dark:bg-[#181818] transition-colors duration-300">
         <div className="flex flex-col items-center gap-2">
-          <svg className="animate-spin h-8 w-8 text-indigo-650" fill="none" viewBox="0 0 24 24">
+          <svg className="animate-spin h-8 w-8 text-[#D4AF37]" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          <span className="text-sm text-zinc-550">Loading Studio details...</span>
+          <span className="text-sm text-[#8E8E8E] font-medium">Loading Studio details...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8 bg-zinc-50 dark:bg-black min-h-screen transition-colors duration-300 text-left">
-      <div className="flex items-center gap-3 border-b border-zinc-200 pb-5 dark:border-zinc-850">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8 bg-[#F7F7F7] dark:bg-[#181818] min-h-screen transition-colors duration-300 text-left"
+    >
+      <div className="flex items-center gap-4 border-b border-zinc-200/50 pb-5 dark:border-zinc-800/40">
         <Link
           href="/dashboard/studio"
-          className="rounded-full border border-zinc-200 bg-white p-2 text-zinc-500 hover:bg-zinc-50 dark:border-zinc-850 dark:bg-zinc-950 dark:hover:bg-zinc-900"
+          className="rounded-[12px] border border-zinc-200/60 bg-white p-2.5 text-zinc-550 hover:bg-zinc-100 dark:border-zinc-850 dark:bg-[#262626] dark:hover:bg-[#2D2D2D] transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
           </svg>
         </Link>
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 font-headline">
             Studio Settings
           </h1>
-          <p className="text-xs text-zinc-455 font-light mt-0.5">Modify branding assets and parameters.</p>
+          <p className="text-xs text-[#8E8E8E] font-light mt-0.5">Modify branding assets and parameters.</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         {saveError && (
-          <div className="rounded-2xl bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3">
+          <div className="rounded-[12px] bg-rose-50 border border-rose-200/80 p-4 dark:bg-rose-950/20 dark:border-rose-900/50 flex items-start gap-3 animate-fade-in">
             <svg className="h-5 w-5 text-rose-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <div>
-              <p className="text-xs font-semibold text-rose-800 dark:text-rose-400">Save Error</p>
-              <p className="text-xs text-rose-650 dark:text-rose-455 font-light mt-0.5 leading-relaxed">{saveError}</p>
+              <p className="text-xs font-semibold text-rose-800 dark:text-rose-455">Save Error</p>
+              <p className="text-xs text-rose-650 dark:text-rose-400 font-light mt-0.5 leading-relaxed">{saveError}</p>
             </div>
           </div>
         )}
 
         {saveSuccess && (
-          <div className="rounded-2xl bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3">
+          <div className="rounded-[12px] bg-emerald-50 border border-emerald-200/80 p-4 dark:bg-emerald-950/20 dark:border-emerald-900/50 flex items-start gap-3 animate-fade-in">
             <svg className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">Settings Saved</p>
-              <p className="text-xs text-emerald-700 dark:text-emerald-450 font-light mt-0.5">Your studio profile has been updated successfully.</p>
+              <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 font-headline">Settings Saved</p>
+              <p className="text-xs text-emerald-750 dark:text-emerald-400 font-light mt-0.5">Your studio profile has been updated successfully.</p>
             </div>
           </div>
         )}
@@ -241,9 +247,9 @@ export default function StudioSettings() {
         {/* Visual Brand Uploads */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Logo Card */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-850 dark:bg-zinc-950/20 flex flex-col items-center">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4 block">Studio Logo</label>
-            <div className="relative h-24 w-24 rounded-full bg-zinc-150 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden flex items-center justify-center">
+          <div className="rounded-[20px] border border-zinc-200/60 bg-white p-6 dark:border-zinc-800/40 dark:bg-[#262626] flex flex-col items-center">
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-4 block">Studio Logo</label>
+            <div className="relative h-24 w-24 rounded-full bg-zinc-150 dark:bg-[#181818] border border-zinc-200/60 dark:border-zinc-800 overflow-hidden flex items-center justify-center">
               {logoPreview ? (
                 <img src={logoPreview} alt="Logo Preview" className="h-full w-full object-cover" />
               ) : (
@@ -252,7 +258,7 @@ export default function StudioSettings() {
                 </svg>
               )}
             </div>
-            <label className="mt-4 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-250 dark:border-zinc-800 px-4 py-2 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-55 cursor-pointer shadow-xs">
+            <label className="mt-4 rounded-[12px] bg-white border border-zinc-200/60 dark:border-zinc-800/40 dark:bg-[#262626] dark:hover:bg-[#2D2D2D] px-4 py-2.5 text-xs font-bold text-[#D4AF37] hover:bg-zinc-55 cursor-pointer shadow-xs select-none">
               Change Logo
               <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, "logo")} className="hidden" />
             </label>
@@ -260,9 +266,9 @@ export default function StudioSettings() {
           </div>
 
           {/* Cover Photo Card */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-850 dark:bg-zinc-950/20 flex flex-col items-center">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4 block">Cover Photo</label>
-            <div className="relative aspect-video w-full rounded-xl bg-zinc-150 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden flex items-center justify-center">
+          <div className="rounded-[20px] border border-zinc-200/60 bg-white p-6 dark:border-zinc-800/40 dark:bg-[#262626] flex flex-col items-center">
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E] mb-4 block">Cover Photo</label>
+            <div className="relative aspect-video w-full rounded-[12px] bg-zinc-150 dark:bg-[#181818] border border-zinc-200/60 dark:border-zinc-800 overflow-hidden flex items-center justify-center">
               {coverPreview ? (
                 <img src={coverPreview} alt="Cover Preview" className="h-full w-full object-cover" />
               ) : (
@@ -271,7 +277,7 @@ export default function StudioSettings() {
                 </svg>
               )}
             </div>
-            <label className="mt-4 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-250 dark:border-zinc-800 px-4 py-2 text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-55 cursor-pointer shadow-xs">
+            <label className="mt-4 rounded-[12px] bg-white border border-zinc-200/60 dark:border-zinc-800/40 dark:bg-[#262626] dark:hover:bg-[#2D2D2D] px-4 py-2.5 text-xs font-bold text-[#D4AF37] hover:bg-zinc-55 cursor-pointer shadow-xs select-none">
               Change Cover
               <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, "coverImage")} className="hidden" />
             </label>
@@ -280,15 +286,15 @@ export default function StudioSettings() {
         </div>
 
         {/* Inputs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-zinc-950/20 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-850">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white dark:bg-[#262626] p-6 rounded-[20px] border border-zinc-200/50 dark:border-zinc-800/40">
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Studio Name *</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Studio Name *</label>
             <input
               type="text"
               name="studioName"
               value={formData.studioName}
               onChange={handleInputChange}
-              className={`rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100 ${
+              className={`rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100 ${
                 errors.studioName ? "border-rose-500 focus:ring-rose-500" : ""
               }`}
             />
@@ -296,13 +302,13 @@ export default function StudioSettings() {
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Studio URL Slug *</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Studio URL Slug *</label>
             <input
               type="text"
               name="studioSlug"
               value={formData.studioSlug}
               onChange={handleInputChange}
-              className={`rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100 ${
+              className={`rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100 ${
                 errors.studioSlug ? "border-rose-500 focus:ring-rose-500" : ""
               }`}
             />
@@ -310,24 +316,24 @@ export default function StudioSettings() {
           </div>
 
           <div className="flex flex-col space-y-1.5 md:col-span-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Studio Description</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Studio Description</label>
             <textarea
               name="description"
               rows={3}
               value={formData.description}
               onChange={handleInputChange}
-              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100 resize-none"
+              className="rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100 resize-none"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Contact Email</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Contact Email</label>
             <input
               type="text"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className={`rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100 ${
+              className={`rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100 ${
                 errors.email ? "border-rose-500 focus:ring-rose-500" : ""
               }`}
             />
@@ -335,72 +341,73 @@ export default function StudioSettings() {
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Phone Number</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Phone Number</label>
             <input
               type="text"
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100"
+              className="rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Studio Location</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Studio Location</label>
             <input
               type="text"
               name="location"
               value={formData.location}
               onChange={handleInputChange}
-              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100"
+              className="rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Website URL</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Website URL</label>
             <input
               type="text"
               name="website"
               value={formData.website}
               onChange={handleInputChange}
-              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100"
+              className="rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Instagram Handle</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Instagram Handle</label>
             <input
               type="text"
               name="instagram"
               value={formData.instagram}
               onChange={handleInputChange}
-              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100"
+              className="rounded-[12px] border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100"
             />
           </div>
 
           <div className="flex flex-col space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-zinc-400">Facebook Page URL</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-[#8E8E8E]">Facebook Page URL</label>
             <input
               type="text"
               name="facebook"
               value={formData.facebook}
               onChange={handleInputChange}
-              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-indigo-500 dark:border-zinc-850 dark:bg-zinc-950 dark:text-zinc-100"
+              className="rounded-[12px] border border-[#202020] bg-white px-4 py-3 text-xs text-zinc-900 placeholder-zinc-400 outline-none focus:ring-2 focus:ring-[#D4AF37] dark:border-zinc-800 dark:bg-[#181818] dark:text-zinc-100"
             />
           </div>
         </div>
 
-        <div className="pt-6 border-t border-zinc-200 dark:border-zinc-850 flex items-center justify-end gap-3">
+        {/* Action Panel buttons */}
+        <div className="pt-6 border-t border-zinc-200/50 dark:border-zinc-800/40 flex items-center justify-end gap-3">
           <Link
             href="/dashboard/studio"
-            className="rounded-full border border-zinc-250 bg-white px-5 py-2.5 text-xs font-bold text-zinc-650 hover:bg-zinc-50 dark:border-zinc-850 dark:bg-zinc-950 dark:hover:bg-zinc-900"
+            className="rounded-[12px] border border-zinc-255 bg-white px-5 py-2.5 text-xs font-bold text-zinc-650 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-[#262626] dark:text-zinc-350 dark:hover:bg-[#2D2D2D] transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isSaving}
-            className={`rounded-full bg-indigo-650 hover:bg-indigo-600 px-6 py-2.5 text-xs font-bold text-white shadow-md hover:shadow-lg transition-all ${
+            className={`rounded-[12px] bg-[#D4AF37] hover:bg-[#E0C55B] px-6 py-2.5 text-xs font-bold text-[#181818] shadow-md hover:shadow-lg transition-all ${
               isSaving ? "opacity-50 pointer-events-none" : ""
             }`}
           >
@@ -408,6 +415,6 @@ export default function StudioSettings() {
           </button>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 }

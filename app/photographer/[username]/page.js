@@ -256,7 +256,7 @@ export default async function PublicProfile({ params }) {
                       {/* Info Panel */}
                       <div className="p-4 flex-grow flex flex-col justify-between">
                         <div>
-                          <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-55 truncate">
+                          <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 truncate">
                             {evt.eventName}
                           </h4>
                           <p className="mt-1 text-[11px] text-zinc-400 font-light truncate">
