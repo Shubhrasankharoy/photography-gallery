@@ -214,7 +214,7 @@ export default function GlobalSearch() {
         {/* Header Search Box */}
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-150 dark:border-zinc-900 shrink-0">
           <svg
-            className="h-5 w-5 text-zinc-400 dark:text-zinc-650"
+            className="h-5 w-5 text-zinc-400 dark:text-zinc-500"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth="2"
@@ -230,7 +230,7 @@ export default function GlobalSearch() {
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleInputKeyDown}
             placeholder="Search studios, members, events, brides, grooms, locations..."
-            className="flex-1 text-base bg-transparent text-zinc-800 placeholder-zinc-400 border-none outline-hidden focus:ring-0 focus:outline-hidden dark:text-zinc-250 dark:placeholder-zinc-600"
+            className="flex-1 text-base bg-transparent text-zinc-800 placeholder-zinc-400 border-none outline-hidden focus:ring-0 focus:outline-hidden dark:text-zinc-50 dark:placeholder-zinc-600"
             aria-autocomplete="list"
             aria-activedescendant={highlightedIndex >= 0 ? `result-${highlightedIndex}` : undefined}
           />
@@ -250,7 +250,7 @@ export default function GlobalSearch() {
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
               showFilters || Object.values(activeFilters).some(v => v !== "")
-                ? "bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-950/20 dark:border-indigo-900 dark:text-indigo-400"
+                ? "bg-[#D4AF37]/10 border-[#D4AF37]/20 text-[#D4AF37]"
                 : "bg-zinc-50 border-zinc-200 text-zinc-600 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-400"
             }`}
           >
@@ -503,7 +503,7 @@ export default function GlobalSearch() {
                           <button
                             key={freq.item.id}
                             onClick={() => selectResult(freq.item)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-200 bg-white text-xs font-semibold text-zinc-650 hover:bg-indigo-50/10 hover:border-indigo-200 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400 dark:hover:bg-zinc-900 transition-all"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-200 bg-white text-xs font-semibold text-zinc-500 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400 dark:hover:bg-zinc-900 transition-all"
                           >
                             {getEntityIcon(freq.item.type)}
                             <span>{freq.item.title}</span>
@@ -546,7 +546,7 @@ export default function GlobalSearch() {
               <div className="space-y-6">
                 {flatResultsList.length === 0 ? (
                   <div className="text-center py-16">
-                    <p className="text-base font-semibold text-zinc-400 dark:text-zinc-650">No matching records found.</p>
+                    <p className="text-base font-semibold text-zinc-400 dark:text-zinc-500">No matching records found.</p>
                     <p className="text-xs text-zinc-300 mt-1 dark:text-zinc-700">Try modifying filters or checking spelling.</p>
                   </div>
                 ) : (
@@ -573,8 +573,8 @@ export default function GlobalSearch() {
                               onMouseEnter={() => setHighlightedIndex(index)}
                               className={`group flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
                                 isHighlighted
-                                  ? "bg-indigo-50/50 border-indigo-200 dark:bg-indigo-950/20 dark:border-indigo-900"
-                                  : "bg-white border-zinc-150 hover:bg-zinc-50 dark:bg-zinc-950 dark:border-zinc-900 dark:hover:bg-zinc-900/50"
+                                  ? "bg-[#D4AF37]/10 border-[#D4AF37]/30"
+                                  : "bg-white border-zinc-150 hover:bg-zinc-55 dark:bg-zinc-950 dark:border-zinc-900 dark:hover:bg-zinc-900/50"
                               }`}
                             >
                               <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -600,7 +600,7 @@ export default function GlobalSearch() {
                                       {item.title}
                                     </h4>
                                     {item.badge && (
-                                      <span className="inline-flex items-center rounded-sm bg-zinc-50 border border-zinc-200 px-1.5 py-0.5 text-[9px] font-bold text-zinc-500 uppercase tracking-wider dark:bg-zinc-900 dark:border-zinc-850 dark:text-zinc-450">
+                                      <span className="inline-flex items-center rounded-sm bg-zinc-50 border border-zinc-200 px-1.5 py-0.5 text-[9px] font-bold text-zinc-500 uppercase tracking-wider dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-400">
                                         {item.badge}
                                       </span>
                                     )}
@@ -609,7 +609,7 @@ export default function GlobalSearch() {
                                     {item.subtitle}
                                   </p>
                                   {item.description && (
-                                    <p className="text-[11px] text-zinc-350 dark:text-zinc-650 truncate mt-1">
+                                    <p className="text-[11px] text-zinc-400 dark:text-zinc-500 truncate mt-1">
                                       {item.description}
                                     </p>
                                   )}
@@ -636,9 +636,9 @@ export default function GlobalSearch() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.371 1.24.588 1.81l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.18 0l-3.97 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h4.908a1 1 0 00.95-.69l1.518-4.674z" />
                                   </svg>
                                 </button>
-                                <span className="text-xs font-bold text-indigo-650 hover:underline dark:text-indigo-400 select-none">
-                                  View Details
-                                </span>
+                                 <span className="text-xs font-bold text-[#D4AF37] hover:text-[#E0C55B] hover:underline select-none">
+                                   View Details
+                                 </span>
                               </div>
                             </div>
                           );

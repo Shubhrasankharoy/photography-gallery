@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { getShareService } from '@/lib/share/shareFactory';
 import { RESOURCE_TYPES, VISIBILITY_TYPES, SHARE_STATUS } from '@/lib/share/shareConstants';
 import QRCodeModal from './QRCodeModal';
+import { ConfirmationDialog } from '../ConfirmationDialog';
 
 export default function ShareManager({ 
   isOpen, 
@@ -23,6 +24,13 @@ export default function ShareManager({
   const [copied, setCopied] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [qrThumbnail, setQrThumbnail] = useState('');
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    confirmText: '',
+    onConfirm: null
+  });
 
   // Settings form state
   const [visibility, setVisibility] = useState(VISIBILITY_TYPES.PUBLIC);
@@ -146,32 +154,48 @@ export default function ShareManager({
     }
   };
 
-  const handleRotateToken = async () => {
+  const handleRotateToken = () => {
     if (!activeShare) return;
-    if (!confirm('Rotating this token will immediately invalidate the old link. Continue?')) return;
-    setSaving(true);
-    try {
-      await shareService.rotateToken(activeShare.shareId);
-      await loadShares();
-    } catch (err) {
-      console.error('Failed to rotate token:', err);
-    } finally {
-      setSaving(false);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Rotate Link Token?',
+      description: 'Rotating this token will immediately invalidate the old link. Visitors will no longer be able to use the old URL. Continue?',
+      confirmText: 'Rotate Link',
+      onConfirm: async () => {
+        setSaving(true);
+        try {
+          await shareService.rotateToken(activeShare.shareId);
+          await loadShares();
+        } catch (err) {
+          console.error('Failed to rotate token:', err);
+        } finally {
+          setSaving(false);
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        }
+      }
+    });
   };
 
-  const handleRevokeShare = async () => {
+  const handleRevokeShare = () => {
     if (!activeShare) return;
-    if (!confirm('Are you sure you want to revoke this share link? Visitors will no longer have access.')) return;
-    setSaving(true);
-    try {
-      await shareService.revokeShare(activeShare.shareId);
-      await loadShares();
-    } catch (err) {
-      console.error('Failed to revoke share link:', err);
-    } finally {
-      setSaving(false);
-    }
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Revoke Share Link?',
+      description: 'Are you sure you want to revoke this share link? Visitors will no longer have access to this resource.',
+      confirmText: 'Revoke Link',
+      onConfirm: async () => {
+        setSaving(true);
+        try {
+          await shareService.revokeShare(activeShare.shareId);
+          await loadShares();
+        } catch (err) {
+          console.error('Failed to revoke share link:', err);
+        } finally {
+          setSaving(false);
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+        }
+      }
+    });
   };
 
   const handleCopyLink = async () => {
@@ -389,6 +413,18 @@ export default function ShareManager({
         token={activeShare?.token}
         shareTitle={resourceTitle}
         shareService={shareService}
+      />
+
+      <ConfirmationDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmText={confirmDialog.confirmText}
+        cancelText="Cancel"
+        loading={saving}
+        variant="danger"
       />
     </>
   );

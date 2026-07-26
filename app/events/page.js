@@ -7,6 +7,7 @@ import { getAllPhotographers, getAllEvents } from "@/lib/profileService";
 export default function EventsSearchDirectory() {
   const [events, setEvents] = useState([]);
   const [photographers, setPhotographers] = useState([]);
+  const [studiosMap, setStudiosMap] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   // Search & Filter state
@@ -19,6 +20,7 @@ export default function EventsSearchDirectory() {
 
   // Autocomplete UI state
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const suppressHydrationWarning = true;
   const suggestionRef = useRef(null);
 
   const ITEMS_PER_PAGE = 6;
@@ -42,14 +44,43 @@ export default function EventsSearchDirectory() {
     loadData();
   }, []);
 
+  // Resolve studio details individually (bypassing Firestore list query rules)
+  useEffect(() => {
+    if (events.length === 0) return;
+    async function resolveStudios() {
+      const uniqueStudioIds = Array.from(new Set(events.map(e => e.studioId).filter(Boolean)));
+      const { getStudioById } = await import("@/lib/studioService");
+      const resolved = {};
+      await Promise.all(
+        uniqueStudioIds.map(async (sid) => {
+          try {
+            const studioData = await getStudioById(sid);
+            if (studioData) {
+              resolved[sid] = {
+                studioName: studioData.studioName,
+                studioSlug: studioData.studioSlug
+              };
+            }
+          } catch (err) {
+            console.error(`Failed to resolve studio ${sid}:`, err);
+          }
+        })
+      );
+      setStudiosMap(resolved);
+    }
+    resolveStudios();
+  }, [events]);
+
   // Map photographers and compile full event dataset
   const enrichedEvents = events.map((e) => {
     const photographer = photographers.find((p) => p.uid === e.photographerId);
+    const studio = e.studioId ? studiosMap[e.studioId] : null;
     return {
       ...e,
       photographerName: photographer?.photographerName || "Unknown Photographer",
-      studioName: photographer?.studioName || "Unknown Studio",
+      studioName: studio?.studioName || photographer?.studioName || "Unknown Studio",
       photographerUsername: photographer?.username || "",
+      studioSlug: studio?.studioSlug || "",
     };
   });
 
@@ -440,8 +471,8 @@ export default function EventsSearchDirectory() {
               {paginatedEvents.map((event) => {
                 const isPrivate = event.visibility === "private";
                 const eventLink = `/event/${event.eventId}`;
-                const photographerLink = event.photographerUsername
-                  ? `/photographer/${event.photographerUsername}`
+                const studioLink = event.studioSlug
+                  ? `/studio/${event.studioSlug}`
                   : null;
 
                 return (
@@ -535,20 +566,20 @@ export default function EventsSearchDirectory() {
                         )}
                       </div>
 
-                      {/* Photographer Credit */}
+                      {/* Studio Credit */}
                       <div className="pt-4 border-t border-zinc-100 dark:border-zinc-900 flex items-center justify-between">
                         <div>
-                          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-semibold">Photographer</p>
-                          {photographerLink ? (
+                          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-semibold">Studio</p>
+                          {studioLink ? (
                             <Link
-                              href={photographerLink}
-                              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                              href={studioLink}
+                              className="relative z-20 cursor-pointer text-xs font-bold text-[#D4AF37] hover:text-[#E0C55B] dark:text-[#D4AF37] hover:underline"
                             >
-                              {event.studioName || event.photographerName}
+                              {event.studioName}
                             </Link>
                           ) : (
                             <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400">
-                              {event.studioName || event.photographerName}
+                              {event.studioName}
                             </span>
                           )}
                         </div>
@@ -611,7 +642,6 @@ export default function EventsSearchDirectory() {
             )}
           </>
         )}
-
       </div>
     </div>
   );

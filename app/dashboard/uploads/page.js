@@ -9,6 +9,7 @@ import { uploadPhoto, deletePhoto, canPerformPhotoAction } from "@/lib/photoServ
 import Link from "next/link";
 import JobMonitor from "@/components/queue/JobMonitor";
 import { motion, AnimatePresence } from "motion/react";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 /**
  * Generate a thumbnail blob from an image file via canvas compression
@@ -158,6 +159,8 @@ export default function UploadsPage() {
   const [uploads, setUploads] = useState([]); // Array of { id, file, status, progress, error, photoData }
   const uploadsRef = useRef([]);
   const [isFetching, setIsFetching] = useState(true);
+  const [deleteUploadDialog, setDeleteUploadDialog] = useState({ isOpen: false, upload: null });
+  const [isDeletingUpload, setIsDeletingUpload] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [studioSettings, setStudioSettings] = useState(null);
@@ -401,9 +404,15 @@ export default function UploadsPage() {
   };
 
   // Delete photo (soft-delete with permissions checks)
-  const handleDeletePhoto = async (upload) => {
-    if (!confirm("Are you sure you want to delete this photo?")) return;
+  const handleDeletePhoto = (upload) => {
+    setDeleteUploadDialog({ isOpen: true, upload });
+  };
 
+  const handleConfirmDeleteUpload = async () => {
+    const upload = deleteUploadDialog.upload;
+    if (!upload) return;
+
+    setIsDeletingUpload(true);
     try {
       if (upload.photoData) {
         const hasPermission = await canPerformPhotoAction(
@@ -416,6 +425,7 @@ export default function UploadsPage() {
 
         if (!hasPermission) {
           alert("You do not have permission to delete this photo.");
+          setDeleteUploadDialog({ isOpen: false, upload: null });
           return;
         }
 
@@ -428,8 +438,11 @@ export default function UploadsPage() {
 
       setUploads((prev) => prev.filter((u) => u.id !== upload.id));
     } catch (error) {
-      console.error("Delete error:", error);
+      console.error("Failed to delete photo:", error);
       alert("Failed to delete photo: " + error.message);
+    } finally {
+      setIsDeletingUpload(false);
+      setDeleteUploadDialog({ isOpen: false, upload: null });
     }
   };
 
@@ -775,6 +788,19 @@ export default function UploadsPage() {
           <JobMonitor studioId={currentStudio.studioId} />
         </div>
       )}
+
+      <ConfirmationDialog
+        isOpen={deleteUploadDialog.isOpen}
+        onClose={() => setDeleteUploadDialog({ isOpen: false, upload: null })}
+        onConfirm={handleConfirmDeleteUpload}
+        title="Move Photo to Trash?"
+        description="Are you sure you want to delete this photo? It will be moved to Trash & Recovery and can be restored within 30 days."
+        warningText="This item can be restored from Trash."
+        confirmText="Move to Trash"
+        cancelText="Cancel"
+        loading={isDeletingUpload}
+        variant="warning"
+      />
     </motion.div>
   );
 }

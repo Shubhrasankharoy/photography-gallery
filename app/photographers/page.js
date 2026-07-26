@@ -224,24 +224,37 @@ export default function PhotographersDirectory() {
                     <div>
                       {/* Hero banner preview */}
                       <div className="relative h-32 w-full overflow-hidden bg-zinc-200 dark:bg-zinc-900">
+                        {/* Premium placeholder gradient with camera icon */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-zinc-900 to-slate-900 flex items-center justify-center">
+                          <svg className="w-8 h-8 text-zinc-650/40 dark:text-zinc-800/60 animate-pulse" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316A2.192 2.192 0 0 0 14.502 4h-5c-.71 0-1.364.356-1.74 1.055l-.823 1.316ZM10.5 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Zm0 0c0 1.657 1.007 3 2.25 3s2.25-1.343 2.25-3-1.007-3-2.25-3-2.25 1.343-2.25 3Z" />
+                          </svg>
+                        </div>
                         <img
                           src={coverImg}
                           alt={p.studioName}
-                          className="h-full w-full object-cover filter brightness-[0.8] group-hover:scale-102 transition-transform duration-300"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                          className="absolute inset-0 h-full w-full object-cover filter brightness-[0.8] group-hover:scale-102 transition-transform duration-300 z-10"
                         />
                       </div>
 
                       {/* Header Avatar logo row */}
                       <div className="px-6 pb-4">
-                        <div className="relative -mt-10 mb-4 h-20 w-20 rounded-full border-4 border-white bg-indigo-650 dark:border-zinc-950 flex items-center justify-center text-white text-2xl font-bold select-none overflow-hidden shrink-0 shadow-md">
-                          {p.logo ? (
+                        <div className="relative -mt-10 mb-4 h-20 w-20 rounded-full border-4 border-white bg-[#D4AF37] dark:border-zinc-950 flex items-center justify-center text-[#181818] text-2xl font-bold select-none overflow-hidden shrink-0 shadow-md">
+                          <span className="absolute inset-0 flex items-center justify-center bg-[#D4AF37] text-[#181818] font-bold">
+                            {initial}
+                          </span>
+                          {p.logo && (
                             <img
                               src={p.logo}
                               alt={p.studioName}
-                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                              className="absolute inset-0 h-full w-full object-cover z-10"
                             />
-                          ) : (
-                            initial
                           )}
                         </div>
 

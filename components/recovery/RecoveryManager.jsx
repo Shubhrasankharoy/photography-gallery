@@ -30,7 +30,7 @@ export function RecoveryManager({ studioId, user }) {
 
   // Dialogs
   const [restoreModal, setRestoreModal] = useState({ isOpen: false, trashId: null, isBulk: false });
-  const [deleteModal, setDeleteModal] = useState({ isOpen: false, trashId: null, isBulk: false });
+  const [deleteModal, setDeleteModal] = useState({ isOpen: false, trashId: null, isBulk: false, isEmptyTrash: false });
 
   // Fetch Trash Summary
   const fetchSummary = useCallback(async () => {
@@ -122,35 +122,26 @@ export function RecoveryManager({ studioId, user }) {
   const handleConfirmPermanentDelete = async () => {
     setActionLoading(true);
     try {
-      if (deleteModal.isBulk) {
+      if (deleteModal.isEmptyTrash) {
+        await recoveryService.emptyTrash(studioId, user);
+      } else if (deleteModal.isBulk) {
         await recoveryService.batchPermanentDelete(selectedIds, user);
       } else if (deleteModal.trashId) {
         await recoveryService.permanentDelete(deleteModal.trashId, user);
       }
-      setDeleteModal({ isOpen: false, trashId: null, isBulk: false });
+      setDeleteModal({ isOpen: false, trashId: null, isBulk: false, isEmptyTrash: false });
       setSelectedIds([]);
       fetchSummary();
       fetchTrash(false);
     } catch (err) {
-      alert(err.message || 'Failed to permanently delete resource');
+      alert(err.message || (deleteModal.isEmptyTrash ? 'Failed to empty trash' : 'Failed to permanently delete resource'));
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleEmptyTrash = async () => {
-    if (!confirm('Are you sure you want to empty the entire trash? This action is permanent.')) return;
-    setActionLoading(true);
-    try {
-      await recoveryService.emptyTrash(studioId, user);
-      fetchSummary();
-      fetchTrash(false);
-      setSelectedIds([]);
-    } catch (err) {
-      alert(err.message || 'Failed to empty trash');
-    } finally {
-      setActionLoading(false);
-    }
+  const handleEmptyTrash = () => {
+    setDeleteModal({ isOpen: true, trashId: null, isBulk: false, isEmptyTrash: true });
   };
 
   return (
@@ -285,10 +276,11 @@ export function RecoveryManager({ studioId, user }) {
 
       <DeleteForeverDialog
         isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, trashId: null, isBulk: false })}
+        onClose={() => setDeleteModal({ isOpen: false, trashId: null, isBulk: false, isEmptyTrash: false })}
         onConfirm={handleConfirmPermanentDelete}
         count={deleteModal.isBulk ? selectedIds.length : 1}
         loading={actionLoading}
+        isEmptyTrash={deleteModal.isEmptyTrash}
       />
     </div>
   );

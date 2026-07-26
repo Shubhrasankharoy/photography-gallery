@@ -131,16 +131,9 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════════
           1. HERO SECTION
           ═══════════════════════════════════════════════════════════ */}
-      <section className="relative flex min-h-[92vh] w-full items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1452780212940-6f5c0d14d84a?q=80&w=1920&auto=format&fit=crop"
-            alt="Hero Background"
-            className="h-full w-full object-cover object-center scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/20" />
-        </div>
+      <section className="relative flex min-h-[92vh] w-full items-center justify-center overflow-hidden bg-white dark:bg-[#181818] transition-colors duration-300">
+        {/* Modern Dot Grid Background with gold gradients */}
+        <div className="absolute inset-0 z-0 bg-grid-pattern bg-grid-glow pointer-events-none" />
 
         {/* Content Container */}
         <motion.div
@@ -152,7 +145,7 @@ export default function Home() {
           <motion.span
             variants={fadeUp}
             custom={0}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-xs font-semibold text-white/95 backdrop-blur-md border border-white/15 mb-8 tracking-wide"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#D4AF37]/10 dark:bg-white/5 border border-[#D4AF37]/20 dark:border-white/10 px-4 py-1.5 text-xs font-bold text-zinc-800 dark:text-white/95 mb-8 tracking-wide select-none"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
             Empowering Professional Photographers
@@ -161,7 +154,7 @@ export default function Home() {
           <motion.h1
             variants={fadeUp}
             custom={1}
-            className="max-w-4xl text-4xl font-bold tracking-tight text-white sm:text-6xl lg:text-7xl leading-tight"
+            className="max-w-4xl text-4xl font-bold tracking-tight text-zinc-950 dark:text-white sm:text-6xl lg:text-7xl leading-tight"
           >
             <span className="font-body">Your Art. Delivered in</span>{" "}
             <span className="font-headline text-[#D4AF37]">
@@ -172,7 +165,7 @@ export default function Home() {
           <motion.p
             variants={fadeUp}
             custom={2}
-            className="mt-6 max-w-2xl text-lg text-zinc-300 leading-relaxed font-light"
+            className="mt-6 max-w-2xl text-lg text-zinc-550 dark:text-zinc-300 leading-relaxed font-light"
           >
             Share secure client spaces, facilitate high-speed digital delivery, and enable immediate discovery with cutting-edge AI Face Search.
           </motion.p>
@@ -193,7 +186,7 @@ export default function Home() {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <a
                 href="#showcase"
-                className="flex w-full sm:w-auto items-center justify-center rounded-[12px] border border-white/25 bg-white/5 backdrop-blur-md px-8 py-3.5 text-sm font-semibold text-white hover:bg-white/15 transition-all duration-150"
+                className="flex w-full sm:w-auto items-center justify-center rounded-[12px] border border-zinc-200/60 dark:border-white/20 bg-zinc-50 hover:bg-zinc-100 dark:bg-white/5 dark:hover:bg-white/10 px-8 py-3.5 text-sm font-semibold text-zinc-800 dark:text-white transition-all duration-150"
               >
                 Explore Sample Galleries
               </a>
@@ -207,7 +200,7 @@ export default function Home() {
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
         >
-          <a href="#features" className="text-white/50 hover:text-[#D4AF37] transition-colors" aria-label="Scroll down">
+          <a href="#features" className="text-zinc-400 dark:text-white/50 hover:text-[#D4AF37] transition-colors" aria-label="Scroll down">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
             </svg>

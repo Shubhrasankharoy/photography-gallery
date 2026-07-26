@@ -13,6 +13,7 @@ import {
   getStudioSettings
 } from "@/lib/eventService";
 import { motion, AnimatePresence } from "motion/react";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 /* ── Motion Variants ──────────────────────────────────────────── */
 const containerVariants = {
@@ -46,6 +47,7 @@ export default function EventsList() {
   const [notification, setNotification] = useState("");
   const [studioUsername, setStudioUsername] = useState("");
   const [studioSettings, setStudioSettings] = useState(null);
+  const [deleteDialog, setDeleteDialog] = useState({ isOpen: false, eventId: null, eventName: "" });
 
   // Helper to show notifications
   const showNotification = (msg) => {
@@ -163,13 +165,15 @@ export default function EventsList() {
     }
   };
 
-  const handleDelete = async (eventId, name) => {
-    if (!window.confirm(`Are you sure you want to delete the event "${name}"? This action is permanent and will delete all photos inside.`)) {
-      return;
-    }
+  const handleDelete = (eventId, name) => {
+    setDeleteDialog({ isOpen: true, eventId, eventName: name });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteDialog.eventId) return;
     setIsActionLoading(true);
     try {
-      await deleteEvent(eventId);
+      await deleteEvent(deleteDialog.eventId);
       showNotification("Event deleted successfully.");
       await loadData();
     } catch (err) {
@@ -177,6 +181,7 @@ export default function EventsList() {
       showNotification("Failed to delete event.");
     } finally {
       setIsActionLoading(false);
+      setDeleteDialog({ isOpen: false, eventId: null, eventName: "" });
     }
   };
 
@@ -356,7 +361,7 @@ export default function EventsList() {
                   {/* Quick actions buttons */}
                   <div className="mt-6 pt-4 border-t border-zinc-150 dark:border-zinc-800 flex items-center justify-between gap-2">
                     
-                    {/* Copy Link & Duplicate */}
+                    {/* Copy Link, Visit & Duplicate */}
                     <div className="flex gap-2">
                       <span
                         role="button"
@@ -372,6 +377,17 @@ export default function EventsList() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                         </svg>
                       </span>
+
+                      <Link
+                        href={`/event/${evt.eventId}`}
+                        target="_blank"
+                        className="rounded-[12px] border border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 hover:text-[#D4AF37] dark:hover:bg-zinc-900 p-2.5 text-zinc-600 dark:text-zinc-400 select-none transition-all"
+                        title="Visit Event Gallery"
+                      >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                      </Link>
 
                       {canCreateEvent && (
                         <span
@@ -426,6 +442,18 @@ export default function EventsList() {
         </motion.div>
       )}
 
+      <ConfirmationDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, eventId: null, eventName: "" })}
+        onConfirm={handleConfirmDelete}
+        title="Move Event to Trash?"
+        description={`Are you sure you want to delete the event "${deleteDialog.eventName}"? It will be moved to Trash & Recovery and can be restored within 30 days.`}
+        warningText="This item can be restored from Trash."
+        confirmText="Move to Trash"
+        cancelText="Cancel"
+        loading={isActionLoading}
+        variant="warning"
+      />
     </motion.div>
   );
 }

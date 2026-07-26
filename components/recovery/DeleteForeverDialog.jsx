@@ -7,7 +7,8 @@ export function DeleteForeverDialog({
   onClose, 
   onConfirm, 
   count = 1,
-  loading = false 
+  loading = false,
+  isEmptyTrash = false
 }) {
   if (!isOpen) return null;
 
@@ -22,7 +23,7 @@ export function DeleteForeverDialog({
           </div>
           <div>
             <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-              Permanently Delete {count > 1 ? `${count} Resources` : 'Resource'}?
+              {isEmptyTrash ? 'Empty Trash?' : (count > 1 ? `Permanently Delete ${count} Resources?` : 'Permanently Delete Resource?')}
             </h3>
             <p className="text-xs text-rose-600 dark:text-rose-400 font-bold">
               Warning: This action is irreversible!
@@ -31,9 +32,12 @@ export function DeleteForeverDialog({
         </div>
 
         <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-light">
-          {count > 1 
-            ? `You are about to permanently delete ${count} items. Cloud storage files and Firestore records will be purged forever.`
-            : `This resource and its associated storage files will be permanently purged from system storage.`
+          {isEmptyTrash
+            ? 'Are you sure you want to empty the entire trash? All resources, cloud storage files, and Firestore records will be permanently purged.'
+            : (count > 1 
+              ? `You are about to permanently delete ${count} items. Cloud storage files and Firestore records will be purged forever.`
+              : `This resource and its associated storage files will be permanently purged from system storage.`
+            )
           }
         </p>
 
@@ -53,13 +57,13 @@ export function DeleteForeverDialog({
             className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-xl transition-colors flex items-center gap-1 shadow-md shadow-rose-600/10"
           >
             {loading ? (
-              <span>Deleting...</span>
+              <span>{isEmptyTrash ? 'Emptying...' : 'Deleting...'}</span>
             ) : (
               <>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Delete Permanently
+                {isEmptyTrash ? 'Empty Trash' : 'Delete Permanently'}
               </>
             )}
           </button>

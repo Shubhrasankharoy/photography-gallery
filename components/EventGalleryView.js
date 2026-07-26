@@ -9,6 +9,7 @@ import WatermarkOverlay from "@/components/WatermarkOverlay";
 import Slideshow from "@/components/Slideshow";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 
 const DOWNLOAD_INTERVAL_MS = 200;
 
@@ -44,6 +45,8 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
   const [failedJobs, setFailedJobs] = useState([]);
   const [queuePosition, setQueuePosition] = useState(0);
   const [facesIndexed, setFacesIndexed] = useState(0);
+  const [deletePhotoDialog, setDeletePhotoDialog] = useState({ isOpen: false, photo: null });
+  const [isDeletingPhoto, setIsDeletingPhoto] = useState(false);
 
   useEffect(() => {
     if (!event?.eventId) return;
@@ -338,16 +341,24 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
     }
   };
 
-  const handleDeletePhotoFromGallery = async (photo) => {
+  const handleDeletePhotoFromGallery = (photo) => {
     if (!photo || !user?.uid) return;
-    if (!confirm("Are you sure you want to delete this photo from the gallery?")) return;
+    setDeletePhotoDialog({ isOpen: true, photo });
+  };
+
+  const handleConfirmDeletePhoto = async () => {
+    const photo = deletePhotoDialog.photo;
+    if (!photo || !user?.uid) return;
+    setIsDeletingPhoto(true);
     try {
       const { deletePhoto } = await import("@/lib/photoService");
       await deletePhoto(photo.photoId, event.studioId, user.uid);
-      alert("Photo deleted successfully.");
+      setDeletePhotoDialog({ isOpen: false, photo: null });
       window.location.reload();
     } catch (err) {
       alert("Failed to delete photo: " + err.message);
+    } finally {
+      setIsDeletingPhoto(false);
     }
   };
 
@@ -1330,6 +1341,18 @@ export default function EventGalleryView({ event, initialPhotos = [], clientPin 
           </div>
         </div>
       )}
+      <ConfirmationDialog
+        isOpen={deletePhotoDialog.isOpen}
+        onClose={() => setDeletePhotoDialog({ isOpen: false, photo: null })}
+        onConfirm={handleConfirmDeletePhoto}
+        title="Move Photo to Trash?"
+        description="Are you sure you want to delete this photo from the gallery? It will be moved to Trash & Recovery and can be restored within 30 days."
+        warningText="This item can be restored from Trash."
+        confirmText="Move to Trash"
+        cancelText="Cancel"
+        loading={isDeletingPhoto}
+        variant="warning"
+      />
     </div>
   );
 }
